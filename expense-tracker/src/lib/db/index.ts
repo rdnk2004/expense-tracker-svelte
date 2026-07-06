@@ -30,7 +30,7 @@ const KEYS = {
 } as const;
 
 // Schema version
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 // ============================================================================
 // DEFAULT DATA
@@ -42,7 +42,7 @@ const DEFAULT_CATEGORIES: Category[] = [
         name: 'Food',
         subcategories: ['Tea', 'Breakfast', 'Snacks', 'Lunch', 'Dinner'],
         color: '#FF6B6B',
-        icon: '🍽️',
+        icon: 'Utensils',
         isDefault: true
     },
     {
@@ -50,7 +50,7 @@ const DEFAULT_CATEGORIES: Category[] = [
         name: 'Entertainment',
         subcategories: ['Cinema', 'Turf', 'Games', 'Subscription'],
         color: '#4ECDC4',
-        icon: '🎮',
+        icon: 'Gamepad2',
         isDefault: true
     },
     {
@@ -58,7 +58,7 @@ const DEFAULT_CATEGORIES: Category[] = [
         name: 'Home',
         subcategories: [],
         color: '#95E1D3',
-        icon: '🏠',
+        icon: 'Home',
         isDefault: true
     },
     {
@@ -66,7 +66,7 @@ const DEFAULT_CATEGORIES: Category[] = [
         name: 'Transport',
         subcategories: ['Fuel', 'Auto', 'Bus', 'Parking'],
         color: '#F38181',
-        icon: '🚗',
+        icon: 'Car',
         isDefault: true
     },
     {
@@ -74,7 +74,7 @@ const DEFAULT_CATEGORIES: Category[] = [
         name: 'Shopping',
         subcategories: ['Clothes', 'Electronics', 'Groceries'],
         color: '#AA96DA',
-        icon: '🛍️',
+        icon: 'ShoppingBag',
         isDefault: true
     },
     {
@@ -82,7 +82,7 @@ const DEFAULT_CATEGORIES: Category[] = [
         name: 'Other',
         subcategories: [],
         color: '#FCBAD3',
-        icon: '📦',
+        icon: 'Package',
         isDefault: true
     }
 ];
@@ -353,7 +353,7 @@ export async function saveMetadata(metadata: AppMetadata): Promise<void> {
 // ============================================================================
 
 export async function exportAllData(): Promise<object> {
-    const data = {
+    return {
         wallets: await getWallets(),
         expenses: await getExpenses(),
         transfers: await getTransfers(),
@@ -363,7 +363,6 @@ export async function exportAllData(): Promise<object> {
         summaries: await get<Record<string, MonthlySummary>>(KEYS.SUMMARIES, customStore),
         metadata: await getMetadata()
     };
-    return data;
 }
 
 export async function importAllData(data: any): Promise<void> {
@@ -435,9 +434,9 @@ async function runMigrations(fromVersion: number): Promise<void> {
 
     // Future migrations will go here
     // Example:
-    // if (fromVersion < 2) {
-    //   await migrateToV2();
-    // }
+    if (fromVersion < 2) {
+        await migrateToV2();
+    }
     // if (fromVersion < 3) {
     //   await migrateToV3();
     // }
@@ -451,6 +450,47 @@ async function runMigrations(fromVersion: number): Promise<void> {
     }
 
     console.log('✅ Migrations complete');
+}
+
+/**
+ * Migrate to v2: Update category icons from emojis to Lucide names
+ */
+async function migrateToV2(): Promise<void> {
+    console.log('📦 Migrating to v2: Updating category icons...');
+    const categories = await getCategories();
+
+    const emojiMap: Record<string, string> = {
+        '🍽️': 'Utensils',
+        '🎮': 'Gamepad2',
+        '🏠': 'Home',
+        '🚗': 'Car',
+        '🛍️': 'ShoppingBag',
+        '📦': 'Package',
+        '💊': 'HeartPulse',
+        '🎓': 'GraduationCap',
+        '✈️': 'Plane',
+        '⚡': 'Zap',
+        '☕': 'Coffee',
+        '🎵': 'Music',
+        '📱': 'Smartphone',
+        '💪': 'Dumbbell',
+        '💳': 'CreditCard'
+    };
+
+    let updatedCount = 0;
+
+    for (const category of categories) {
+        if (emojiMap[category.icon]) {
+            category.icon = emojiMap[category.icon];
+            updatedCount++;
+        }
+    }
+
+    if (updatedCount > 0) {
+        await set(KEYS.CATEGORIES, categories, customStore);
+    }
+
+    console.log(`✅ Updated ${updatedCount} categories`);
 }
 
 // ============================================================================

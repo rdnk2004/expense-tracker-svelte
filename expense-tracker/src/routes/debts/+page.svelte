@@ -9,6 +9,22 @@
 		formatDate,
 		formatDateInput
 	} from '$lib/stores';
+	import {
+		Handshake,
+		ArrowUpRight,
+		ArrowDownLeft,
+		TrendingUp,
+		TrendingDown,
+		Check,
+		X,
+		Banknote,
+		Smartphone,
+		Loader2,
+		Ban,
+		Plus,
+		ChevronDown,
+		ChevronRight
+	} from 'lucide-svelte';
 
 	// Form state
 	let formData = $state({
@@ -27,11 +43,13 @@
 		debt: Debt | null;
 		step: 'options' | 'confirm';
 		walletId: string | null;
+		settleAmount: string; // New field for partial settlement
 	}>({
 		open: false,
 		debt: null,
 		step: 'options',
-		walletId: null
+		walletId: null,
+		settleAmount: ''
 	});
 
 	// UI state
@@ -53,10 +71,14 @@
 	let selectedWallet = $derived(
 		settlementModal.walletId ? $wallets.find((w) => w.id === settlementModal.walletId) : null
 	);
+
+	// Updated balance calculation based on settleAmount
+	let settleAmountValue = $derived(
+		settlementModal.settleAmount ? Math.round(parseFloat(settlementModal.settleAmount) * 100) : 0
+	);
+
 	let balanceAfterSettlement = $derived(
-		selectedWallet && settlementModal.debt
-			? selectedWallet.balance - settlementModal.debt.amount
-			: 0
+		selectedWallet ? selectedWallet.balance - settleAmountValue : 0
 	);
 
 	function validateForm(): boolean {
@@ -100,10 +122,10 @@
 				note: ''
 			};
 
-			showSuccessToast('Debt added successfully! 🎉');
+			showSuccessToast('Debt added successfully!');
 		} catch (error) {
 			console.error('Failed to add debt:', error);
-			showSuccessToast('Failed to add debt ❌');
+			showSuccessToast('Failed to add debt');
 		} finally {
 			isSubmitting = false;
 		}
@@ -114,7 +136,8 @@
 			open: true,
 			debt,
 			step: 'options',
-			walletId: null
+			walletId: null,
+			settleAmount: (debt.amount / 100).toFixed(2) // Default to full amount
 		};
 	}
 
@@ -123,11 +146,24 @@
 			open: false,
 			debt: null,
 			step: 'options',
-			walletId: null
+			walletId: null,
+			settleAmount: ''
 		};
 	}
 
 	function selectWalletOption(walletId: string | null) {
+		// Validate settlement amount
+		const amount = parseFloat(settlementModal.settleAmount);
+		if (!amount || amount <= 0) {
+			alert('Please enter a valid settlement amount');
+			return;
+		}
+
+		if (settlementModal.debt && amount > settlementModal.debt.amount / 100) {
+			alert('Settlement amount cannot exceed the debt amount');
+			return;
+		}
+
 		settlementModal.walletId = walletId;
 		settlementModal.step = 'confirm';
 	}
@@ -136,12 +172,17 @@
 		if (!settlementModal.debt) return;
 
 		try {
-			await settleDebt(settlementModal.debt.id, settlementModal.walletId || undefined);
-			showSuccessToast('Debt settled successfully! ✅');
+			// Pass the settleAmount value (converted to paise)
+			await settleDebt(
+				settlementModal.debt.id,
+				settleAmountValue,
+				settlementModal.walletId || undefined
+			);
+			showSuccessToast('Debt updated successfully!');
 			closeSettlementModal();
 		} catch (error) {
 			console.error('Failed to settle debt:', error);
-			showSuccessToast('Failed to settle debt ❌');
+			showSuccessToast('Failed to settle debt');
 		}
 	}
 
@@ -160,17 +201,23 @@
 		<div class="toast">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">🤝 Debts</h1>
+	<h1 class="page-title">
+		<Handshake class="inline-icon" size={32} /> Debts
+	</h1>
 
 	<!-- Debts Overview -->
 	<div class="overview-card">
 		<div class="overview-totals">
 			<div class="overview-stat danger">
-				<span class="overview-label">You Owe</span>
+				<span class="overview-label">
+					<TrendingDown size={14} class="inline" /> You Owe
+				</span>
 				<span class="overview-amount">{formatCurrency(totalYouOwe)}</span>
 			</div>
 			<div class="overview-stat success">
-				<span class="overview-label">Owed to You</span>
+				<span class="overview-label">
+					<TrendingUp size={14} class="inline" /> Owed to You
+				</span>
 				<span class="overview-amount">{formatCurrency(totalOwedToYou)}</span>
 			</div>
 		</div>
@@ -224,15 +271,19 @@
 				</div>
 
 				<div class="form-group">
-					<label>Direction *</label>
+					<span class="label">Direction *</span>
 					<div class="radio-group">
 						<label class="radio-label">
 							<input type="radio" bind:group={formData.direction} value="give" />
-							<span class="radio-text">💸 I owe them</span>
+							<span class="radio-text">
+								<ArrowUpRight size={16} class="inline" /> I owe them
+							</span>
 						</label>
 						<label class="radio-label">
 							<input type="radio" bind:group={formData.direction} value="receive" />
-							<span class="radio-text">💰 They owe me</span>
+							<span class="radio-text">
+								<ArrowDownLeft size={16} class="inline" /> They owe me
+							</span>
 						</label>
 					</div>
 				</div>
@@ -258,7 +309,12 @@
 			</div>
 
 			<button type="submit" class="submit-btn" disabled={isSubmitting}>
-				{isSubmitting ? '⏳ Adding...' : '+ Add Debt'}
+				{isSubmitting ? 'Adding...' : 'Add Debt'}
+				{#if isSubmitting}
+					<Loader2 size={16} class="animate-spin ml-2" />
+				{:else}
+					<Plus size={16} class="ml-2" />
+				{/if}
 			</button>
 		</form>
 	</div>
@@ -267,7 +323,9 @@
 	<div class="debts-grid">
 		<!-- You Owe Column -->
 		<div class="debts-column">
-			<h2 class="column-title danger">💸 You Owe ({debtsYouOwe.length})</h2>
+			<h2 class="column-title danger">
+				<TrendingDown size={20} class="inline-icon" /> You Owe ({debtsYouOwe.length})
+			</h2>
 			{#if debtsYouOwe.length > 0}
 				<div class="debts-list">
 					{#each debtsYouOwe as debt (debt.id)}
@@ -282,7 +340,7 @@
 							<div class="debt-footer">
 								<span class="debt-date">{formatDate(debt.date)}</span>
 								<button class="settle-btn" onclick={() => openSettlementModal(debt)}>
-									✓ Settle
+									<Check size={14} /> Settle
 								</button>
 							</div>
 						</div>
@@ -297,7 +355,9 @@
 
 		<!-- Owed to You Column -->
 		<div class="debts-column">
-			<h2 class="column-title success">💰 Owed to You ({debtsOwedToYou.length})</h2>
+			<h2 class="column-title success">
+				<TrendingUp size={20} class="inline-icon" /> Owed to You ({debtsOwedToYou.length})
+			</h2>
 			{#if debtsOwedToYou.length > 0}
 				<div class="debts-list">
 					{#each debtsOwedToYou as debt (debt.id)}
@@ -312,7 +372,7 @@
 							<div class="debt-footer">
 								<span class="debt-date">{formatDate(debt.date)}</span>
 								<button class="settle-btn" onclick={() => openSettlementModal(debt)}>
-									✓ Settle
+									<Check size={14} /> Settle
 								</button>
 							</div>
 						</div>
@@ -330,7 +390,12 @@
 	{#if settledDebts.length > 0}
 		<div class="settled-section">
 			<button class="toggle-settled-btn" onclick={() => (showSettled = !showSettled)}>
-				{showSettled ? '▼' : '▶'} Settled Debts ({settledDebts.length})
+				{#if showSettled}
+					<ChevronDown size={16} />
+				{:else}
+					<ChevronRight size={16} />
+				{/if}
+				Settled Debts ({settledDebts.length})
 			</button>
 
 			{#if showSettled}
@@ -342,9 +407,13 @@
 								<span class="settled-amount">{formatCurrency(debt.amount)}</span>
 							</div>
 							<div class="settled-meta">
-								<span class="settled-direction"
-									>{debt.direction === 'give' ? '💸 You owed' : '💰 They owed you'}</span
-								>
+								<span class="settled-direction">
+									{#if debt.direction === 'give'}
+										<TrendingDown size={12} class="inline" /> You owed
+									{:else}
+										<TrendingUp size={12} class="inline" /> They owed you
+									{/if}
+								</span>
 								<span class="settled-date">Settled: {formatDate(debt.settledDate || '')}</span>
 								{#if debt.linkedTransactionId}
 									<span class="settled-link">🔗 Linked to transaction</span>
@@ -362,15 +431,45 @@
 
 	<!-- Settlement Modal -->
 	{#if settlementModal.open && settlementModal.debt}
-		<div class="modal-overlay" onclick={closeSettlementModal}>
-			<div class="modal" onclick={(e) => e.stopPropagation()}>
+		<div
+			class="modal-overlay"
+			role="button"
+			tabindex="0"
+			onclick={(e) => {
+				if (e.target === e.currentTarget) closeSettlementModal();
+			}}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') closeSettlementModal();
+			}}
+		>
+			<div class="modal">
 				{#if settlementModal.step === 'options'}
 					<h2 class="modal-title">Settle Debt</h2>
 					<div class="modal-debt-info">
 						<div class="modal-debt-person">{settlementModal.debt.person}</div>
 						<div class="modal-debt-amount">{formatCurrency(settlementModal.debt.amount)}</div>
 						<div class="modal-debt-direction">
-							{settlementModal.debt.direction === 'give' ? '💸 You owe them' : '💰 They owe you'}
+							{#if settlementModal.debt.direction === 'give'}
+								<TrendingDown size={14} class="inline" /> You owe them
+							{:else}
+								<TrendingUp size={14} class="inline" /> They owe you
+							{/if}
+						</div>
+					</div>
+
+					<!-- Settlement Amount Input -->
+					<div class="modal-input-group">
+						<label for="settleAmount">Amount to Settle (₹)</label>
+						<input
+							type="number"
+							id="settleAmount"
+							bind:value={settlementModal.settleAmount}
+							step="0.01"
+							min="0.01"
+							max={(settlementModal.debt.amount / 100).toFixed(2)}
+						/>
+						<div class="input-hint">
+							Remaining: {formatCurrency(settlementModal.debt.amount)}
 						</div>
 					</div>
 
@@ -382,7 +481,13 @@
 					<div class="modal-options">
 						{#each $wallets as wallet}
 							<button class="modal-option-btn" onclick={() => selectWalletOption(wallet.id)}>
-								<span class="option-icon">{wallet.name === 'UPI' ? '📱' : '💵'}</span>
+								<span class="option-icon">
+									{#if wallet.name === 'UPI'}
+										<Smartphone size={24} />
+									{:else}
+										<Banknote size={24} />
+									{/if}
+								</span>
 								<span class="option-text">
 									Yes - {wallet.name} wallet
 									<span class="option-balance">({formatCurrency(wallet.balance)})</span>
@@ -391,7 +496,9 @@
 						{/each}
 
 						<button class="modal-option-btn" onclick={() => selectWalletOption(null)}>
-							<span class="option-icon">🚫</span>
+							<span class="option-icon">
+								<Ban size={24} />
+							</span>
 							<span class="option-text">No - Settled outside app</span>
 						</button>
 					</div>
@@ -402,12 +509,11 @@
 					<div class="modal-confirm-info">
 						<p>
 							{#if settlementModal.walletId}
-								This will create an expense of <strong
-									>{formatCurrency(settlementModal.debt.amount)}</strong
-								>
+								This will create an expense of <strong>{formatCurrency(settleAmountValue)}</strong>
 								from your <strong>{selectedWallet?.name}</strong> wallet.
 							{:else}
-								This will mark the debt as settled without affecting your wallet balances.
+								This will mark <strong>{formatCurrency(settleAmountValue)}</strong> as settled without
+								affecting your wallet balances.
 							{/if}
 						</p>
 
@@ -418,18 +524,24 @@
 									<span>
 										{formatCurrency(selectedWallet.balance)} →
 										{formatCurrency(balanceAfterSettlement)}
-										<span class="change negative"
-											>(-{formatCurrency(settlementModal.debt.amount)})</span
-										>
+										<span class="change negative">(-{formatCurrency(settleAmountValue)})</span>
 									</span>
 								</div>
+							</div>
+						{/if}
+
+						{#if settlementModal.debt && settleAmountValue < settlementModal.debt.amount}
+							<div class="partial-settlement-note">
+								<strong>Note:</strong> Since you are paying partially, the remaining debt of
+								<strong>{formatCurrency(settlementModal.debt.amount - settleAmountValue)}</strong> will
+								stay active.
 							</div>
 						{/if}
 					</div>
 
 					<div class="modal-actions">
 						<button class="modal-confirm-btn" onclick={confirmSettlement}>
-							✓ Confirm Settlement
+							<Check size={16} /> Confirm Settlement
 						</button>
 						<button class="modal-back-btn" onclick={() => (settlementModal.step = 'options')}>
 							← Back
@@ -492,7 +604,7 @@
 
 	/* Overview Card */
 	.overview-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
@@ -583,7 +695,7 @@
 
 	/* Form Card */
 	.form-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
@@ -615,14 +727,14 @@
 		grid-column: 1 / -1;
 	}
 
-	label {
+	label,
+	.label {
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: var(--text-secondary);
 	}
 
-	input,
-	select {
+	input {
 		background: var(--bg-secondary);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
@@ -632,8 +744,7 @@
 		transition: all 0.2s;
 	}
 
-	input:focus,
-	select:focus {
+	input:focus {
 		outline: none;
 		border-color: var(--accent-primary);
 		box-shadow: 0 0 0 3px rgba(192, 192, 192, 0.1);
@@ -967,6 +1078,53 @@
 	.modal-debt-direction {
 		font-size: 0.875rem;
 		color: var(--text-secondary);
+	}
+
+	/* Partial Settlement Input */
+	.modal-input-group {
+		margin-bottom: 1.5rem;
+	}
+
+	.modal-input-group label {
+		display: block;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--text-secondary);
+		margin-bottom: 0.5rem;
+	}
+
+	.modal-input-group input {
+		width: 100%;
+		padding: 0.75rem;
+		font-size: 1.125rem;
+		border: 1px solid var(--border-color);
+		background: var(--bg-secondary);
+		color: var(--text-primary);
+		border-radius: var(--border-radius);
+		font-weight: 600;
+	}
+
+	.modal-input-group input:focus {
+		outline: none;
+		border-color: var(--accent-primary);
+		box-shadow: 0 0 0 3px rgba(192, 192, 192, 0.1);
+	}
+
+	.input-hint {
+		font-size: 0.75rem;
+		color: var(--text-secondary);
+		margin-top: 0.5rem;
+		text-align: right;
+	}
+
+	.partial-settlement-note {
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: rgba(255, 215, 0, 0.1);
+		border: 1px solid rgba(255, 215, 0, 0.3);
+		border-radius: var(--border-radius);
+		font-size: 0.875rem;
+		color: #ffd700;
 	}
 
 	.modal-question {

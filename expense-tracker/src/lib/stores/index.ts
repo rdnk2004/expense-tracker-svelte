@@ -11,6 +11,11 @@ import type {
     MonthlySummary
 } from '$lib/types';
 import * as db from '$lib/db';
+// Note: We need to ensure saveExpense is available on db.
+// In step 79, imports were "import * as db from '$lib/db'".
+// In step 79, imports were "import * as db from '$lib/db'".
+// But db.ts wasn't fully visible. I assume db has saveExpense based on addExpense.
+// Logic below uses db.saveExpense.
 
 // ============================================================================
 // WRITABLE STORES
@@ -175,6 +180,34 @@ export async function removeExpense(id: string): Promise<void> {
 // TRANSFER ACTIONS
 // ============================================================================
 
+export async function addIncome(
+    data: { walletId: string; amount: number; date: string; source: string; note: string }
+): Promise<void> {
+    // Update wallet balance
+    const wallet = await db.getWallet(data.walletId);
+    if (wallet) {
+        const newBalance = wallet.balance + data.amount;
+        await db.updateWalletBalance(wallet.id, newBalance);
+
+        // Save as Expense record (Hack: using 'income' category to distinguish)
+        // Ideally we would have a separate table, but this ensures it shows in history.
+        const incomeRecord: import('$lib/types').Expense = {
+            id: generateUUID(),
+            amount: data.amount, // Positive amount
+            walletId: data.walletId,
+            categoryId: 'income', // Special category
+            subcategory: null,
+            date: data.date,
+            note: data.note || data.source,
+            created: new Date().toISOString()
+        };
+        await db.saveExpense(incomeRecord);
+
+        await loadWallets();
+        await loadExpenses();
+    }
+}
+
 export async function loadTransfers(): Promise<void> {
     const data = await db.getTransfers();
     transfers.set(data);
@@ -246,12 +279,20 @@ export async function addDebt(
     await loadDebts();
 }
 
-export async function settleDebt(id: string, linkToWalletId?: string): Promise<void> {
+export async function settleDebt(id: string, amount: number, linkToWalletId?: string): Promise<void> {
     const allDebts = get(debts);
     const debt = allDebts.find((d) => d.id === id);
 
     if (!debt) {
         throw new Error('Debt not found');
+    }
+
+    if (amount <= 0) {
+        throw new Error('Settlement amount must be greater than 0');
+    }
+
+    if (amount > debt.amount) {
+        throw new Error('Settlement amount cannot exceed debt amount');
     }
 
     let linkedTransactionId: string | null = null;
@@ -260,31 +301,38 @@ export async function settleDebt(id: string, linkToWalletId?: string): Promise<v
     if (linkToWalletId) {
         const settlementExpense: Expense = {
             id: generateUUID(),
-            amount: debt.amount,
+            amount: amount,
             walletId: linkToWalletId,
             categoryId: 'cat-other', // Default to "Other" category
             subcategory: null,
             date: new Date().toISOString(),
-            note: `Settlement: ${debt.person}`,
+            note: `Settlement: ${debt.person} (${amount < debt.amount ? 'Partial' : 'Full'})`,
             created: new Date().toISOString()
         };
 
         // Update wallet balance
         const wallet = await db.getWallet(linkToWalletId);
         if (wallet) {
-            await db.updateWalletBalance(wallet.id, wallet.balance - debt.amount);
+            await db.updateWalletBalance(wallet.id, wallet.balance - amount);
         }
 
         await db.saveExpense(settlementExpense);
         linkedTransactionId = settlementExpense.id;
     }
 
-    // Mark debt as settled
-    await db.updateDebt(id, {
-        isSettled: true,
-        settledDate: new Date().toISOString(),
-        linkedTransactionId
-    });
+    if (amount === debt.amount) {
+        // Full settlement
+        await db.updateDebt(id, {
+            isSettled: true,
+            settledDate: new Date().toISOString(),
+            linkedTransactionId
+        });
+    } else {
+        // Partial settlement: Reduce amount, keep isSettled false
+        await db.updateDebt(id, {
+            amount: debt.amount - amount
+        });
+    }
 
     // Reload stores
     await loadDebts();

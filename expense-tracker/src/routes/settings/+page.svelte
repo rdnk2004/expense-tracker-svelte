@@ -12,6 +12,21 @@
 		clearAllData
 	} from '$lib/stores';
 	import { lockApp, passwordExists } from '$lib/stores/auth';
+	import {
+		Settings,
+		Info,
+		Download,
+		Upload,
+		Lock,
+		FolderOpen,
+		TriangleAlert,
+		Trash2,
+		X,
+		Moon,
+		Sun
+	} from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 
 	// UI State
 	let showToast = $state(false);
@@ -22,7 +37,23 @@
 	let importFileInput: HTMLInputElement;
 	let importPreview = $state<any>(null);
 
-	// Computed stats
+	let theme = $state<'light' | 'dark'>('light');
+
+	onMount(() => {
+		// Initialize theme state
+		const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+		if (savedTheme) {
+			theme = savedTheme;
+		} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+			theme = 'dark';
+		}
+	});
+
+	function toggleTheme() {
+		theme = theme === 'light' ? 'dark' : 'light';
+		document.documentElement.setAttribute('data-theme', theme);
+		localStorage.setItem('theme', theme);
+	}
 	let totalExpensesCount = $derived($expenses.length);
 	let totalDebtsCount = $derived($debts.length);
 	let totalTransfersCount = $derived($transfers.length);
@@ -45,7 +76,7 @@
 	async function handleExportData() {
 		try {
 			await exportData();
-			showSuccessToast('Data exported successfully! 📥');
+			showSuccessToast('Data exported successfully!');
 		} catch (error) {
 			console.error('Export failed:', error);
 			showSuccessToast('Export failed ❌');
@@ -101,7 +132,7 @@
 
 			showImportModal = false;
 			importPreview = null;
-			showSuccessToast('Data imported successfully! 📤');
+			showSuccessToast('Data imported successfully!');
 		} catch (error) {
 			console.error('Import failed:', error);
 			showSuccessToast('Import failed ❌');
@@ -123,7 +154,7 @@
 			await clearAllData();
 			showResetModal = false;
 			resetConfirmText = '';
-			showSuccessToast('All data cleared successfully! 🗑️');
+			showSuccessToast('All data cleared successfully!');
 		} catch (error) {
 			console.error('Reset failed:', error);
 			showSuccessToast('Reset failed ❌');
@@ -132,7 +163,7 @@
 
 	function handleLockApp() {
 		lockApp();
-		showSuccessToast('App locked! 🔒');
+		showSuccessToast('App locked');
 		setTimeout(() => {
 			goto('/login');
 		}, 1000);
@@ -153,11 +184,45 @@
 		<div class="toast">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">⚙️ Settings</h1>
+	<h1 class="page-title">
+		<Settings class="inline-icon" size={32} /> Settings
+	</h1>
+
+	<!-- Appearance Section -->
+	<div class="section">
+		<h2 class="section-title">
+			<Sun class="inline-icon" size={20} /> Appearance
+		</h2>
+		<p class="section-description">Customize the look and feel of the application.</p>
+		<div class="appearance-row">
+			<div class="appearance-label-group">
+				<span class="label-main">Dark Mode</span>
+				<span class="label-sub">Switch between light and dark themes</span>
+			</div>
+			<button
+				class="toggle-switch"
+				class:checked={theme === 'dark'}
+				onclick={toggleTheme}
+				aria-label="Toggle dark mode"
+				role="switch"
+				aria-checked={theme === 'dark'}
+			>
+				<div class="toggle-thumb">
+					{#if theme === 'dark'}
+						<Moon size={12} color="#000" />
+					{:else}
+						<Sun size={12} color="#FDB813" />
+					{/if}
+				</div>
+			</button>
+		</div>
+	</div>
 
 	<!-- App Info Section -->
 	<div class="section">
-		<h2 class="section-title">ℹ️ App Information</h2>
+		<h2 class="section-title">
+			<Info class="inline-icon" size={20} /> App Information
+		</h2>
 		<div class="info-grid">
 			<div class="info-item">
 				<span class="info-label">Version</span>
@@ -195,19 +260,23 @@
 
 	<!-- Export Data Section -->
 	<div class="section">
-		<h2 class="section-title">📥 Export Data</h2>
+		<h2 class="section-title">
+			<Download class="inline-icon" size={20} /> Export Data
+		</h2>
 		<p class="section-description">
 			Download a complete backup of all your financial data as a JSON file.
 		</p>
 		<button class="action-btn primary" onclick={handleExportData}>
-			<span>📥</span>
+			<Download size={20} />
 			<span>Export All Data</span>
 		</button>
 	</div>
 
 	<!-- Import Data Section -->
 	<div class="section">
-		<h2 class="section-title">📤 Import Data</h2>
+		<h2 class="section-title">
+			<Upload class="inline-icon" size={20} /> Import Data
+		</h2>
 		<p class="section-description">
 			Import data from a previously exported JSON file. This will overwrite all existing data.
 		</p>
@@ -219,7 +288,7 @@
 			style="display: none;"
 		/>
 		<button class="action-btn secondary" onclick={handleImportClick}>
-			<span>📤</span>
+			<Upload size={20} />
 			<span>Select File to Import</span>
 		</button>
 	</div>
@@ -227,13 +296,15 @@
 	<!-- Security Section -->
 	{#if $passwordExists}
 		<div class="section">
-			<h2 class="section-title">🔒 Security</h2>
+			<h2 class="section-title">
+				<Lock class="inline-icon" size={20} /> Security
+			</h2>
 			<p class="section-description">
 				Lock the app to require password authentication. You'll need to enter your password to
 				unlock.
 			</p>
 			<button class="action-btn secondary" onclick={handleLockApp}>
-				<span>🔒</span>
+				<Lock size={20} />
 				<span>Lock App Now</span>
 			</button>
 		</div>
@@ -241,11 +312,15 @@
 
 	<!-- Category Management Section -->
 	<div class="section">
-		<h2 class="section-title">📁 Category Management</h2>
+		<h2 class="section-title">
+			<FolderOpen class="inline-icon" size={20} /> Category Management
+		</h2>
 		<div class="categories-list">
 			{#each $categories as category}
 				<div class="category-item">
-					<div class="category-icon">{category.icon}</div>
+					<div class="category-icon">
+						<CategoryIcon icon={category.icon} size={32} />
+					</div>
 					<div class="category-details">
 						<div class="category-name">{category.name}</div>
 						{#if category.subcategories.length > 0}
@@ -259,18 +334,21 @@
 			{/each}
 		</div>
 		<p class="help-text">
-			ℹ️ Category customization (add, edit, delete) coming soon in a future update!
+			<Info size={14} class="inline" /> Category customization (add, edit, delete) coming soon in a future
+			update!
 		</p>
 	</div>
 
 	<!-- Danger Zone -->
 	<div class="section danger-zone">
-		<h2 class="section-title">⚠️ Danger Zone</h2>
+		<h2 class="section-title">
+			<TriangleAlert class="inline-icon" size={20} /> Danger Zone
+		</h2>
 		<p class="section-description">
 			Irreversible actions. Please be careful. All data will be permanently deleted.
 		</p>
 		<button class="action-btn danger" onclick={openResetModal}>
-			<span>🗑️</span>
+			<Trash2 size={20} />
 			<span>Clear All Data</span>
 		</button>
 	</div>
@@ -293,7 +371,9 @@
 				aria-modal="true"
 				tabindex="-1"
 			>
-				<h2 class="modal-title">⚠️ Import Data</h2>
+				<h2 class="modal-title">
+					<Upload class="inline-icon" size={24} /> Import Data
+				</h2>
 
 				<div class="modal-warning">
 					<strong>Warning:</strong> This will overwrite all existing data!
@@ -339,7 +419,9 @@
 				aria-modal="true"
 				tabindex="-1"
 			>
-				<h2 class="modal-title">⚠️ Clear All Data</h2>
+				<h2 class="modal-title">
+					<TriangleAlert class="inline-icon" size={24} /> Clear All Data
+				</h2>
 
 				<div class="modal-warning">
 					<strong>Warning:</strong> This action cannot be undone!
@@ -740,5 +822,64 @@
 		.modal {
 			padding: 1.5rem;
 		}
+	}
+
+	/* Toggle Switch */
+	.appearance-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem 0;
+	}
+
+	.appearance-label-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.label-main {
+		font-weight: 600;
+		color: var(--text-primary);
+	}
+
+	.label-sub {
+		font-size: 0.85rem;
+		color: var(--text-secondary);
+	}
+
+	.toggle-switch {
+		width: 50px;
+		height: 30px;
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 15px;
+		position: relative;
+		cursor: pointer;
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		padding: 2px;
+	}
+
+	.toggle-switch.checked {
+		background: var(--accent-primary);
+		border-color: var(--accent-primary);
+	}
+
+	.toggle-thumb {
+		width: 24px;
+		height: 24px;
+		background: white;
+		border-radius: 50%;
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.toggle-switch.checked .toggle-thumb {
+		transform: translateX(20px);
 	}
 </style>

@@ -10,6 +10,19 @@
 		goToNextMonth,
 		getMonthName
 	} from '$lib/stores';
+	import {
+		Target,
+		ChevronLeft,
+		ChevronRight,
+		ChartPie,
+		CheckCircle,
+		CircleAlert,
+		Wallet,
+		FolderOpen,
+		TrendingUp,
+		Loader2
+	} from 'lucide-svelte';
+	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 
 	// Form state
 	let overallBudgetAmount = $state('');
@@ -78,7 +91,7 @@
 
 	async function handleSetOverallBudget() {
 		if (!overallBudgetAmount || parseFloat(overallBudgetAmount) <= 0) {
-			showSuccessToast('Please enter a valid amount ❌');
+			showSuccessToast('Please enter a valid amount');
 			return;
 		}
 
@@ -86,17 +99,17 @@
 			await setBudget('overall', Math.round(parseFloat(overallBudgetAmount) * 100));
 
 			overallBudgetAmount = '';
-			showSuccessToast('Overall budget set successfully! 🎉');
+			showSuccessToast('Overall budget set successfully!');
 		} catch (error) {
 			console.error('Failed to set budget:', error);
-			showSuccessToast('Failed to set budget ❌');
+			showSuccessToast('Failed to set budget');
 		}
 	}
 
 	async function handleSetCategoryBudget(categoryId: string) {
 		const amount = categoryBudgetInputs[categoryId];
 		if (!amount || parseFloat(amount) <= 0) {
-			showSuccessToast('Please enter a valid amount ❌');
+			showSuccessToast('Please enter a valid amount');
 			return;
 		}
 
@@ -104,10 +117,10 @@
 			await setBudget('category', Math.round(parseFloat(amount) * 100), categoryId);
 
 			categoryBudgetInputs = { ...categoryBudgetInputs, [categoryId]: '' };
-			showSuccessToast('Category budget set successfully! 🎉');
+			showSuccessToast('Category budget set successfully!');
 		} catch (error) {
 			console.error('Failed to set budget:', error);
-			showSuccessToast('Failed to set budget ❌');
+			showSuccessToast('Failed to set budget');
 		}
 	}
 
@@ -133,21 +146,27 @@
 		<div class="toast">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">🎯 Budgets</h1>
+	<h1 class="page-title">
+		<Target class="inline-icon" size={32} /> Budgets
+	</h1>
 
 	<!-- Month Selector -->
 	<div class="month-selector-card">
 		<button class="month-nav-btn" onclick={goToPreviousMonth} aria-label="Previous month">
-			◀
+			<ChevronLeft size={24} />
 		</button>
 		<div class="month-display">{getMonthName(selectedMonth)}</div>
-		<button class="month-nav-btn" onclick={goToNextMonth} aria-label="Next month">▶</button>
+		<button class="month-nav-btn" onclick={goToNextMonth} aria-label="Next month">
+			<ChevronRight size={24} />
+		</button>
 	</div>
 
 	<!-- Budget Insights -->
 	{#if overallBudget || categoryBudgets.length > 0}
 		<div class="insights-card">
-			<h2 class="insights-title">📊 Budget Insights</h2>
+			<h2 class="insights-title">
+				<ChartPie class="inline-icon" size={24} /> Budget Insights
+			</h2>
 			<div class="insights-grid">
 				<div class="insight">
 					<div class="insight-label">Status</div>
@@ -157,9 +176,14 @@
 						class:danger={overBudgetCount > 0}
 					>
 						{#if overBudgetCount === 0}
-							✅ You're on track!
+							<span class="success-text"
+								><CheckCircle size={16} class="inline" /> You're on track!</span
+							>
 						{:else}
-							⚠️ {overBudgetCount} budget{overBudgetCount > 1 ? 's' : ''} exceeded
+							<span class="danger-text"
+								><CircleAlert size={16} class="inline" />
+								{overBudgetCount} budget{overBudgetCount > 1 ? 's' : ''} exceeded</span
+							>
 						{/if}
 					</div>
 				</div>
@@ -191,7 +215,9 @@
 
 	<!-- Set Overall Budget -->
 	<div class="budget-card">
-		<h2 class="card-title">💰 Overall Budget</h2>
+		<h2 class="card-title">
+			<Wallet class="inline-icon" size={24} /> Overall Budget
+		</h2>
 
 		{#if overallBudget}
 			<div class="current-budget">
@@ -238,7 +264,9 @@
 
 	<!-- Category Budgets -->
 	<div class="category-budgets-card">
-		<h2 class="card-title">📁 Category Budgets</h2>
+		<h2 class="card-title">
+			<FolderOpen class="inline-icon" size={24} /> Category Budgets
+		</h2>
 
 		{#if categoriesWithBudgets.length > 0}
 			<div class="categories-list">
@@ -246,7 +274,9 @@
 					<div class="category-budget-item">
 						<div class="category-header">
 							<div class="category-info">
-								<span class="category-icon">{category.icon}</span>
+								<span class="category-icon">
+									<CategoryIcon icon={category.icon} size={24} />
+								</span>
 								<span class="category-name">{category.name}</span>
 							</div>
 							<div class="category-spent">{formatCurrency(spent)}</div>
@@ -301,12 +331,14 @@
 	<!-- Budget Overview Chart -->
 	{#if categoryBudgets.length > 0}
 		<div class="overview-card">
-			<h2 class="card-title">📈 Budget Overview</h2>
+			<h2 class="card-title">
+				<TrendingUp class="inline-icon" size={24} /> Budget Overview
+			</h2>
 			<div class="overview-chart">
 				{#each categoriesWithBudgets.filter((c) => c.budget) as { category, budget, spent, percentage }}
 					<div class="chart-row">
 						<div class="chart-label">
-							<span>{category.icon}</span>
+							<span><CategoryIcon icon={category.icon} size={18} /></span>
 							<span>{category.name}</span>
 						</div>
 						<div class="chart-bars">
@@ -380,7 +412,7 @@
 
 	/* Month Selector */
 	.month-selector-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1rem;
@@ -422,7 +454,7 @@
 
 	/* Insights Card */
 	.insights-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
@@ -479,7 +511,7 @@
 	.budget-card,
 	.category-budgets-card,
 	.overview-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;

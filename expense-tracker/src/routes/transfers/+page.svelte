@@ -8,6 +8,7 @@
 		formatDate,
 		formatDateInput
 	} from '$lib/stores';
+	import { ArrowLeftRight, ArrowRight, Loader2 } from 'lucide-svelte';
 
 	// Form state
 	let formData = $state({
@@ -182,7 +183,9 @@
 		<div class="toast">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">🔄 Transfers</h1>
+	<h1 class="page-title">
+		<ArrowLeftRight class="inline-icon" size={32} /> Transfers
+	</h1>
 
 	<!-- Summary Stats -->
 	<div class="stats-card">
@@ -191,7 +194,7 @@
 			<span class="stat-value">{formatCurrency(totalTransferred)}</span>
 		</div>
 		<div class="stat">
-			<span class="stat-label">UPI → Cash</span>
+			<span class="stat-label">UPI <ArrowRight size={12} class="inline" /> Cash</span>
 			<span class="stat-value"
 				>{upiToCash.length} ({formatCurrency(
 					upiToCash.reduce((sum, t) => sum + t.amount, 0)
@@ -199,7 +202,7 @@
 			>
 		</div>
 		<div class="stat">
-			<span class="stat-label">Cash → UPI</span>
+			<span class="stat-label">Cash <ArrowRight size={12} class="inline" /> UPI</span>
 			<span class="stat-value"
 				>{cashToUpi.length} ({formatCurrency(
 					cashToUpi.reduce((sum, t) => sum + t.amount, 0)
@@ -317,7 +320,12 @@
 			{/if}
 
 			<button type="submit" class="submit-btn" disabled={isSubmitting || hasInsufficientBalance}>
-				{isSubmitting ? '⏳ Processing...' : '🔄 Create Transfer'}
+				{isSubmitting ? 'Processing...' : 'Create Transfer'}
+				{#if isSubmitting}
+					<Loader2 size={16} class="animate-spin ml-2" />
+				{:else}
+					<ArrowLeftRight size={16} class="ml-2" />
+				{/if}
 			</button>
 		</form>
 	</div>
@@ -348,11 +356,13 @@
 				{@const fromWallet = getWalletById(transfer.fromWalletId)}
 				{@const toWallet = getWalletById(transfer.toWalletId)}
 				<div class="transfer-item">
-					<div class="transfer-icon">🔄</div>
+					<div class="transfer-icon">
+						<ArrowLeftRight size={24} />
+					</div>
 					<div class="transfer-details">
 						<div class="transfer-flow">
 							<span class="wallet-badge from">{fromWallet?.name || 'Unknown'}</span>
-							<span class="arrow">→</span>
+							<span class="arrow"><ArrowRight size={16} /></span>
 							<span class="wallet-badge to">{toWallet?.name || 'Unknown'}</span>
 						</div>
 						{#if transfer.note}
@@ -365,7 +375,9 @@
 			{/each}
 		{:else}
 			<div class="empty-state">
-				<div class="empty-icon">🔄</div>
+				<div class="empty-icon">
+					<ArrowLeftRight size={48} />
+				</div>
 				<h3>No transfers found</h3>
 				<p>
 					{#if filters.search || filters.monthFilter}

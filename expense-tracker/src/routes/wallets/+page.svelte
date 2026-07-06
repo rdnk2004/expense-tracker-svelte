@@ -12,6 +12,19 @@
 	} from '$lib/stores';
 	import type { Expense, Transfer, Category, Wallet } from '$lib/types';
 	import * as db from '$lib/db';
+	import {
+		Wallet as WalletIcon,
+		Banknote,
+		Smartphone,
+		Settings,
+		Plus,
+		ArrowLeftRight,
+		ArrowUpRight,
+		ArrowDownLeft,
+		Package,
+		Inbox,
+		Loader2
+	} from 'lucide-svelte';
 
 	// Modal states
 	let showTransferModal = $state(false);
@@ -248,11 +261,11 @@
 				transferForm.note || undefined
 			);
 
-			showSuccessToast('Transfer completed successfully! 💸');
+			showSuccessToast('Transfer completed successfully!');
 			closeTransferModal();
 		} catch (error) {
 			console.error('Failed to create transfer:', error);
-			showErrorToast('Failed to create transfer ❌');
+			showErrorToast('Failed to create transfer');
 		} finally {
 			isSubmittingTransfer = false;
 		}
@@ -313,11 +326,11 @@
 				note: expenseForm.note || null
 			});
 
-			showSuccessToast('Expense added successfully! 🎉');
+			showSuccessToast('Expense added successfully!');
 			closeExpenseModal();
 		} catch (error) {
 			console.error('Failed to add expense:', error);
-			showErrorToast('Failed to add expense ❌');
+			showErrorToast('Failed to add expense');
 		} finally {
 			isSubmittingExpense = false;
 		}
@@ -370,11 +383,11 @@
 			const updatedWallets = await db.getWallets();
 			wallets.set(updatedWallets);
 
-			showSuccessToast('Wallet balance updated! 💰');
+			showSuccessToast('Wallet balance updated!');
 			closeManualAdjustment();
 		} catch (error) {
 			console.error('Failed to update wallet balance:', error);
-			showErrorToast('Failed to update balance ❌');
+			showErrorToast('Failed to update balance');
 		}
 	}
 
@@ -406,10 +419,16 @@
 
 	<!-- Page Header -->
 	<div class="page-header">
-		<h1 class="page-title">💰 Wallets</h1>
+		<h1 class="page-title">
+			<WalletIcon class="inline-icon" size={32} /> Wallets
+		</h1>
 		<div class="header-actions">
-			<button class="action-btn primary" onclick={openExpenseModal}>+ Add Expense</button>
-			<button class="action-btn secondary" onclick={openTransferModal}>🔄 Transfer Money</button>
+			<button class="action-btn primary" onclick={openExpenseModal}>
+				<Plus size={18} /> Add Expense
+			</button>
+			<button class="action-btn secondary" onclick={openTransferModal}>
+				<ArrowLeftRight size={18} /> Transfer Money
+			</button>
 		</div>
 	</div>
 
@@ -422,7 +441,9 @@
 			<div class="wallet-card">
 				<div class="wallet-header">
 					<div class="wallet-info">
-						<h2 class="wallet-name">📱 UPI</h2>
+						<h2 class="wallet-name">
+							<Smartphone class="inline-icon" size={24} /> UPI
+						</h2>
 						<span class="wallet-updated">Updated {formatRelativeTime(upiWallet.updated)}</span>
 					</div>
 					<button
@@ -430,7 +451,7 @@
 						onclick={() => openManualAdjustment(upiWallet.id)}
 						title="Manual adjustment"
 					>
-						⚙️
+						<Settings size={18} />
 					</button>
 				</div>
 
@@ -443,9 +464,10 @@
 					</div>
 					<div class="stat-item">
 						<span class="stat-label">Transfers</span>
-						<span class="stat-value"
-							>↓{formatCurrency(stats.transfersIn)} / ↑{formatCurrency(stats.transfersOut)}</span
-						>
+						<span class="stat-value">
+							<ArrowDownLeft size={14} class="inline" />{formatCurrency(stats.transfersIn)} /
+							<ArrowUpRight size={14} class="inline" />{formatCurrency(stats.transfersOut)}
+						</span>
 					</div>
 					<div class="stat-item">
 						<span class="stat-label">Transactions</span>
@@ -514,11 +536,15 @@
 								<div class="transaction-item" class:negative={transaction.amount < 0}>
 									<div class="transaction-icon">
 										{#if transaction.type === 'expense'}
-											{transaction.category?.icon || '📦'}
+											{#if transaction.category?.icon}
+												{transaction.category.icon}
+											{:else}
+												<Package size={20} />
+											{/if}
 										{:else if transaction.type === 'transfer-in'}
-											⬇️
+											<ArrowDownLeft size={20} />
 										{:else}
-											⬆️
+											<ArrowUpRight size={20} />
 										{/if}
 									</div>
 									<div class="transaction-details">
@@ -548,7 +574,9 @@
 							{/each}
 						{:else}
 							<div class="empty-state">
-								<div class="empty-icon">📭</div>
+								<div class="empty-icon">
+									<Inbox size={48} />
+								</div>
 								<p>No transactions found</p>
 							</div>
 						{/if}
@@ -564,7 +592,9 @@
 			<div class="wallet-card">
 				<div class="wallet-header">
 					<div class="wallet-info">
-						<h2 class="wallet-name">💵 Cash</h2>
+						<h2 class="wallet-name">
+							<Banknote class="inline-icon" size={24} /> Cash
+						</h2>
 						<span class="wallet-updated">Updated {formatRelativeTime(cashWallet.updated)}</span>
 					</div>
 					<button
@@ -572,7 +602,7 @@
 						onclick={() => openManualAdjustment(cashWallet.id)}
 						title="Manual adjustment"
 					>
-						⚙️
+						<Settings size={18} />
 					</button>
 				</div>
 
@@ -656,11 +686,15 @@
 								<div class="transaction-item" class:negative={transaction.amount < 0}>
 									<div class="transaction-icon">
 										{#if transaction.type === 'expense'}
-											{transaction.category?.icon || '📦'}
+											{#if transaction.category?.icon}
+												{transaction.category.icon}
+											{:else}
+												<Package size={20} />
+											{/if}
 										{:else if transaction.type === 'transfer-in'}
-											⬇️
+											<ArrowDownLeft size={20} />
 										{:else}
-											⬆️
+											<ArrowUpRight size={20} />
 										{/if}
 									</div>
 									<div class="transaction-details">
@@ -712,7 +746,9 @@
 		></div>
 		<div class="modal">
 			<div class="modal-header">
-				<h2>🔄 Transfer Money</h2>
+				<h2>
+					<ArrowLeftRight size={24} class="inline-icon" /> Transfer Money
+				</h2>
 				<button class="modal-close" onclick={closeTransferModal}>✕</button>
 			</div>
 
@@ -821,7 +857,11 @@
 						class="btn-submit"
 						disabled={isSubmittingTransfer || hasInsufficientTransferBalance}
 					>
-						{isSubmittingTransfer ? '⏳ Processing...' : '✓ Transfer'}
+						{isSubmittingTransfer ? 'Processing...' : 'Transfer'}
+						<!-- Removed checkmark/hourglass -->
+						{#if isSubmittingTransfer}
+							<Loader2 size={16} class="animate-spin ml-2" />
+						{/if}
 					</button>
 				</div>
 			</form>
@@ -950,7 +990,12 @@
 				<div class="modal-actions">
 					<button type="button" class="btn-cancel" onclick={closeExpenseModal}>Cancel</button>
 					<button type="submit" class="btn-submit" disabled={isSubmittingExpense}>
-						{isSubmittingExpense ? '⏳ Adding...' : '+ Add Expense'}
+						{isSubmittingExpense ? 'Adding...' : 'Add Expense'}
+						{#if isSubmittingExpense}
+							<Loader2 size={16} class="animate-spin ml-2" />
+						{:else}
+							<Plus size={16} class="ml-2" />
+						{/if}
 					</button>
 				</div>
 			</form>
@@ -1059,27 +1104,61 @@
 		border-color: var(--accent-primary);
 	}
 
-	/* Wallet Cards */
+	/* Wallet Cards Grid */
 	.wallet-cards {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 		gap: 1.5rem;
 		margin-bottom: 2rem;
 	}
 
 	.wallet-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
+		border-radius: 28px; /* Super rounded */
 		padding: 2rem;
-		box-shadow: var(--shadow-md);
+		color: white; /* Default text white for these cards */
+		position: relative;
+		overflow: hidden;
+		box-shadow: var(--shadow-lg);
+		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		min-height: 400px; /* Taller for presence */
+	}
+
+	.wallet-card:hover {
+		transform: translateY(-6px);
+		box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Gradient Variants */
+	.wallet-card:nth-child(1) {
+		background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); /* Indigo-Violet */
+	}
+
+	.wallet-card:nth-child(2) {
+		background: linear-gradient(135deg, #059669 0%, #10b981 100%); /* Emerald-Teal */
+	}
+
+	/* Background Decorations */
+	.wallet-card::before {
+		content: '';
+		position: absolute;
+		top: -20%;
+		right: -10%;
+		width: 200px;
+		height: 200px;
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 50%;
+		filter: blur(40px);
 	}
 
 	.wallet-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		margin-bottom: 1.5rem;
+		margin-bottom: 2rem;
+		z-index: 1;
 	}
 
 	.wallet-info {
@@ -1090,65 +1169,74 @@
 
 	.wallet-name {
 		font-size: 1.5rem;
-		font-weight: 600;
-		color: var(--text-primary);
-		margin: 0;
+		font-weight: 700;
+		color: white;
+		margin-bottom: 0.25rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
 	}
 
 	.wallet-updated {
-		font-size: 0.875rem;
-		color: var(--text-muted);
+		font-size: 0.8rem;
+		color: rgba(255, 255, 255, 0.7);
 	}
 
 	.manual-adjust-btn {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		color: var(--text-secondary);
-		padding: 0.5rem;
-		border-radius: var(--border-radius);
-		cursor: pointer;
-		transition: all 0.2s;
-		font-size: 1.25rem;
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: background 0.2s;
 	}
 
 	.manual-adjust-btn:hover {
-		background: var(--bg-hover);
-		color: var(--accent-primary);
+		background: rgba(255, 255, 255, 0.3);
 	}
 
 	.wallet-balance {
-		font-size: 2.5rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		margin-bottom: 1.5rem;
+		font-size: 3rem;
+		font-weight: 800;
+		margin-bottom: 2rem;
+		z-index: 1;
+		line-height: 1;
+		letter-spacing: -1px;
 	}
 
+	/* Stats inside card */
 	.wallet-stats {
+		background: rgba(0, 0, 0, 0.15);
+		border-radius: 16px;
+		padding: 1rem;
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-		padding: 1rem;
-		background: var(--bg-secondary);
-		border-radius: var(--border-radius);
+		gap: 0.5rem;
+		backdrop-filter: blur(10px);
+		z-index: 1;
 	}
 
 	.stat-item {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		align-items: center;
+		text-align: center;
 	}
 
 	.stat-label {
-		font-size: 0.75rem;
-		color: var(--text-muted);
+		font-size: 0.7rem;
 		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.6);
+		margin-bottom: 4px;
 	}
 
 	.stat-value {
-		font-size: 0.875rem;
+		font-size: 0.95rem;
 		font-weight: 600;
-		color: var(--text-primary);
+		color: white;
 	}
 
 	/* Manual Adjustment */
@@ -1231,10 +1319,14 @@
 		color: var(--text-primary);
 	}
 
-	/* Transaction Section */
+	/* Lists container - pulling out of card visually or nested cleanly */
 	.transaction-section {
-		border-top: 1px solid var(--border-color);
-		padding-top: 1.5rem;
+		background: var(--bg-card);
+		border-radius: 20px;
+		padding: 1.5rem;
+		margin-top: 1.5rem;
+		color: var(--text-primary); /* Reset text color */
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 	}
 
 	.transaction-header {
@@ -1247,10 +1339,8 @@
 	}
 
 	.transaction-header h3 {
-		font-size: 1.125rem;
-		font-weight: 600;
 		color: var(--text-primary);
-		margin: 0;
+		font-size: 1.1rem;
 	}
 
 	.filter-buttons {
@@ -1260,7 +1350,6 @@
 
 	.filter-btn {
 		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
 		color: var(--text-secondary);
 		padding: 0.5rem 1rem;
 		border-radius: var(--border-radius);
