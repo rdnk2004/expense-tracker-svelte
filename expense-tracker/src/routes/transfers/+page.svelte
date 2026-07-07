@@ -442,7 +442,7 @@
 
 	/* Stats Card */
 	.stats-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-hover) 100%);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
@@ -475,7 +475,7 @@
 
 	/* Form Card */
 	.form-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-hover) 100%);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
@@ -722,12 +722,12 @@
 	}
 
 	.wallet-badge.from {
-		background: linear-gradient(135deg, #4ecdc4 0%, #44a3a0 100%);
+		background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
 		color: white;
 	}
 
 	.wallet-badge.to {
-		background: linear-gradient(135deg, #ff6b6b 0%, #e85a5a 100%);
+		background: linear-gradient(135deg, #db2777 0%, #9d174d 100%);
 		color: white;
 	}
 

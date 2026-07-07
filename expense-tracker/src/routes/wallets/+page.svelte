@@ -1107,7 +1107,7 @@
 	/* Wallet Cards Grid */
 	.wallet-cards {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
 		gap: 1.5rem;
 		margin-bottom: 2rem;
 	}
@@ -1124,6 +1124,7 @@
 		flex-direction: column;
 		justify-content: space-between;
 		min-height: 400px; /* Taller for presence */
+		border: 1px solid rgba(168, 85, 247, 0.15);
 	}
 
 	.wallet-card:hover {
@@ -1133,11 +1134,13 @@
 
 	/* Gradient Variants */
 	.wallet-card:nth-child(1) {
-		background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); /* Indigo-Violet */
+		background: linear-gradient(135deg, #0b071e 0%, #5b21b6 100%); /* Deep Violet-Black to Purple */
+		border-color: rgba(168, 85, 247, 0.35);
 	}
 
 	.wallet-card:nth-child(2) {
-		background: linear-gradient(135deg, #059669 0%, #10b981 100%); /* Emerald-Teal */
+		background: linear-gradient(135deg, #05020c 0%, #701a75 100%); /* Obsidian-Black to Wine-Magenta */
+		border-color: rgba(236, 72, 153, 0.25);
 	}
 
 	/* Background Decorations */

@@ -189,14 +189,9 @@
 	}
 
 	.tab.active {
-		background: var(--text-primary);
-		color: var(--bg-card);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
-
-	:global([data-theme='dark']) .tab.active {
-		background: white;
-		color: black;
+		background: var(--accent-gradient);
+		color: white;
+		box-shadow: var(--shadow-sm);
 	}
 
 	.amount-display {

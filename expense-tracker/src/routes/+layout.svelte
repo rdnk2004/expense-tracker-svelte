@@ -535,7 +535,7 @@
 	}
 
 	.action-btn.danger:hover {
-		background: rgba(255, 59, 48, 0.1);
+		background: var(--danger-bg);
 		color: var(--danger);
 	}
 
@@ -577,7 +577,7 @@
 
 	.bottom-nav-item.active {
 		color: var(--accent-primary);
-		background: rgba(79, 70, 229, 0.1);
+		background: var(--bg-hover);
 	}
 
 	.active-dot {

@@ -79,23 +79,28 @@
 	.login-page {
 		height: 100vh;
 		width: 100vw;
-		background: #000;
+		background: radial-gradient(circle at center, #12072b 0%, #03000a 100%);
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		color: #fff;
-		font-family: 'Inter', sans-serif;
+		font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
 		overflow: hidden;
 	}
 
 	.login-container {
 		width: 100%;
 		max-width: 400px;
-		padding: 2rem;
+		padding: 2.5rem;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 3rem;
+		background: rgba(15, 10, 42, 0.4);
+		border: 1px solid rgba(168, 85, 247, 0.1);
+		border-radius: 32px;
+		backdrop-filter: blur(20px);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 	}
 
 	/* Brand Animation */
@@ -123,10 +128,11 @@
 
 	.rdnk {
 		color: #fff;
+		text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 	}
 
 	.slash {
-		color: #333;
+		color: rgba(168, 85, 247, 0.4);
 		font-weight: 300;
 		margin: 0 0.2rem;
 	}
@@ -138,7 +144,7 @@
 
 	.axiom {
 		color: transparent;
-		background: linear-gradient(90deg, #fff, #888);
+		background: linear-gradient(90deg, #ffffff 0%, #a855f7 100%);
 		-webkit-background-clip: text;
 		background-clip: text;
 		transform: translateX(-100%);
@@ -153,7 +159,7 @@
 
 	.brand-subtitle {
 		margin-top: 0.5rem;
-		color: #666;
+		color: rgba(168, 85, 247, 0.6);
 		font-size: 0.875rem;
 		text-transform: uppercase;
 		letter-spacing: 2px;
@@ -165,7 +171,7 @@
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 1.25rem;
 		opacity: 0;
 		transform: translateY(10px);
 		transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
@@ -177,9 +183,9 @@
 	}
 
 	.input-wrapper {
-		background: #111;
-		border: 1px solid #333;
-		border-radius: 12px;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(168, 85, 247, 0.2);
+		border-radius: 16px;
 		padding: 1rem;
 		display: flex;
 		align-items: center;
@@ -188,12 +194,14 @@
 	}
 
 	.input-wrapper:focus-within {
-		border-color: #666;
-		background: #161616;
+		border-color: #a855f7;
+		background: rgba(168, 85, 247, 0.08);
+		box-shadow: 0 0 15px rgba(168, 85, 247, 0.25);
 	}
 
 	.input-wrapper.error {
-		border-color: #ff3b30;
+		border-color: #ff3366;
+		background: rgba(255, 51, 102, 0.1);
 		animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 	}
 
@@ -218,7 +226,7 @@
 	}
 
 	.input-icon {
-		color: #444;
+		color: rgba(168, 85, 247, 0.5);
 	}
 
 	input {
@@ -230,21 +238,22 @@
 		outline: none;
 		text-align: center;
 		letter-spacing: 4px;
+		font-family: inherit;
 	}
 
 	::placeholder {
 		letter-spacing: normal;
-		color: #444;
+		color: rgba(168, 85, 247, 0.4);
 		text-transform: uppercase;
 		font-size: 0.75rem;
 	}
 
 	.login-btn {
-		background: #fff;
-		color: #000;
+		background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+		color: #fff;
 		border: none;
 		padding: 1rem;
-		border-radius: 12px;
+		border-radius: 16px;
 		font-weight: 600;
 		cursor: pointer;
 		display: flex;
@@ -252,11 +261,13 @@
 		justify-content: center;
 		gap: 0.5rem;
 		transition: all 0.2s;
+		box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
 	}
 
 	.login-btn:hover {
-		background: #ddd;
+		background: linear-gradient(135deg, #8b5cf6 0%, #f472b6 100%);
 		transform: translateY(-2px);
+		box-shadow: 0 8px 20px rgba(124, 58, 237, 0.5);
 	}
 
 	.login-btn:active {
@@ -264,10 +275,11 @@
 	}
 
 	.error-msg {
-		color: #ff3b30;
+		color: #ff3366;
 		font-size: 0.875rem;
 		text-align: center;
 		animation: fadeIn 0.2s;
+		font-weight: 500;
 	}
 
 	@keyframes fadeIn {

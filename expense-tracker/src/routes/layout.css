@@ -33,60 +33,52 @@ body {
    =================================== */
 
 :root {
-	/* LIGHT THEME (Default) */
-	--bg-primary: #F0F2F5;
-	/* Slightly cooler grey for better contrast */
+	/* LIGHT THEME - Premium Lavender-Violet & Deep Indigo */
+	--bg-primary: #F5F3FF;
 	--bg-secondary: #ffffff;
 	--bg-card: #ffffff;
-	--bg-hover: #F8F9FA;
+	--bg-hover: #F0EAFF;
 
 	/* Brand Gradients & Colors */
-	/* Deep Blue/Purple aesthetic */
-	--accent-primary: #4318FF;
-	/* Vivid Blue */
-	--accent-secondary: #7B61FF;
-	/* Soft Purple */
-	--accent-gradient: linear-gradient(135deg, #4318FF 0%, #7B61FF 100%);
-	--accent-glow: rgba(67, 24, 255, 0.4);
+	--accent-primary: #7C3AED;
+	--accent-secondary: #A78BFA;
+	--accent-gradient: linear-gradient(135deg, #7C3AED 0%, #C084FC 100%);
+	--accent-glow: rgba(124, 58, 237, 0.15);
 
 	/* Hero Gradient */
-	--hero-gradient: linear-gradient(110deg, #111827 0%, #1e1b4b 50%, #312e81 100%);
-	/* Deep Night Sky */
+	--hero-gradient: linear-gradient(110deg, #1E1B4B 0%, #312E81 50%, #4C1D95 100%);
 	--hero-text: #ffffff;
 
 	/* Status Colors */
-	--success: #05CD99;
-	--success-bg: rgba(5, 205, 153, 0.1);
-	--warning: #FFB547;
-	--warning-bg: rgba(255, 181, 71, 0.1);
-	--danger: #E31A1A;
-	--danger-bg: rgba(227, 26, 26, 0.1);
+	--success: #10B981;
+	--success-bg: rgba(16, 185, 129, 0.1);
+	--warning: #F59E0B;
+	--warning-bg: rgba(245, 158, 11, 0.1);
+	--danger: #FF3366;
+	--danger-bg: rgba(255, 51, 102, 0.1);
 
 	/* Text Colors */
-	--text-primary: #1B2559;
-	/* Navy Black */
-	--text-secondary: #A3AED0;
-	/* Cool Grey */
-	--text-muted: #B0BBD5;
+	--text-primary: #1E1B4B;
+	--text-secondary: #5B21B6;
+	--text-muted: #8B5CF6;
 
 	/* Borders & Radius */
-	--border-color: #E0E5F2;
+	--border-color: #E9D5FF;
 	--border-radius-sm: 10px;
 	--border-radius: 20px;
 	--border-radius-lg: 30px;
-	/* Super rounded */
 	--border-radius-xl: 40px;
 	--border-radius-pill: 9999px;
 
 	/* Shadows */
-	--shadow-sm: 0px 2px 6px rgba(112, 144, 176, 0.12);
-	--shadow-md: 0px 10px 30px rgba(112, 144, 176, 0.15);
-	--shadow-lg: 0px 20px 50px rgba(112, 144, 176, 0.2);
-	--shadow-glow: 0px 10px 40px rgba(67, 24, 255, 0.3);
+	--shadow-sm: 0px 2px 6px rgba(124, 58, 237, 0.06);
+	--shadow-md: 0px 10px 30px rgba(124, 58, 237, 0.1);
+	--shadow-lg: 0px 20px 50px rgba(124, 58, 237, 0.15);
+	--shadow-glow: 0px 10px 40px rgba(124, 58, 237, 0.25);
 
 	/* Glassmorphism */
-	--glass-bg: rgba(255, 255, 255, 0.7);
-	--glass-border: rgba(255, 255, 255, 0.5);
+	--glass-bg: rgba(255, 255, 255, 0.8);
+	--glass-border: rgba(124, 58, 237, 0.1);
 	--glass-blur: 20px;
 
 	/* Dimensions */
@@ -95,33 +87,38 @@ body {
 	--island-width: 90%;
 }
 
-/* DARK THEME */
+/* DARK THEME - Sleek Obsidian Black & Electric Neon Violet */
 [data-theme='dark'] {
-	--bg-primary: #0b1437;
-	/* Very Dark Navy */
-	--bg-secondary: #111c44;
-	--bg-card: #111c44;
-	--bg-hover: #1b254b;
+	--bg-primary: #03000A;
+	--bg-secondary: #0B071E;
+	--bg-card: #0F0A2A;
+	--bg-hover: #1C1242;
 
-	--accent-primary: #7551FF;
-	--accent-secondary: #C084FC;
-	--accent-gradient: linear-gradient(135deg, #7551FF 0%, #C084FC 100%);
-	--accent-glow: rgba(117, 81, 255, 0.4);
+	--accent-primary: #A855F7;
+	--accent-secondary: #D8B4FE;
+	--accent-gradient: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+	--accent-glow: rgba(168, 85, 247, 0.35);
 
-	--hero-gradient: linear-gradient(110deg, #1f2937 0%, #312e81 100%);
+	--hero-gradient: linear-gradient(110deg, #090014 0%, #1D003B 50%, #4D002B 100%);
 
 	--text-primary: #ffffff;
-	--text-secondary: #A3AED0;
-	--text-muted: #707EAE;
+	--text-secondary: #D8B4FE;
+	--text-muted: #7E6E9E;
 
-	--border-color: rgba(255, 255, 255, 0.05);
+	--border-color: rgba(168, 85, 247, 0.2);
 
-	--shadow-sm: 0px 2px 8px rgba(0, 0, 0, 0.4);
-	--shadow-md: 0px 10px 30px rgba(0, 0, 0, 0.5);
-	--shadow-lg: 0px 20px 50px rgba(0, 0, 0, 0.6);
+	--shadow-sm: 0px 2px 10px rgba(0, 0, 0, 0.6);
+	--shadow-md: 0px 10px 35px rgba(0, 0, 0, 0.8);
+	--shadow-lg: 0px 20px 60px rgba(0, 0, 0, 0.9);
 
-	--glass-bg: rgba(17, 28, 68, 0.7);
-	--glass-border: rgba(255, 255, 255, 0.05);
+	--glass-bg: rgba(11, 7, 30, 0.75);
+	--glass-border: rgba(168, 85, 247, 0.15);
+	--glass-blur: 24px;
+}
+
+/* Default state: Bottom nav is hidden on desktop viewports */
+.bottom-nav-island {
+	display: none;
 }
 
 /* ===================================

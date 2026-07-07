@@ -503,7 +503,7 @@
 
 	/* Section */
 	.section {
-		background: linear-gradient(135deg, var(--bg-card) 0%, #1a1a1a 100%);
+		background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-hover) 100%);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-lg);
 		padding: 1.5rem;
@@ -513,7 +513,7 @@
 
 	.section.danger-zone {
 		border-color: var(--danger);
-		background: linear-gradient(135deg, rgba(248, 113, 113, 0.05) 0%, #1a1a1a 100%);
+		background: linear-gradient(135deg, var(--danger-bg) 0%, var(--bg-card) 100%);
 	}
 
 	.section-title {
