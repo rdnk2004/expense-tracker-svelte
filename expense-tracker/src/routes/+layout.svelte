@@ -145,8 +145,14 @@
 	{:else if $auth}
 		<!-- Mobile Top Header (Minimal) -->
 		<header class="mobile-header glass-panel">
-			<h1 class="mobile-title">RDNK / Axiom</h1>
-			<button class="theme-toggle-btn" onclick={toggleTheme}>
+			<h1 class="mobile-title">
+				<span class="rdnk-title">RDNK</span>
+				<span class="slash-title">/</span>
+				<span class="axiom-wrapper-title">
+					<span class="axiom-title">Axiom</span>
+				</span>
+			</h1>
+			<button class="theme-toggle-btn" onclick={toggleTheme} aria-label="Toggle theme">
 				{#if theme === 'light'}
 					<Moon size={20} />
 				{:else}
@@ -338,19 +344,42 @@
 		justify-content: space-between;
 		align-items: center;
 		z-index: 100;
+		border-top: none;
+		border-left: none;
+		border-right: none;
 		border-bottom: 1px solid var(--border-color);
 	}
 
 	.mobile-title {
-		font-size: 1.25rem;
+		font-size: 1.35rem;
 		font-weight: 800;
-		letter-spacing: -0.5px;
+		letter-spacing: -1px;
+		display: flex;
+		align-items: center;
+		margin: 0;
 	}
 
 	.theme-toggle-btn {
-		background: none;
+		background: var(--bg-hover);
 		color: var(--text-primary);
 		padding: 0.5rem;
+		border-radius: 50%;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid var(--border-color);
+		transition: all 0.2s ease;
+	}
+
+	.theme-toggle-btn:hover {
+		background: var(--border-color);
+		transform: scale(1.05);
+	}
+
+	.theme-toggle-btn:active {
+		transform: scale(0.95);
 	}
 
 	/* ===================================
