@@ -100,7 +100,7 @@
 					amount: amountInPaise,
 					date: new Date(date).toISOString(),
 					source: description.trim() || 'Income',
-					note: description.trim() || null
+					note: description.trim()
 				});
 			} else if (type === 'transfer') {
 				if (selectedWalletId === selectedToWalletId) {
@@ -237,8 +237,10 @@
 
 <!-- Wallet Selection Modal -->
 {#if showWalletModal}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div class="modal-overlay" onclick={() => (showWalletModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showWalletModal = false)}>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Wallet</h3>
 				<button class="close-btn" onclick={() => (showWalletModal = false)} aria-label="Close"><X size={20} /></button>
@@ -256,7 +258,7 @@
 						<span class="item-name">{wallet.name}</span>
 						<span class="item-balance">{formatCurrency(wallet.balance)}</span>
 						{#if selectedWalletId === wallet.id}
-							<Check size={18} class="check-icon" />
+							<span class="check-icon"><Check size={18} /></span>
 						{/if}
 					</button>
 				{/each}
@@ -267,8 +269,10 @@
 
 <!-- Target Wallet Selection Modal -->
 {#if showToWalletModal}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div class="modal-overlay" onclick={() => (showToWalletModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showToWalletModal = false)}>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Destination Wallet</h3>
 				<button class="close-btn" onclick={() => (showToWalletModal = false)} aria-label="Close"><X size={20} /></button>
@@ -286,7 +290,7 @@
 						<span class="item-name">{wallet.name}</span>
 						<span class="item-balance">{formatCurrency(wallet.balance)}</span>
 						{#if selectedToWalletId === wallet.id}
-							<Check size={18} class="check-icon" />
+							<span class="check-icon"><Check size={18} /></span>
 						{/if}
 					</button>
 				{/each}
@@ -297,8 +301,10 @@
 
 <!-- Category Selection Modal -->
 {#if showCategoryModal}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div class="modal-overlay" onclick={() => (showCategoryModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showCategoryModal = false)}>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Category</h3>
 				<button class="close-btn" onclick={() => (showCategoryModal = false)} aria-label="Close"><X size={20} /></button>
@@ -326,8 +332,10 @@
 
 <!-- Subcategory Selection Modal -->
 {#if showSubcategoryModal && selectedCategory}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div class="modal-overlay" onclick={() => (showSubcategoryModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showSubcategoryModal = false)}>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Subcategory</h3>
 				<button class="close-btn" onclick={() => (showSubcategoryModal = false)} aria-label="Close"><X size={20} /></button>
@@ -343,7 +351,7 @@
 				>
 					<span class="item-name">None (Main Category)</span>
 					{#if selectedSubcategory === ''}
-						<Check size={18} class="check-icon" />
+						<span class="check-icon"><Check size={18} /></span>
 					{/if}
 				</button>
 				{#each selectedCategory.subcategories as sub}
@@ -357,7 +365,7 @@
 					>
 						<span class="item-name">{sub}</span>
 						{#if selectedSubcategory === sub}
-							<Check size={18} class="check-icon" />
+							<span class="check-icon"><Check size={18} /></span>
 						{/if}
 					</button>
 				{/each}

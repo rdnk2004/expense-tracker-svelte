@@ -52,7 +52,7 @@
 
 		<div class="input-container" class:visible={mounted}>
 			<div class="input-wrapper" class:error>
-				<Lock size={18} class="input-icon" />
+				<span class="input-icon"><Lock size={18} /></span>
 				<input
 					type="password"
 					bind:value={pin}

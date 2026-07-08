@@ -174,7 +174,7 @@
 						<div class="bill-details">
 							<div class="bill-name">{debt.person}</div>
 							<div class="bill-date">
-								Due {new Date(debt.dueDate || Date.now()).toLocaleDateString('en-US', {
+								Due {new Date(debt.date).toLocaleDateString('en-US', {
 									day: 'numeric',
 									month: 'short'
 								})}
