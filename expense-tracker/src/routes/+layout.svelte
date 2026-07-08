@@ -65,6 +65,15 @@
 	// Initialize app on mount
 	onMount(async () => {
 		try {
+			// One-time database wipe
+			const WIPE_KEY = 'axiom_one_time_wipe_v2';
+			if (!localStorage.getItem(WIPE_KEY)) {
+				const { clearAllData } = await import('$lib/db');
+				await clearAllData();
+				localStorage.setItem(WIPE_KEY, 'true');
+				console.log('🧹 One-time database wipe completed.');
+			}
+
 			await initializeApp();
 
 			// Theme Initialization

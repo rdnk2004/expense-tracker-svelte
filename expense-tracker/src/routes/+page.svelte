@@ -35,10 +35,12 @@
 	$: cashWallet = $wallets.find((w) => w.name === 'Cash');
 
 	// Calculate Income and Expense
-	$: monthlyExpense = $currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
-	// Mock Income logic matching the design's "Income" arrow
-	// We'll calculate mock income as a percentage of balance for visual flair, or 0 if balance is low
-	$: monthlyIncome = Math.round($totalBalance * 0.15);
+	$: monthlyExpense = $currentMonthExpenses
+		.filter((e) => e.categoryId !== 'income')
+		.reduce((sum, e) => sum + e.amount, 0);
+	$: monthlyIncome = $currentMonthExpenses
+		.filter((e) => e.categoryId === 'income')
+		.reduce((sum, e) => sum + e.amount, 0);
 
 	$: categoryBreakdown = $currentMonthExpenses.reduce(
 		(acc, expense) => {
