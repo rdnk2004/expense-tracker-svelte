@@ -14,8 +14,8 @@ function createIncomeStore() {
             set(income);
         },
         // Add new income
-        add: async (income: Omit<Income, 'id' | 'createdAt' | 'updatedAt'>) => {
-            const newIncome = await addIncome(income);
+        add: async (incomeData: Omit<Income, 'id' | 'created'>) => {
+            const newIncome = await addIncome(incomeData);
             update((incomeList) => [...incomeList, newIncome]);
             return newIncome;
         },
@@ -57,5 +57,5 @@ export const incomeByCategory = derived(income, ($income) => {
 
 // Derived store for recent income (last 10)
 export const recentIncome = derived(income, ($income) =>
-    [...$income].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10)
+    [...$income].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10)
 );

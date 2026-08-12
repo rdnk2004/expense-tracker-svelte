@@ -42,7 +42,7 @@ export const categories = createCategoriesStore();
 
 // Derived store for expense categories
 export const expenseCategories = derived(categories, ($categories) =>
-    $categories.filter((c) => c.type === 'expense')
+    $categories.filter((c) => !c.type || c.type === 'expense')
 );
 
 // Derived store for income categories

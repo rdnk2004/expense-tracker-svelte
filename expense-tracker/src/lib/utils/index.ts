@@ -13,9 +13,9 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
 }
 
 /**
- * Format a date string
+ * Format a date string or Date object
  */
-export function formatDate(date: Date, format: string = 'MM/DD/YYYY'): string {
+export function formatDate(date: Date | string, format: string = 'MM/DD/YYYY'): string {
     const d = new Date(date);
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -36,7 +36,7 @@ export function formatDate(date: Date, format: string = 'MM/DD/YYYY'): string {
 /**
  * Format a date as relative time (e.g., "2 days ago")
  */
-export function formatRelativeTime(date: Date): string {
+export function formatRelativeTime(date: Date | string): string {
     const now = new Date();
     const diffMs = now.getTime() - new Date(date).getTime();
     const diffSec = Math.floor(diffMs / 1000);
@@ -192,13 +192,16 @@ export function isValidAmount(amount: number): boolean {
 }
 
 /**
- * Search transactions by description
+ * Search transactions by note or description
  */
 export function searchTransactions(transactions: Transaction[], query: string): Transaction[] {
     const lowerQuery = query.toLowerCase().trim();
     if (!lowerQuery) return transactions;
 
-    return transactions.filter((t) => t.description.toLowerCase().includes(lowerQuery));
+    return transactions.filter((t) => {
+        const text = t.note || '';
+        return text.toLowerCase().includes(lowerQuery);
+    });
 }
 
 /**
@@ -212,13 +215,13 @@ export function sortByDateDesc(transactions: Transaction[]): Transaction[] {
  * Export transactions to CSV
  */
 export function exportToCSV(transactions: Transaction[], filename: string = 'transactions.csv'): void {
-    const headers = ['Date', 'Description', 'Amount', 'Category ID', 'Type'];
+    const headers = ['Date', 'Note', 'Amount', 'Category ID', 'Type'];
     const rows = transactions.map((t) => [
         formatDate(t.date),
-        t.description,
+        t.note || '',
         t.amount.toString(),
         t.categoryId,
-        'type' in t ? t.type : 'transaction'
+        'type' in t ? (t as any).type : 'transaction'
     ]);
 
     const csvContent = [headers, ...rows].map((row) => row.join(',')).join('\n');

@@ -32,8 +32,44 @@ export interface Category {
     name: string;
     subcategories: string[];
     color: string; // hex color code
-    icon: string; // emoji
+    icon: string; // emoji or lucide icon name
     isDefault: boolean;
+    type?: 'expense' | 'income' | string;
+}
+
+/**
+ * Income - Individual income transaction
+ */
+export interface Income {
+    id: string; // UUID
+    amount: number; // in paise
+    walletId: string;
+    categoryId: string;
+    date: string; // ISO date string
+    note: string | null;
+    created: string; // ISO date string
+}
+
+/**
+ * Transaction - General transaction (Expense or Income)
+ */
+export type Transaction = Expense | Income;
+
+export interface CategoryStats {
+    categoryId: string;
+    categoryName: string;
+    total: number;
+    count: number;
+    percentage: number;
+    color: string;
+}
+
+export interface PeriodStats {
+    income: number;
+    expenses: number;
+    balance: number;
+    topCategories: CategoryStats[];
+    transactionCount: number;
 }
 
 /**

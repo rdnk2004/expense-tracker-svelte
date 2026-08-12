@@ -4,6 +4,7 @@ import type {
     Wallet,
     Category,
     Expense,
+    Income,
     Transfer,
     Debt,
     Budget,
@@ -21,6 +22,7 @@ const customStore = createStore('finance-tracker-db', 'finance-tracker-store');
 const KEYS = {
     WALLETS: 'wallets',
     EXPENSES: 'expenses',
+    INCOME: 'income',
     TRANSFERS: 'transfers',
     DEBTS: 'debts',
     BUDGETS: 'budgets',
@@ -173,7 +175,28 @@ export async function saveExpense(expense: Expense): Promise<void> {
     await markSummaryDirty(month);
 }
 
-export async function deleteExpense(id: string): Promise<void> {
+export async function addExpense(expenseData: Omit<Expense, 'id' | 'created'>): Promise<Expense> {
+    const newExpense: Expense = {
+        ...expenseData,
+        id: generateId(),
+        created: getCurrentDateISO()
+    };
+    await saveExpense(newExpense);
+    return newExpense;
+}
+
+export async function updateExpense(id: string, updates: Partial<Expense>): Promise<Expense | null> {
+    const expenses = await getExpenses();
+    const index = expenses.findIndex((e) => e.id === id);
+    if (index >= 0) {
+        expenses[index] = { ...expenses[index], ...updates };
+        await saveExpense(expenses[index]);
+        return expenses[index];
+    }
+    return null;
+}
+
+export async function deleteExpense(id: string): Promise<boolean> {
     const expenses = await getExpenses();
     const expense = expenses.find((e) => e.id === id);
 
@@ -184,7 +207,64 @@ export async function deleteExpense(id: string): Promise<void> {
         // Mark the month's summary as dirty
         const month = expense.date.substring(0, 7);
         await markSummaryDirty(month);
+        return true;
     }
+    return false;
+}
+
+// ============================================================================
+// INCOME OPERATIONS
+// ============================================================================
+
+export async function getIncome(): Promise<Income[]> {
+    const income = await get<Income[]>(KEYS.INCOME, customStore);
+    return income || [];
+}
+
+export async function saveIncome(incomeItem: Income): Promise<void> {
+    const incomeList = await getIncome();
+    const index = incomeList.findIndex((i) => i.id === incomeItem.id);
+
+    if (index >= 0) {
+        incomeList[index] = incomeItem;
+    } else {
+        incomeList.push(incomeItem);
+    }
+
+    await set(KEYS.INCOME, incomeList, customStore);
+}
+
+export async function addIncome(incomeData: Omit<Income, 'id' | 'created'>): Promise<Income> {
+    const newIncome: Income = {
+        ...incomeData,
+        id: generateId(),
+        created: getCurrentDateISO()
+    };
+    await saveIncome(newIncome);
+    return newIncome;
+}
+
+export async function updateIncome(id: string, updates: Partial<Income>): Promise<Income | null> {
+    const list = await getIncome();
+    const index = list.findIndex((i) => i.id === id);
+    if (index >= 0) {
+        list[index] = { ...list[index], ...updates };
+        await saveIncome(list[index]);
+        return list[index];
+    }
+    return null;
+}
+
+export async function deleteIncome(id: string): Promise<boolean> {
+    const list = await getIncome();
+    const item = list.find((i) => i.id === id);
+
+    if (item) {
+        const filtered = list.filter((i) => i.id !== id);
+        await set(KEYS.INCOME, filtered, customStore);
+        return true;
+    }
+    return false;
 }
 
 // ============================================================================
@@ -292,6 +372,37 @@ export async function saveCategory(category: Category): Promise<void> {
     }
 
     await set(KEYS.CATEGORIES, categories, customStore);
+}
+
+export async function addCategory(categoryData: Omit<Category, 'id'>): Promise<Category> {
+    const newCategory: Category = {
+        ...categoryData,
+        id: generateId()
+    };
+    await saveCategory(newCategory);
+    return newCategory;
+}
+
+export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+    const categories = await getCategories();
+    const index = categories.findIndex((c) => c.id === id);
+    if (index >= 0) {
+        categories[index] = { ...categories[index], ...updates };
+        await saveCategory(categories[index]);
+        return categories[index];
+    }
+    return null;
+}
+
+export async function deleteCategory(id: string): Promise<boolean> {
+    const categories = await getCategories();
+    const cat = categories.find((c) => c.id === id);
+    if (cat) {
+        const filtered = categories.filter((c) => c.id !== id);
+        await set(KEYS.CATEGORIES, filtered, customStore);
+        return true;
+    }
+    return false;
 }
 
 export async function initializeDefaultCategories(): Promise<void> {

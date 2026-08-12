@@ -14,7 +14,7 @@ function createExpensesStore() {
             set(expenses);
         },
         // Add new expense
-        add: async (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => {
+        add: async (expense: Omit<Expense, 'id' | 'created'>) => {
             const newExpense = await addExpense(expense);
             update((expenses) => [...expenses, newExpense]);
             return newExpense;
@@ -57,5 +57,5 @@ export const expensesByCategory = derived(expenses, ($expenses) => {
 
 // Derived store for recent expenses (last 10)
 export const recentExpenses = derived(expenses, ($expenses) =>
-    [...$expenses].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10)
+    [...$expenses].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10)
 );
