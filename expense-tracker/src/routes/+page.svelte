@@ -39,6 +39,7 @@
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import SafeSpendCard from '$lib/components/SafeSpendCard.svelte';
 	import HealthScoreCard from '$lib/components/HealthScoreCard.svelte';
+	import AnalystNudgeCard from '$lib/components/AnalystNudgeCard.svelte';
 
 	// Computed values
 	let upiWallet = $derived($wallets.find((w) => w.name.toLowerCase().includes('upi')));
@@ -122,6 +123,9 @@
 	</div>
 
 	<div class="dashboard-container">
+		<!-- 0. AI Financial Analyst Commentary & Proactive Nudge -->
+		<AnalystNudgeCard />
+
 		<!-- 1. Dynamic Safe-to-Spend & Runway Engine Card -->
 		<SafeSpendCard />
 

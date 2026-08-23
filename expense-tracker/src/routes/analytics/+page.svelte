@@ -21,6 +21,7 @@
 		Compass
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
+	import AnalystNudgeCard from '$lib/components/AnalystNudgeCard.svelte';
 
 	let emotional = $derived($analytics.emotionalRoi);
 	let valueTags = $derived($analytics.valueTags);
@@ -35,6 +36,9 @@
 			<h1 class="page-title">Spending Intelligence</h1>
 		</div>
 	</div>
+
+	<!-- Analyst Nudge Pulse -->
+	<AnalystNudgeCard />
 
 	<!-- 1. Emotional ROI Matrix (Worth It vs Regret) -->
 	<div class="card emotional-roi-card">

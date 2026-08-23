@@ -18,6 +18,7 @@ import { subscriptions, subscriptionStats, getMonthlyNormalizedCost } from './su
 import { goals, goalStats } from './goals';
 import { analytics } from './analytics';
 import { healthScore } from './healthScore';
+import { analystInsights } from './analystInsights';
 
 export {
     studentProfile,
@@ -32,7 +33,8 @@ export {
     goals,
     goalStats,
     analytics,
-    healthScore
+    healthScore,
+    analystInsights
 };
 
 // ============================================================================
