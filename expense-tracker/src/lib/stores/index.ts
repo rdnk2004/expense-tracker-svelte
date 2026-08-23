@@ -13,8 +13,9 @@ import type {
 import * as db from '$lib/db';
 import { studentProfile } from './profile';
 import { runway, getAllowanceCycleDates } from './runway';
+import { buckets, setCategoryBucket, updateBucketSplit } from './buckets';
 
-export { studentProfile, runway, getAllowanceCycleDates };
+export { studentProfile, runway, getAllowanceCycleDates, buckets, setCategoryBucket, updateBucketSplit };
 
 // ============================================================================
 // WRITABLE STORES

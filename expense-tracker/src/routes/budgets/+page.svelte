@@ -4,12 +4,17 @@
 		categories,
 		currentMonth,
 		currentMonthExpenses,
+		studentProfile,
+		buckets,
 		setBudget,
+		setCategoryBucket,
+		updateBucketSplit,
 		formatCurrency,
 		goToPreviousMonth,
 		goToNextMonth,
 		getMonthName
 	} from '$lib/stores';
+	import type { BudgetBucketType, Category } from '$lib/types';
 	import {
 		Target,
 		ChevronLeft,
@@ -20,16 +25,31 @@
 		Wallet,
 		FolderOpen,
 		TrendingUp,
-		Loader2
+		Loader2,
+		ShieldCheck,
+		Sparkles,
+		PiggyBank,
+		Sliders,
+		AlertTriangle,
+		ArrowRight,
+		Plus,
+		Edit3
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 
-	// Form state
+	// Form & modal state
 	let overallBudgetAmount = $state('');
 	let categoryBudgetInputs = $state<Record<string, string>>({});
 	let selectedMonth = $state($currentMonth);
 	let showToast = $state(false);
 	let toastMessage = $state('');
+	let showSplitModal = $state(false);
+	let activeTab = $state<'buckets' | 'categories'>('buckets');
+
+	// Split adjustment state
+	let customSurvival = $state($studentProfile.survivalBucketPercent || 50);
+	let customFun = $state($studentProfile.funBucketPercent || 30);
+	let customFuture = $state($studentProfile.futureBucketPercent || 20);
 
 	// Computed values
 	let overallBudget = $derived(
@@ -65,10 +85,6 @@
 		})
 	);
 
-	let overBudgetCount = $derived(
-		categoriesWithBudgets.filter((c) => c.budget && c.spent > c.budget.amount).length
-	);
-
 	let daysInMonth = $derived(
 		new Date(
 			parseInt(selectedMonth.split('-')[0]),
@@ -76,18 +92,10 @@
 			0
 		).getDate()
 	);
-
 	let daysElapsed = $derived(selectedMonth === $currentMonth ? new Date().getDate() : daysInMonth);
-
 	let daysRemaining = $derived(Math.max(0, daysInMonth - daysElapsed));
-
 	let averageDailySpending = $derived(daysElapsed > 0 ? totalExpenses / daysElapsed : 0);
-
 	let projectedMonthlySpending = $derived(averageDailySpending * daysInMonth);
-
-	let overallBudgetPercentage = $derived(
-		overallBudget ? (totalExpenses / overallBudget.amount) * 100 : 0
-	);
 
 	async function handleSetOverallBudget() {
 		if (!overallBudgetAmount || parseFloat(overallBudgetAmount) <= 0) {
@@ -97,9 +105,8 @@
 
 		try {
 			await setBudget('overall', Math.round(parseFloat(overallBudgetAmount) * 100));
-
 			overallBudgetAmount = '';
-			showSuccessToast('Overall budget set successfully!');
+			showSuccessToast('Monthly budget updated!');
 		} catch (error) {
 			console.error('Failed to set budget:', error);
 			showSuccessToast('Failed to set budget');
@@ -115,13 +122,32 @@
 
 		try {
 			await setBudget('category', Math.round(parseFloat(amount) * 100), categoryId);
-
 			categoryBudgetInputs = { ...categoryBudgetInputs, [categoryId]: '' };
 			showSuccessToast('Category budget set successfully!');
 		} catch (error) {
 			console.error('Failed to set budget:', error);
 			showSuccessToast('Failed to set budget');
 		}
+	}
+
+	async function handleCategoryBucketChange(categoryId: string, bucketType: BudgetBucketType) {
+		try {
+			await setCategoryBucket(categoryId, bucketType);
+			showSuccessToast('Category bucket updated!');
+		} catch (err) {
+			console.error(err);
+		}
+	}
+
+	async function handleSaveCustomSplit() {
+		const total = Number(customSurvival) + Number(customFun) + Number(customFuture);
+		if (total !== 100) {
+			showSuccessToast(`Percentages must add up to 100% (currently ${total}%)`);
+			return;
+		}
+		await updateBucketSplit(Number(customSurvival), Number(customFun), Number(customFuture));
+		showSplitModal = false;
+		showSuccessToast('3-Bucket allocations saved!');
 	}
 
 	function showSuccessToast(message: string) {
@@ -133,229 +159,327 @@
 	}
 
 	function getBudgetColor(percentage: number): string {
-		if (percentage < 70) return 'var(--success)';
-		if (percentage < 90) return 'var(--warning)';
+		if (percentage < 70) return 'var(--success, #10B981)';
+		if (percentage < 90) return 'var(--warning, #F59E0B)';
 		if (percentage < 100) return '#fb8c00';
-		return 'var(--danger)';
+		return 'var(--danger, #FF3366)';
 	}
 </script>
 
 <div class="budgets-page">
-	<!-- Toast Notification -->
 	{#if showToast}
 		<div class="toast">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">
-		<Target class="inline-icon" size={32} /> Budgets
-	</h1>
+	<div class="page-header-row">
+		<div>
+			<span class="eyebrow">Smart Allocation</span>
+			<h1 class="page-title">Student Budgeting</h1>
+		</div>
+		<button class="settings-btn" onclick={() => (showSplitModal = true)} aria-label="Adjust 3-Bucket Split">
+			<Sliders size={18} />
+			<span>Adjust Split</span>
+		</button>
+	</div>
 
 	<!-- Month Selector -->
 	<div class="month-selector-card">
 		<button class="month-nav-btn" onclick={goToPreviousMonth} aria-label="Previous month">
-			<ChevronLeft size={24} />
+			<ChevronLeft size={22} />
 		</button>
 		<div class="month-display">{getMonthName(selectedMonth)}</div>
 		<button class="month-nav-btn" onclick={goToNextMonth} aria-label="Next month">
-			<ChevronRight size={24} />
+			<ChevronRight size={22} />
 		</button>
 	</div>
 
-	<!-- Budget Insights -->
-	{#if overallBudget || categoryBudgets.length > 0}
-		<div class="insights-card">
-			<h2 class="insights-title">
-				<ChartPie class="inline-icon" size={24} /> Budget Insights
-			</h2>
-			<div class="insights-grid">
-				<div class="insight">
-					<div class="insight-label">Status</div>
+	<!-- Tab Switcher -->
+	<div class="tab-control">
+		<button
+			class="tab-btn"
+			class:active={activeTab === 'buckets'}
+			onclick={() => (activeTab = 'buckets')}
+		>
+			<ChartPie size={16} />
+			<span>3-Bucket System (50/30/20)</span>
+		</button>
+		<button
+			class="tab-btn"
+			class:active={activeTab === 'categories'}
+			onclick={() => (activeTab = 'categories')}
+		>
+			<FolderOpen size={16} />
+			<span>Category Limits</span>
+		</button>
+	</div>
+
+	{#if activeTab === 'buckets'}
+		<!-- 3-BUCKET SYSTEM -->
+		<div class="buckets-container">
+			<!-- Survival 50% Card -->
+			<div class="bucket-card-hero bucket-survival">
+				<div class="bucket-card-header">
+					<div class="bucket-title-group">
+						<div class="bucket-icon-badge survival">
+							<ShieldCheck size={20} />
+						</div>
+						<div>
+							<h3 class="b-title">{$buckets.survival.name} ({$buckets.survival.targetPercent}%)</h3>
+							<p class="b-desc">{$buckets.survival.description}</p>
+						</div>
+					</div>
+					<span class="bucket-status-badge status-{$buckets.survival.status}">
+						{$buckets.survival.status === 'safe' ? 'On Track' : $buckets.survival.status === 'warning' ? 'Near Limit' : 'Exceeded'}
+					</span>
+				</div>
+
+				<div class="bucket-figures">
+					<div class="spent-figure">
+						<span class="fig-label">Spent</span>
+						<span class="fig-val">{formatCurrency($buckets.survival.spentAmount)}</span>
+					</div>
+					<div class="limit-figure">
+						<span class="fig-label">Allocated</span>
+						<span class="fig-val">{formatCurrency($buckets.survival.allocatedAmount)}</span>
+					</div>
+				</div>
+
+				<div class="progress-track">
 					<div
-						class="insight-value"
-						class:success={overBudgetCount === 0}
-						class:danger={overBudgetCount > 0}
-					>
-						{#if overBudgetCount === 0}
-							<span class="success-text"
-								><CheckCircle size={16} class="inline" /> You're on track!</span
-							>
+						class="progress-bar-fill survival-fill"
+						style="width: {Math.min(100, $buckets.survival.spentPercent)}%;"
+					></div>
+				</div>
+
+				<div class="bucket-categories-chips">
+					{#each $buckets.survival.categories as cat}
+						<span class="cat-chip">
+							<CategoryIcon icon={cat.icon} size={14} />
+							{cat.name}
+						</span>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Fun & Social 30% Card -->
+			<div class="bucket-card-hero bucket-fun">
+				<div class="bucket-card-header">
+					<div class="bucket-title-group">
+						<div class="bucket-icon-badge fun">
+							<Sparkles size={20} />
+						</div>
+						<div>
+							<h3 class="b-title">{$buckets.fun.name} ({$buckets.fun.targetPercent}%)</h3>
+							<p class="b-desc">{$buckets.fun.description}</p>
+						</div>
+					</div>
+					<span class="bucket-status-badge status-{$buckets.fun.status}">
+						{$buckets.fun.status === 'safe' ? 'Guilt-Free' : $buckets.fun.status === 'warning' ? 'High Fun Burn' : 'Exceeded'}
+					</span>
+				</div>
+
+				<div class="bucket-figures">
+					<div class="spent-figure">
+						<span class="fig-label">Spent</span>
+						<span class="fig-val">{formatCurrency($buckets.fun.spentAmount)}</span>
+					</div>
+					<div class="limit-figure">
+						<span class="fig-label">Allocated</span>
+						<span class="fig-val">{formatCurrency($buckets.fun.allocatedAmount)}</span>
+					</div>
+				</div>
+
+				<div class="progress-track">
+					<div
+						class="progress-bar-fill fun-fill"
+						style="width: {Math.min(100, $buckets.fun.spentPercent)}%;"
+					></div>
+				</div>
+
+				<div class="bucket-categories-chips">
+					{#each $buckets.fun.categories as cat}
+						<span class="cat-chip">
+							<CategoryIcon icon={cat.icon} size={14} />
+							{cat.name}
+						</span>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Future & Sinking Buffer 20% Card -->
+			<div class="bucket-card-hero bucket-future">
+				<div class="bucket-card-header">
+					<div class="bucket-title-group">
+						<div class="bucket-icon-badge future">
+							<PiggyBank size={20} />
+						</div>
+						<div>
+							<h3 class="b-title">{$buckets.future.name} ({$buckets.future.targetPercent}%)</h3>
+							<p class="b-desc">{$buckets.future.description}</p>
+						</div>
+					</div>
+					<span class="bucket-status-badge status-{$buckets.future.status}">
+						{$buckets.future.status === 'safe' ? 'Buffer Protected' : 'Low Savings'}
+					</span>
+				</div>
+
+				<div class="bucket-figures">
+					<div class="spent-figure">
+						<span class="fig-label">Saved / Allocated</span>
+						<span class="fig-val">{formatCurrency($buckets.future.spentAmount)}</span>
+					</div>
+					<div class="limit-figure">
+						<span class="fig-label">Goal Target</span>
+						<span class="fig-val">{formatCurrency($buckets.future.allocatedAmount)}</span>
+					</div>
+				</div>
+
+				<div class="progress-track">
+					<div
+						class="progress-bar-fill future-fill"
+						style="width: {Math.min(100, $buckets.future.spentPercent)}%;"
+					></div>
+				</div>
+
+				<div class="bucket-categories-chips">
+					{#each $buckets.future.categories as cat}
+						<span class="cat-chip">
+							<CategoryIcon icon={cat.icon} size={14} />
+							{cat.name}
+						</span>
+					{/each}
+				</div>
+			</div>
+		</div>
+	{:else}
+		<!-- CATEGORY BUDGETS -->
+		<div class="category-budgets-section">
+			<!-- Overall Budget Setup -->
+			<div class="card-section">
+				<div class="section-title-bar">
+					<Wallet size={20} class="text-accent" />
+					<h2 class="card-title">Base Monthly Budget</h2>
+				</div>
+
+				<div class="budget-form-row">
+					<input
+						type="number"
+						bind:value={overallBudgetAmount}
+						placeholder={overallBudget ? `${overallBudget.amount / 100}` : 'e.g. 8000'}
+						step="1"
+						min="0"
+					/>
+					<button class="primary-btn" onclick={handleSetOverallBudget}>
+						{overallBudget ? 'Update Limit' : 'Set Budget'}
+					</button>
+				</div>
+			</div>
+
+			<!-- Individual Category Limits List -->
+			<div class="category-list-grid">
+				{#each categoriesWithBudgets as { category, budget, spent, percentage } (category.id)}
+					<div class="category-card-item">
+						<div class="cat-top-row">
+							<div class="cat-info">
+								<span class="cat-icon-wrap">
+									<CategoryIcon icon={category.icon} size={20} />
+								</span>
+								<div>
+									<div class="cat-name">{category.name}</div>
+									<div class="cat-bucket-select">
+										<select
+											value={category.bucketType || 'fun'}
+											onchange={(e) => handleCategoryBucketChange(category.id, e.currentTarget.value as BudgetBucketType)}
+										>
+											<option value="survival">Survival (50%)</option>
+											<option value="fun">Fun & Social (30%)</option>
+											<option value="future">Future/Savings (20%)</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="cat-spent-col">
+								<div class="spent-val">{formatCurrency(spent)}</div>
+								{#if budget}
+									<div class="budget-limit-val">/ {formatCurrency(budget.amount)}</div>
+								{/if}
+							</div>
+						</div>
+
+						{#if budget}
+							<div class="progress-track mini">
+								<div
+									class="progress-bar-fill"
+									style="width: {Math.min(100, percentage)}%; background: {getBudgetColor(percentage)};"
+								></div>
+							</div>
 						{:else}
-							<span class="danger-text"
-								><CircleAlert size={16} class="inline" />
-								{overBudgetCount} budget{overBudgetCount > 1 ? 's' : ''} exceeded</span
-							>
+							<div class="cat-quick-set">
+								<input
+									type="number"
+									bind:value={categoryBudgetInputs[category.id]}
+									placeholder="Set limit..."
+									step="1"
+									min="0"
+								/>
+								<button class="mini-btn" onclick={() => handleSetCategoryBudget(category.id)}>
+									Save
+								</button>
+							</div>
 						{/if}
 					</div>
-				</div>
-
-				<div class="insight">
-					<div class="insight-label">Projected Spending</div>
-					<div class="insight-value">{formatCurrency(projectedMonthlySpending)}</div>
-					<div class="insight-sub">At current rate</div>
-				</div>
-
-				<div class="insight">
-					<div class="insight-label">Avg Daily Spending</div>
-					<div class="insight-value">{formatCurrency(averageDailySpending)}</div>
-					<div class="insight-sub">
-						{#if overallBudget}
-							Budget: {formatCurrency(overallBudget.amount / daysInMonth)}/day
-						{/if}
-					</div>
-				</div>
-
-				<div class="insight">
-					<div class="insight-label">Days Remaining</div>
-					<div class="insight-value">{daysRemaining}</div>
-					<div class="insight-sub">out of {daysInMonth} days</div>
-				</div>
+				{/each}
 			</div>
 		</div>
 	{/if}
 
-	<!-- Set Overall Budget -->
-	<div class="budget-card">
-		<h2 class="card-title">
-			<Wallet class="inline-icon" size={24} /> Overall Budget
-		</h2>
-
-		{#if overallBudget}
-			<div class="current-budget">
-				<div class="budget-header">
-					<span>Monthly Budget</span>
-					<span class="budget-amount">{formatCurrency(overallBudget.amount)}</span>
+	<!-- Custom Split Modal -->
+	{#if showSplitModal}
+		<div class="modal-backdrop" onclick={() => (showSplitModal = false)}>
+			<div class="modal-sheet" onclick={(e) => e.stopPropagation()}>
+				<div class="modal-header">
+					<h3 class="modal-title">Customize 3-Bucket Split</h3>
+					<button class="close-btn" onclick={() => (showSplitModal = false)}>✕</button>
 				</div>
-				<div class="progress-bar">
-					<div
-						class="progress-fill"
-						style="width: {Math.min(overallBudgetPercentage, 100)}%; background: {getBudgetColor(
-							overallBudgetPercentage
-						)};"
-					></div>
-				</div>
-				<div class="budget-footer">
-					<span>Spent: {formatCurrency(totalExpenses)}</span>
-					<span style="color: {getBudgetColor(overallBudgetPercentage)};"
-						>{overallBudgetPercentage.toFixed(1)}% used</span
-					>
-				</div>
-			</div>
-		{/if}
+				<p class="modal-sub">Allocate your monthly allowance across your 3 student macro-buckets.</p>
 
-		<div class="budget-form">
-			<div class="form-group">
-				<label for="overall-budget">{overallBudget ? 'Update' : 'Set'} Overall Budget (₹)</label>
-				<div class="input-row">
-					<input
-						type="number"
-						id="overall-budget"
-						bind:value={overallBudgetAmount}
-						placeholder={overallBudget ? overallBudget.amount / 100 + '' : '5000.00'}
-						step="0.01"
-						min="0"
-					/>
-					<button class="set-btn" onclick={handleSetOverallBudget}>
-						{overallBudget ? 'Update' : 'Set'} Budget
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Category Budgets -->
-	<div class="category-budgets-card">
-		<h2 class="card-title">
-			<FolderOpen class="inline-icon" size={24} /> Category Budgets
-		</h2>
-
-		{#if categoriesWithBudgets.length > 0}
-			<div class="categories-list">
-				{#each categoriesWithBudgets as { category, budget, spent, percentage } (category.id)}
-					<div class="category-budget-item">
-						<div class="category-header">
-							<div class="category-info">
-								<span class="category-icon">
-									<CategoryIcon icon={category.icon} size={24} />
-								</span>
-								<span class="category-name">{category.name}</span>
-							</div>
-							<div class="category-spent">{formatCurrency(spent)}</div>
+				<div class="sliders-stack">
+					<div class="slider-box survival-box">
+						<div class="slider-label-row">
+							<span>🛡️ Survival & Essentials</span>
+							<strong>{customSurvival}%</strong>
 						</div>
-
-						{#if budget}
-							<div class="budget-details">
-								<div class="budget-bar-header">
-									<span class="budget-limit">Budget: {formatCurrency(budget.amount)}</span>
-									<span class="budget-percentage" style="color: {getBudgetColor(percentage)};"
-										>{percentage.toFixed(1)}%</span
-									>
-								</div>
-								<div class="progress-bar small">
-									<div
-										class="progress-fill"
-										style="width: {Math.min(percentage, 100)}%; background: {getBudgetColor(
-											percentage
-										)};"
-									></div>
-								</div>
-							</div>
-						{:else}
-							<div class="set-budget-form">
-								<div class="input-row">
-									<input
-										type="number"
-										bind:value={categoryBudgetInputs[category.id]}
-										placeholder="Set budget..."
-										step="0.01"
-										min="0"
-									/>
-									<button
-										class="set-btn small"
-										onclick={() => handleSetCategoryBudget(category.id)}
-									>
-										Set
-									</button>
-								</div>
-							</div>
-						{/if}
+						<input type="range" min="20" max="80" bind:value={customSurvival} />
 					</div>
-				{/each}
-			</div>
-		{:else}
-			<div class="empty-state">
-				<p>No categories available</p>
-			</div>
-		{/if}
-	</div>
 
-	<!-- Budget Overview Chart -->
-	{#if categoryBudgets.length > 0}
-		<div class="overview-card">
-			<h2 class="card-title">
-				<TrendingUp class="inline-icon" size={24} /> Budget Overview
-			</h2>
-			<div class="overview-chart">
-				{#each categoriesWithBudgets.filter((c) => c.budget) as { category, budget, spent, percentage }}
-					<div class="chart-row">
-						<div class="chart-label">
-							<span><CategoryIcon icon={category.icon} size={18} /></span>
-							<span>{category.name}</span>
+					<div class="slider-box fun-box">
+						<div class="slider-label-row">
+							<span>✨ Fun & Social</span>
+							<strong>{customFun}%</strong>
 						</div>
-						<div class="chart-bars">
-							<div class="chart-bar-container">
-								<div
-									class="chart-bar spent"
-									style="width: {budget
-										? (spent / budget.amount) * 100
-										: 0}%; background: {getBudgetColor(percentage)};"
-								>
-									<span class="bar-label">{formatCurrency(spent)}</span>
-								</div>
-							</div>
-							<div class="chart-total">{formatCurrency(budget?.amount || 0)}</div>
-						</div>
+						<input type="range" min="10" max="60" bind:value={customFun} />
 					</div>
-				{/each}
+
+					<div class="slider-box future-box">
+						<div class="slider-label-row">
+							<span>🐖 Future Buffer & Goals</span>
+							<strong>{customFuture}%</strong>
+						</div>
+						<input type="range" min="5" max="50" bind:value={customFuture} />
+					</div>
+				</div>
+
+				<div class="modal-total-bar" class:invalid={Number(customSurvival) + Number(customFun) + Number(customFuture) !== 100}>
+					Total: <strong>{Number(customSurvival) + Number(customFun) + Number(customFuture)}%</strong>
+					{#if Number(customSurvival) + Number(customFun) + Number(customFuture) !== 100}
+						<span class="warning-text">(Must equal 100%)</span>
+					{/if}
+				</div>
+
+				<div class="modal-actions">
+					<button class="secondary-btn" onclick={() => (showSplitModal = false)}>Cancel</button>
+					<button class="primary-btn" onclick={handleSaveCustomSplit}>Save Allocations</button>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -363,452 +487,521 @@
 
 <style>
 	.budgets-page {
+		max-width: 620px;
+		margin: 0 auto;
+		padding: 0 16px 120px 16px;
 		animation: fadeIn 0.3s ease-out;
 	}
 
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
+	.page-header-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		margin-bottom: 18px;
+		padding-top: 8px;
 	}
 
-	/* Toast */
-	.toast {
-		position: fixed;
-		top: 2rem;
-		right: 2rem;
-		background: var(--success);
-		color: white;
-		padding: 1rem 1.5rem;
-		border-radius: var(--border-radius);
-		box-shadow: var(--shadow-lg);
-		z-index: 1000;
-		animation: slideIn 0.3s ease-out;
-	}
-
-	@keyframes slideIn {
-		from {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	/* Page Title */
-	.page-title {
-		font-size: 2rem;
+	.eyebrow {
+		font-size: 0.76rem;
 		font-weight: 700;
-		margin-bottom: 1.5rem;
-		color: var(--text-primary);
+		color: var(--accent-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		display: block;
+		margin-bottom: 2px;
 	}
 
-	/* Month Selector */
-	.month-selector-card {
+	.page-title {
+		font-size: 1.75rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		letter-spacing: -0.5px;
+	}
+
+	.settings-btn {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1rem;
-		margin-bottom: 1.5rem;
+		color: var(--text-primary);
+		padding: 8px 14px;
+		border-radius: 9999px;
+		font-weight: 700;
+		font-size: 0.8rem;
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		box-shadow: var(--shadow-md);
+		gap: 6px;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.month-selector-card {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background: var(--bg-card);
+		border: 1px solid var(--border-color);
+		border-radius: 20px;
+		padding: 10px 16px;
+		margin-bottom: 18px;
+		box-shadow: var(--shadow-sm);
 	}
 
 	.month-nav-btn {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
+		background: transparent;
+		border: none;
 		color: var(--accent-primary);
-		width: 40px;
-		height: 40px;
-		border-radius: var(--border-radius);
 		cursor: pointer;
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		font-size: 1.25rem;
-		transition: all 0.2s;
-	}
-
-	.month-nav-btn:hover {
-		background: var(--bg-hover);
-		border-color: var(--accent-primary);
-		transform: scale(1.05);
 	}
 
 	.month-display {
-		flex: 1;
-		text-align: center;
-		font-size: 1.25rem;
-		font-weight: 600;
+		font-weight: 800;
+		font-size: 1.05rem;
 		color: var(--text-primary);
 	}
 
-	/* Insights Card */
-	.insights-card {
+	/* Tab Control */
+	.tab-control {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		background: var(--bg-card);
+		padding: 6px;
+		border-radius: 18px;
+		border: 1px solid var(--border-color);
+		margin-bottom: 20px;
+	}
+
+	.tab-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding: 10px;
+		border-radius: 14px;
+		border: none;
+		background: transparent;
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: var(--text-muted);
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.tab-btn.active {
+		background: var(--accent-primary);
+		color: white;
+		box-shadow: 0 4px 15px var(--accent-glow);
+	}
+
+	/* Buckets Hero Stack */
+	.buckets-container {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.bucket-card-hero {
+		background: var(--bg-card);
+		border-radius: 26px;
+		padding: 22px;
+		border: 1px solid var(--border-color);
+		box-shadow: var(--shadow-sm);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.bucket-card-hero::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+	}
+
+	.bucket-survival::before { background: #3B82F6; }
+	.bucket-fun::before { background: #EC4899; }
+	.bucket-future::before { background: #10B981; }
+
+	.bucket-card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 18px;
+	}
+
+	.bucket-title-group {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.bucket-icon-badge {
+		width: 44px;
+		height: 44px;
+		border-radius: 14px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.bucket-icon-badge.survival { background: rgba(59, 130, 246, 0.12); color: #2563EB; }
+	.bucket-icon-badge.fun { background: rgba(236, 72, 153, 0.12); color: #DB2777; }
+	.bucket-icon-badge.future { background: rgba(16, 185, 129, 0.12); color: #059669; }
+
+	.b-title {
+		font-size: 1.05rem;
+		font-weight: 800;
+		color: var(--text-primary);
+	}
+
+	.b-desc {
+		font-size: 0.74rem;
+		color: var(--text-muted);
+		margin-top: 1px;
+	}
+
+	.bucket-status-badge {
+		font-size: 0.72rem;
+		font-weight: 700;
+		padding: 4px 10px;
+		border-radius: 9999px;
+	}
+
+	.status-safe { background: rgba(16, 185, 129, 0.12); color: #059669; }
+	.status-warning { background: rgba(245, 158, 11, 0.12); color: #D97706; }
+	.status-exceeded { background: rgba(255, 51, 102, 0.12); color: #FF3366; }
+
+	.bucket-figures {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 12px;
+	}
+
+	.fig-label {
+		display: block;
+		font-size: 0.72rem;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		font-weight: 600;
+	}
+
+	.fig-val {
+		font-size: 1.25rem;
+		font-weight: 800;
+		color: var(--text-primary);
+	}
+
+	.progress-track {
+		height: 10px;
+		background: var(--bg-primary);
+		border-radius: 9999px;
+		overflow: hidden;
+		margin-bottom: 16px;
+	}
+
+	.progress-track.mini {
+		height: 6px;
+		margin-top: 10px;
+		margin-bottom: 0;
+	}
+
+	.progress-bar-fill {
+		height: 100%;
+		border-radius: 9999px;
+		transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.survival-fill { background: #3B82F6; }
+	.fun-fill { background: #EC4899; }
+	.future-fill { background: #10B981; }
+
+	.bucket-categories-chips {
+		display: flex;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	.cat-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 4px 10px;
+		border-radius: 10px;
+		background: var(--bg-primary);
+		border: 1px solid var(--border-color);
+		font-size: 0.75rem;
+		color: var(--text-secondary);
+		font-weight: 600;
+	}
+
+	/* Category Limits View */
+	.category-budgets-section {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.card-section {
+		background: var(--bg-card);
+		border-radius: 22px;
+		padding: 18px;
+		border: 1px solid var(--border-color);
+	}
+
+	.section-title-bar {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin-bottom: 12px;
+	}
+
+	.card-title {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--text-primary);
+	}
+
+	.budget-form-row {
+		display: flex;
+		gap: 10px;
+	}
+
+	.budget-form-row input {
+		flex: 1;
+		padding: 10px 14px;
+		border-radius: 14px;
+		border: 1px solid var(--border-color);
+		background: var(--bg-primary);
+		color: var(--text-primary);
+		font-weight: 700;
+	}
+
+	.primary-btn {
+		background: var(--accent-gradient);
+		color: white;
+		border: none;
+		padding: 10px 18px;
+		border-radius: 14px;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.category-list-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.category-card-item {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-		box-shadow: var(--shadow-md);
+		border-radius: 18px;
+		padding: 14px 16px;
 	}
 
-	.insights-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin-bottom: 1.5rem;
+	.cat-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.cat-info {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.cat-icon-wrap {
+		width: 36px;
+		height: 36px;
+		border-radius: 12px;
+		background: var(--bg-primary);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.cat-name {
+		font-weight: 700;
+		font-size: 0.92rem;
 		color: var(--text-primary);
 	}
 
-	.insights-grid {
-		display: grid;
-		grid-template-columns: repeat(4, 1fr);
-		gap: 1.5rem;
+	.cat-bucket-select select {
+		font-size: 0.7rem;
+		border: none;
+		background: transparent;
+		color: var(--text-muted);
+		font-weight: 600;
+		cursor: pointer;
+		padding: 0;
 	}
 
-	.insight {
-		text-align: center;
+	.cat-spent-col {
+		text-align: right;
 	}
 
-	.insight-label {
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-		margin-bottom: 0.5rem;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+	.spent-val {
+		font-weight: 800;
+		font-size: 0.95rem;
+		color: var(--text-primary);
 	}
 
-	.insight-value {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		margin-bottom: 0.25rem;
-	}
-
-	.insight-value.success {
-		color: var(--success);
-	}
-
-	.insight-value.danger {
-		color: var(--danger);
-	}
-
-	.insight-sub {
+	.budget-limit-val {
 		font-size: 0.75rem;
 		color: var(--text-muted);
 	}
 
-	/* Budget Card */
-	.budget-card,
-	.category-budgets-card,
-	.overview-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-		box-shadow: var(--shadow-md);
-	}
-
-	.card-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin-bottom: 1.5rem;
-		color: var(--text-primary);
-	}
-
-	/* Current Budget */
-	.current-budget {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1.25rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.budget-header {
+	.cat-quick-set {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
+		gap: 8px;
+		margin-top: 10px;
 	}
 
-	.budget-amount {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-	}
-
-	.progress-bar {
-		height: 12px;
+	.cat-quick-set input {
+		flex: 1;
+		padding: 6px 10px;
+		border-radius: 10px;
+		border: 1px solid var(--border-color);
 		background: var(--bg-primary);
-		border-radius: 6px;
-		overflow: hidden;
-		margin-bottom: 0.75rem;
-		position: relative;
+		font-size: 0.8rem;
 	}
 
-	.progress-bar.small {
-		height: 8px;
-	}
-
-	.progress-fill {
-		height: 100%;
-		transition:
-			width 0.5s ease,
-			background 0.3s ease;
-		border-radius: 6px;
-		position: relative;
-	}
-
-	.budget-footer {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-	}
-
-	/* Budget Form */
-	.budget-form,
-	.set-budget-form {
-		margin-top: 1rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--text-secondary);
-	}
-
-	.input-row {
-		display: flex;
-		gap: 0.75rem;
-	}
-
-	input[type='number'] {
-		flex: 1;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-		transition: all 0.2s;
-	}
-
-	input[type='number']:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-		box-shadow: 0 0 0 3px rgba(192, 192, 192, 0.1);
-	}
-
-	.set-btn {
+	.mini-btn {
 		background: var(--accent-primary);
-		color: var(--bg-primary);
-		border: none;
-		padding: 0.75rem 1.5rem;
-		border-radius: var(--border-radius);
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-		white-space: nowrap;
-	}
-
-	.set-btn.small {
-		padding: 0.75rem 1rem;
-		font-size: 0.875rem;
-	}
-
-	.set-btn:hover {
-		background: var(--accent-hover);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
-	}
-
-	/* Category Budgets */
-	.categories-list {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.category-budget-item {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1.25rem;
-		transition: all 0.2s;
-	}
-
-	.category-budget-item:hover {
-		background: var(--bg-hover);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.category-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-	}
-
-	.category-info {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.category-icon {
-		font-size: 1.5rem;
-	}
-
-	.category-name {
-		font-weight: 600;
-		color: var(--text-primary);
-		font-size: 1.125rem;
-	}
-
-	.category-spent {
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-	}
-
-	.budget-details {
-		margin-top: 1rem;
-	}
-
-	.budget-bar-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 0.5rem;
-		font-size: 0.875rem;
-	}
-
-	.budget-limit {
-		color: var(--text-secondary);
-	}
-
-	.budget-percentage {
-		font-weight: 600;
-	}
-
-	/* Overview Chart */
-	.overview-chart {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.chart-row {
-		display: flex;
-		gap: 1rem;
-		align-items: center;
-	}
-
-	.chart-label {
-		min-width: 150px;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.875rem;
-		color: var(--text-primary);
-	}
-
-	.chart-bars {
-		flex: 1;
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.chart-bar-container {
-		flex: 1;
-		height: 32px;
-		background: var(--bg-secondary);
-		border-radius: var(--border-radius);
-		overflow: hidden;
-		position: relative;
-	}
-
-	.chart-bar {
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		padding: 0 0.75rem;
-		transition: width 0.5s ease;
-		min-width: fit-content;
-	}
-
-	.bar-label {
-		font-size: 0.75rem;
-		font-weight: 600;
 		color: white;
-		white-space: nowrap;
+		border: none;
+		padding: 6px 12px;
+		border-radius: 10px;
+		font-size: 0.8rem;
+		font-weight: 700;
+		cursor: pointer;
 	}
 
-	.chart-total {
-		min-width: 100px;
-		text-align: right;
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-		font-weight: 500;
+	/* Modal */
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(4px);
+		z-index: 999;
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
 	}
 
-	/* Empty State */
-	.empty-state {
+	.modal-sheet {
+		background: var(--bg-card);
+		border-radius: 28px 28px 0 0;
+		padding: 24px;
+		width: 100%;
+		max-width: 600px;
+		box-shadow: var(--shadow-lg);
+		border: 1px solid var(--border-color);
+	}
+
+	.modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 6px;
+	}
+
+	.modal-title {
+		font-size: 1.2rem;
+		font-weight: 800;
+		color: var(--text-primary);
+	}
+
+	.close-btn {
+		background: transparent;
+		border: none;
+		font-size: 1.2rem;
+		color: var(--text-muted);
+		cursor: pointer;
+	}
+
+	.modal-sub {
+		font-size: 0.82rem;
+		color: var(--text-muted);
+		margin-bottom: 20px;
+	}
+
+	.sliders-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+		margin-bottom: 18px;
+	}
+
+	.slider-box {
+		background: var(--bg-primary);
+		padding: 14px;
+		border-radius: 16px;
+		border: 1px solid var(--border-color);
+	}
+
+	.slider-label-row {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: 8px;
+	}
+
+	.slider-box input[type='range'] {
+		width: 100%;
+		accent-color: var(--accent-primary);
+	}
+
+	.modal-total-bar {
+		font-size: 0.9rem;
+		font-weight: 700;
+		color: var(--text-primary);
 		text-align: center;
-		padding: 3rem 1rem;
-		color: var(--text-secondary);
+		padding: 10px;
+		margin-bottom: 18px;
 	}
 
-	/* Responsive */
-	@media (max-width: 768px) {
-		.insights-grid {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 1rem;
-		}
+	.modal-total-bar.invalid {
+		color: var(--danger);
+	}
 
-		.chart-row {
-			flex-direction: column;
-			align-items: flex-start;
-		}
+	.modal-actions {
+		display: flex;
+		gap: 12px;
+	}
 
-		.chart-label {
-			width: 100%;
-		}
+	.secondary-btn {
+		flex: 1;
+		background: var(--bg-primary);
+		border: 1px solid var(--border-color);
+		color: var(--text-primary);
+		padding: 12px;
+		border-radius: 14px;
+		font-weight: 700;
+		cursor: pointer;
+	}
 
-		.chart-bars {
-			width: 100%;
-		}
+	.modal-actions .primary-btn {
+		flex: 1;
+		padding: 12px;
+	}
 
-		.chart-total {
-			text-align: left;
-		}
-
-		.input-row {
-			flex-direction: column;
-		}
-
-		.set-btn {
-			width: 100%;
-		}
+	.toast {
+		position: fixed;
+		top: 24px;
+		left: 50%;
+		transform: translateX(-50%);
+		background: var(--accent-primary);
+		color: white;
+		padding: 10px 20px;
+		border-radius: 9999px;
+		font-size: 0.85rem;
+		font-weight: 700;
+		box-shadow: var(--shadow-md);
+		z-index: 1001;
 	}
 </style>
