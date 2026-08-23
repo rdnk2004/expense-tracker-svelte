@@ -33,7 +33,8 @@
 		Plus, // FAB icon
 		User,
 		ChartPie,
-		Radio
+		Radio,
+		PiggyBank
 	} from 'lucide-svelte';
 
 	let { children } = $props();
@@ -49,6 +50,7 @@
 		{ icon: Receipt, label: 'Expenses', href: '/expenses' },
 		{ icon: Handshake, label: 'Debts', href: '/debts' },
 		{ icon: Target, label: 'Budgets', href: '/budgets' },
+		{ icon: PiggyBank, label: 'Goals', href: '/goals' },
 		{ icon: Radio, label: 'Subscriptions', href: '/subscriptions' },
 		{ icon: ArrowLeftRight, label: 'Transfers', href: '/transfers' },
 		{ icon: Settings, label: 'Settings', href: '/settings' }

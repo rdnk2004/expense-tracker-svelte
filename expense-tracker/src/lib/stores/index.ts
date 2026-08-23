@@ -15,6 +15,7 @@ import { studentProfile } from './profile';
 import { runway, getAllowanceCycleDates } from './runway';
 import { buckets, setCategoryBucket, updateBucketSplit } from './buckets';
 import { subscriptions, subscriptionStats, getMonthlyNormalizedCost } from './subscriptions';
+import { goals, goalStats } from './goals';
 
 export {
     studentProfile,
@@ -25,7 +26,9 @@ export {
     updateBucketSplit,
     subscriptions,
     subscriptionStats,
-    getMonthlyNormalizedCost
+    getMonthlyNormalizedCost,
+    goals,
+    goalStats
 };
 
 // ============================================================================
@@ -430,7 +433,8 @@ export async function initializeApp(): Promise<void> {
             loadBudgets(),
             loadCategories(),
             studentProfile.load(),
-            subscriptions.load()
+            subscriptions.load(),
+            goals.load()
         ]);
 
         console.log('✅ App initialized successfully');

@@ -34,7 +34,18 @@ export type SubscriptionCycle = 'monthly' | 'quarterly' | 'annual' | 'weekly';
 /**
  * Savings goal / Sinking fund categories
  */
-export type GoalCategory = 'travel' | 'tech' | 'academics' | 'fest' | 'emergency' | 'other';
+export type GoalCategory =
+    | 'travel'
+    | 'tech'
+    | 'academics'
+    | 'fest'
+    | 'emergency'
+    | 'other'
+    | 'semester_trip'
+    | 'gadget'
+    | 'security_deposit'
+    | 'concert'
+    | 'course_cert';
 
 /**
  * Financial runway velocity status
@@ -223,6 +234,7 @@ export interface SavingsGoal {
     targetDate: string; // 'YYYY-MM-DD'
     category: GoalCategory;
     emoji: string;
+    color?: string;
     walletId?: string;
     contributions: GoalContribution[];
     isCompleted: boolean;
