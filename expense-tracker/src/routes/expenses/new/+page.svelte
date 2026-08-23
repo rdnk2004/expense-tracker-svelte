@@ -1,9 +1,31 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { wallets, categories, addExpense, addIncome, createTransfer, formatCurrency } from '$lib/stores';
+	import {
+		wallets,
+		categories,
+		studentProfile,
+		addExpense,
+		addIncome,
+		createTransfer,
+		formatCurrency
+	} from '$lib/stores';
+	import type { ValueTag } from '$lib/types';
+	import { calculateHoursOfWork } from '$lib/utils';
 	import Keypad from '$lib/components/Keypad.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
-	import { ArrowLeft, Calendar, CreditCard, ChevronDown, Check, X } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		Calendar,
+		CreditCard,
+		ChevronDown,
+		Check,
+		X,
+		Zap,
+		Sparkles,
+		GraduationCap,
+		Clock,
+		Flame
+	} from 'lucide-svelte';
 
 	let amountStr = $state('0');
 	let type = $state<'expense' | 'income' | 'transfer'>('expense');
@@ -13,6 +35,7 @@
 	let selectedSubcategory = $state('');
 	let date = $state(new Date().toISOString().split('T')[0]);
 	let description = $state('');
+	let selectedValueTag = $state<ValueTag>('need');
 
 	// Modal states
 	let showWalletModal = $state(false);
@@ -28,8 +51,12 @@
 	});
 
 	$effect(() => {
-		if ($wallets.length > 0 && selectedWalletId && (!selectedToWalletId || selectedToWalletId === selectedWalletId)) {
-			const other = $wallets.find(w => w.id !== selectedWalletId);
+		if (
+			$wallets.length > 0 &&
+			selectedWalletId &&
+			(!selectedToWalletId || selectedToWalletId === selectedWalletId)
+		) {
+			const other = $wallets.find((w) => w.id !== selectedWalletId);
 			if (other) {
 				selectedToWalletId = other.id;
 			}
@@ -50,9 +77,16 @@
 
 	// Derived values
 	let displayAmount = $derived(amountStr === '' ? '0' : amountStr);
+	let amountNumber = $derived(parseFloat(amountStr) || 0);
+	let amountInPaise = $derived(Math.round(amountNumber * 100));
 	let selectedWallet = $derived($wallets.find((w) => w.id === selectedWalletId));
 	let selectedToWallet = $derived($wallets.find((w) => w.id === selectedToWalletId));
 	let selectedCategory = $derived($categories.find((c) => c.id === selectedCategoryId));
+
+	// Work-time equivalence calculation
+	let workTimeEquiv = $derived(
+		calculateHoursOfWork(amountInPaise, $studentProfile.hourlyWageRate || 20000)
+	);
 
 	function handleKeyPress(e: CustomEvent<string>) {
 		const key = e.detail;
@@ -80,9 +114,6 @@
 	async function handleSubmit() {
 		const amount = parseFloat(amountStr);
 		if (amount <= 0) return;
-		
-		// Fix currency increment: convert rupee input to paise
-		const amountInPaise = Math.round(amount * 100);
 
 		try {
 			if (type === 'expense') {
@@ -92,7 +123,8 @@
 					subcategory: selectedSubcategory || null,
 					amount: amountInPaise,
 					date: new Date(date).toISOString(),
-					note: description.trim() || null
+					note: description.trim() || null,
+					valueTag: selectedValueTag
 				});
 			} else if (type === 'income') {
 				await addIncome({
@@ -140,14 +172,55 @@
 			>
 		</div>
 		<div style="width: 40px;"></div>
-		<!-- Spacer -->
 	</div>
 
-	<!-- Amount Display -->
-	<div class="amount-display">
-		<span class="currency">₹</span>
-		<span class="value">{displayAmount}</span>
+	<!-- Amount Display with Live Student Work-Time Badge -->
+	<div class="amount-hero-section">
+		<div class="amount-display">
+			<span class="currency">₹</span>
+			<span class="value">{displayAmount}</span>
+		</div>
+
+		{#if type === 'expense' && amountNumber > 0}
+			<div class="work-time-badge">
+				<Clock size={13} />
+				<span>Cost in Labor: <strong>{workTimeEquiv}</strong> of gig work</span>
+			</div>
+		{/if}
 	</div>
+
+	<!-- Mindful Value Tagging Bar (Expense only) -->
+	{#if type === 'expense'}
+		<div class="value-tag-selector">
+			<button
+				type="button"
+				class="value-tag-btn tag-need"
+				class:selected={selectedValueTag === 'need'}
+				onclick={() => (selectedValueTag = 'need')}
+			>
+				<Zap size={14} />
+				<span>Need</span>
+			</button>
+			<button
+				type="button"
+				class="value-tag-btn tag-want"
+				class:selected={selectedValueTag === 'want'}
+				onclick={() => (selectedValueTag = 'want')}
+			>
+				<Sparkles size={14} />
+				<span>Want</span>
+			</button>
+			<button
+				type="button"
+				class="value-tag-btn tag-growth"
+				class:selected={selectedValueTag === 'growth'}
+				onclick={() => (selectedValueTag = 'growth')}
+			>
+				<GraduationCap size={14} />
+				<span>Growth</span>
+			</button>
+		</div>
+	{/if}
 
 	<!-- Controls / Inputs -->
 	{#if type === 'transfer'}
@@ -198,16 +271,16 @@
 			<div class="input-row">
 				{#if selectedCategory && selectedCategory.subcategories.length > 0}
 					<button class="input-pill" onclick={() => (showCategoryModal = true)}>
-						<span>Category: {selectedCategory.name}</span>
+						<span>{selectedCategory.name}</span>
 						<ChevronDown size={14} />
 					</button>
 					<button class="input-pill" onclick={() => (showSubcategoryModal = true)}>
-						<span>Sub: {selectedSubcategory || 'None'}</span>
+						<span>{selectedSubcategory || 'Subcategory'}</span>
 						<ChevronDown size={14} />
 					</button>
 				{:else}
 					<button class="input-pill full" onclick={() => (showCategoryModal = true)}>
-						<span>Category: {selectedCategory?.name || 'Select Category'}</span>
+						<span>{selectedCategory?.name || 'Select Category'}</span>
 						<ChevronDown size={14} />
 					</button>
 				{/if}
@@ -219,31 +292,39 @@
 	<div class="input-row note-row">
 		<input
 			type="text"
-			placeholder={type === 'income' ? "Income source / description..." : "Add note or description..."}
+			placeholder={type === 'income' ? 'Income source (e.g., Allowance, Freelance, Tutoring)...' : 'Add note (e.g. Swiggy treat, Notes printing)...'}
 			bind:value={description}
 			class="note-input"
 		/>
 	</div>
 
-	<!-- Spacer to push keypad down -->
+	<!-- Spacer -->
 	<div class="spacer"></div>
 
 	<!-- Keypad -->
 	<div class="keypad-section">
 		<Keypad on:press={handleKeyPress} />
-		<button class="submit-btn" onclick={handleSubmit}> Add Transaction </button>
+		<button class="submit-btn" onclick={handleSubmit}>
+			Add {type === 'expense' ? 'Expense' : type === 'income' ? 'Income' : 'Transfer'}
+		</button>
 	</div>
 </div>
 
 <!-- Wallet Selection Modal -->
 {#if showWalletModal}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div class="modal-overlay" onclick={() => (showWalletModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showWalletModal = false)}>
+	<div
+		class="modal-overlay"
+		onclick={() => (showWalletModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showWalletModal = false)}
+	>
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Wallet</h3>
-				<button class="close-btn" onclick={() => (showWalletModal = false)} aria-label="Close"><X size={20} /></button>
+				<button class="close-btn" onclick={() => (showWalletModal = false)} aria-label="Close"
+					><X size={20} /></button
+				>
 			</div>
 			<div class="modal-list">
 				{#each $wallets as wallet}
@@ -269,16 +350,22 @@
 
 <!-- Target Wallet Selection Modal -->
 {#if showToWalletModal}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div class="modal-overlay" onclick={() => (showToWalletModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showToWalletModal = false)}>
+	<div
+		class="modal-overlay"
+		onclick={() => (showToWalletModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showToWalletModal = false)}
+	>
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Destination Wallet</h3>
-				<button class="close-btn" onclick={() => (showToWalletModal = false)} aria-label="Close"><X size={20} /></button>
+				<button class="close-btn" onclick={() => (showToWalletModal = false)} aria-label="Close"
+					><X size={20} /></button
+				>
 			</div>
 			<div class="modal-list">
-				{#each $wallets.filter(w => w.id !== selectedWalletId) as wallet}
+				{#each $wallets.filter((w) => w.id !== selectedWalletId) as wallet}
 					<button
 						class="modal-item"
 						class:selected={selectedToWalletId === wallet.id}
@@ -301,28 +388,34 @@
 
 <!-- Category Selection Modal -->
 {#if showCategoryModal}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div class="modal-overlay" onclick={() => (showCategoryModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showCategoryModal = false)}>
+	<div
+		class="modal-overlay"
+		onclick={() => (showCategoryModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showCategoryModal = false)}
+	>
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Category</h3>
-				<button class="close-btn" onclick={() => (showCategoryModal = false)} aria-label="Close"><X size={20} /></button>
+				<button class="close-btn" onclick={() => (showCategoryModal = false)} aria-label="Close"
+					><X size={20} /></button
+				>
 			</div>
-			<div class="modal-grid">
+			<div class="modal-list category-grid">
 				{#each $categories as category}
 					<button
-						class="category-grid-item"
+						class="modal-category-item"
 						class:selected={selectedCategoryId === category.id}
 						onclick={() => {
 							selectedCategoryId = category.id;
 							showCategoryModal = false;
 						}}
 					>
-						<div class="category-icon-wrapper" style="background: {category.color}15; color: {category.color};">
-							<CategoryIcon icon={category.icon} size={24} />
+						<div class="cat-icon-badge" style="background: {category.color}20; color: {category.color};">
+							<CategoryIcon icon={category.icon} size={22} />
 						</div>
-						<span class="category-name">{category.name}</span>
+						<span class="cat-label">{category.name}</span>
 					</button>
 				{/each}
 			</div>
@@ -332,13 +425,19 @@
 
 <!-- Subcategory Selection Modal -->
 {#if showSubcategoryModal && selectedCategory}
-	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div class="modal-overlay" onclick={() => (showSubcategoryModal = false)} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && (showSubcategoryModal = false)}>
+	<div
+		class="modal-overlay"
+		onclick={() => (showSubcategoryModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showSubcategoryModal = false)}
+	>
 		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
 			<div class="modal-header">
 				<h3>Select Subcategory</h3>
-				<button class="close-btn" onclick={() => (showSubcategoryModal = false)} aria-label="Close"><X size={20} /></button>
+				<button class="close-btn" onclick={() => (showSubcategoryModal = false)} aria-label="Close"
+					><X size={20} /></button
+				>
 			</div>
 			<div class="modal-list">
 				<button
@@ -349,7 +448,7 @@
 						showSubcategoryModal = false;
 					}}
 				>
-					<span class="item-name">None (Main Category)</span>
+					<span class="item-name">None</span>
 					{#if selectedSubcategory === ''}
 						<span class="check-icon"><Check size={18} /></span>
 					{/if}
@@ -378,109 +477,179 @@
 	.page-container {
 		display: flex;
 		flex-direction: column;
-		height: 100vh;
-		background: var(--bg-primary);
-		padding: 16px;
-		position: fixed;
-		inset: 0;
-		z-index: 2000;
+		min-height: 100vh;
+		max-width: 500px;
+		margin: 0 auto;
+		padding: 16px 20px 24px 20px;
 	}
 
 	.header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 24px;
+		margin-bottom: 12px;
 	}
 
 	.icon-btn {
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
 		background: var(--bg-card);
+		border: 1px solid var(--border-color);
+		color: var(--text-primary);
+		padding: 8px;
+		border-radius: 50%;
+		cursor: pointer;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--text-primary);
-		border: 1px solid var(--border-color);
-		cursor: pointer;
 	}
 
 	.tabs {
 		display: flex;
 		background: var(--bg-card);
 		padding: 4px;
-		border-radius: 999px;
+		border-radius: 9999px;
 		border: 1px solid var(--border-color);
 	}
 
 	.tab {
-		padding: 8px 16px;
-		border-radius: 999px;
-		font-size: 0.9rem;
-		font-weight: 500;
-		color: var(--text-secondary);
-		background: transparent;
-		transition: all 0.2s;
-		cursor: pointer;
+		padding: 6px 14px;
+		border-radius: 9999px;
 		border: none;
+		background: transparent;
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--text-muted);
+		cursor: pointer;
+		transition: all 0.2s;
 	}
 
 	.tab.active {
-		background: var(--accent-gradient);
+		background: var(--accent-primary);
 		color: white;
-		box-shadow: var(--shadow-sm);
+		box-shadow: 0 4px 12px var(--accent-glow);
+	}
+
+	.amount-hero-section {
+		text-align: center;
+		margin: 12px 0 16px 0;
 	}
 
 	.amount-display {
-		text-align: center;
-		margin-bottom: 32px;
 		display: flex;
 		justify-content: center;
-		align-items: flex-start;
+		align-items: baseline;
 		gap: 4px;
 	}
 
 	.currency {
 		font-size: 2rem;
-		font-weight: 600;
-		color: var(--text-secondary);
-		margin-top: 8px;
+		font-weight: 700;
+		color: var(--text-muted);
 	}
 
 	.value {
-		font-size: 4rem;
+		font-size: 3.2rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		line-height: 1;
+		letter-spacing: -1px;
+	}
+
+	.work-time-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background: rgba(124, 58, 237, 0.08);
+		border: 1px solid rgba(124, 58, 237, 0.2);
+		color: var(--accent-primary);
+		padding: 4px 12px;
+		border-radius: 9999px;
+		font-size: 0.76rem;
+		font-weight: 600;
+		margin-top: 6px;
+	}
+
+	/* Value Tag Selector */
+	.value-tag-selector {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 8px;
+		margin-bottom: 14px;
+	}
+
+	.value-tag-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding: 9px;
+		border-radius: 14px;
+		border: 1px solid var(--border-color);
+		background: var(--bg-card);
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: var(--text-secondary);
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.value-tag-btn.tag-need.selected {
+		background: #2563EB;
+		color: white;
+		border-color: #2563EB;
+		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+	}
+
+	.value-tag-btn.tag-want.selected {
+		background: #DB2777;
+		color: white;
+		border-color: #DB2777;
+		box-shadow: 0 4px 12px rgba(219, 39, 119, 0.3);
+	}
+
+	.value-tag-btn.tag-growth.selected {
+		background: #059669;
+		color: white;
+		border-color: #059669;
+		box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
 	}
 
 	.input-row {
 		display: flex;
-		justify-content: center;
-		gap: 12px;
-		margin-bottom: 16px;
+		gap: 8px;
+		margin-bottom: 10px;
 	}
 
 	.input-pill {
+		flex: 1;
+		background: var(--bg-card);
+		border: 1px solid var(--border-color);
+		padding: 10px 14px;
+		border-radius: 14px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--text-primary);
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		background: var(--bg-card);
-		padding: 10px 16px;
-		border-radius: 12px;
-		font-size: 0.95rem;
-		color: var(--text-primary);
-		border: 1px solid var(--border-color);
+		justify-content: space-between;
 		cursor: pointer;
-		flex: 1;
-		justify-content: center;
 	}
 
 	.input-pill.full {
 		width: 100%;
-		justify-content: space-between;
-		flex: none;
+	}
+
+	.note-input {
+		width: 100%;
+		padding: 12px 16px;
+		background: var(--bg-card);
+		border: 1px solid var(--border-color);
+		border-radius: 14px;
+		font-size: 0.9rem;
+		color: var(--text-primary);
+	}
+
+	.note-input:focus {
+		outline: none;
+		border-color: var(--accent-primary);
 	}
 
 	.spacer {
@@ -488,225 +657,131 @@
 	}
 
 	.keypad-section {
-		display: flex;
-		flex-direction: column;
-		gap: 24px;
-		padding-bottom: 20px;
+		margin-top: 10px;
 	}
 
 	.submit-btn {
-		background: var(--accent-primary);
-		color: white;
 		width: 100%;
-		padding: 18px;
-		border-radius: 20px;
-		font-size: 1.1rem;
-		font-weight: 700;
-		box-shadow: var(--shadow-glow);
-		transition: all 0.2s;
+		background: var(--accent-gradient);
+		color: white;
 		border: none;
+		padding: 15px;
+		border-radius: 18px;
+		font-size: 1rem;
+		font-weight: 800;
 		cursor: pointer;
+		margin-top: 12px;
+		box-shadow: 0 10px 25px var(--accent-glow);
+		transition: transform 0.2s;
 	}
 
 	.submit-btn:active {
 		transform: scale(0.98);
 	}
 
-	/* Modal Styles */
+	/* Modals */
 	.modal-overlay {
 		position: fixed;
 		inset: 0;
-		background: rgba(0, 0, 0, 0.4);
-		backdrop-filter: blur(8px);
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(4px);
+		z-index: 999;
 		display: flex;
 		align-items: flex-end;
 		justify-content: center;
-		z-index: 3000;
-		cursor: default;
 	}
 
 	.modal {
 		background: var(--bg-card);
+		border-radius: 28px 28px 0 0;
+		padding: 24px;
 		width: 100%;
 		max-width: 500px;
-		border-radius: 32px 32px 0 0;
-		padding: 24px 24px 34px 24px;
-		box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+		max-height: 70vh;
+		overflow-y: auto;
 		border: 1px solid var(--border-color);
-		border-bottom: none;
-		max-height: 80vh;
-		display: flex;
-		flex-direction: column;
-		animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-	}
-
-	@keyframes slideUp {
-		from {
-			transform: translateY(100%);
-		}
-		to {
-			transform: translateY(0);
-		}
 	}
 
 	.modal-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 20px;
+		margin-bottom: 16px;
 	}
 
 	.modal-header h3 {
-		font-size: 1.25rem;
-		font-weight: 700;
+		font-size: 1.1rem;
+		font-weight: 800;
 		color: var(--text-primary);
-		margin: 0;
 	}
 
 	.close-btn {
 		background: transparent;
-		color: var(--text-secondary);
 		border: none;
+		color: var(--text-muted);
 		cursor: pointer;
-		padding: 4px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-		transition: background 0.2s;
-	}
-
-	.close-btn:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
 	}
 
 	.modal-list {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		overflow-y: auto;
 	}
 
 	.modal-item {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		width: 100%;
-		padding: 16px;
-		background: var(--bg-secondary);
+		padding: 12px 16px;
+		border-radius: 14px;
+		background: var(--bg-primary);
 		border: 1px solid var(--border-color);
-		border-radius: 16px;
-		cursor: pointer;
-		transition: all 0.2s;
 		color: var(--text-primary);
-	}
-
-	.modal-item:hover {
-		border-color: var(--accent-primary);
-		background: var(--bg-hover);
+		cursor: pointer;
+		font-weight: 600;
 	}
 
 	.modal-item.selected {
 		border-color: var(--accent-primary);
-		background: rgba(79, 70, 229, 0.05);
+		background: rgba(124, 58, 237, 0.08);
 	}
 
-	.item-name {
-		font-weight: 600;
-		font-size: 1rem;
-	}
-
-	.item-balance {
-		font-weight: 700;
-		font-size: 0.95rem;
-		color: var(--accent-primary);
-		margin-right: auto;
-		margin-left: 12px;
-	}
-
-	.check-icon {
-		color: var(--accent-primary);
-	}
-
-	/* Category Grid */
-	.modal-grid {
+	.category-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 12px;
-		overflow-y: auto;
-		padding: 4px 0;
+		gap: 10px;
 	}
 
-	.category-grid-item {
+	.modal-category-item {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		justify-content: center;
-		padding: 16px 8px;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: 20px;
-		cursor: pointer;
-		transition: all 0.2s;
-		gap: 10px;
-		color: var(--text-primary);
-	}
-
-	.category-grid-item:hover {
-		border-color: var(--accent-primary);
-		background: var(--bg-hover);
-		transform: translateY(-2px);
-	}
-
-	.category-grid-item.selected {
-		border-color: var(--accent-primary);
-		background: rgba(79, 70, 229, 0.05);
-		box-shadow: 0 4px 12px rgba(79, 70, 229, 0.05);
-	}
-
-	.category-icon-wrapper {
-		width: 48px;
-		height: 48px;
+		gap: 8px;
+		padding: 14px 10px;
 		border-radius: 16px;
+		background: var(--bg-primary);
+		border: 1px solid var(--border-color);
+		cursor: pointer;
+	}
+
+	.modal-category-item.selected {
+		border-color: var(--accent-primary);
+		background: rgba(124, 58, 237, 0.08);
+	}
+
+	.cat-icon-badge {
+		width: 44px;
+		height: 44px;
+		border-radius: 14px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: transform 0.2s;
 	}
 
-	.category-grid-item:hover .category-icon-wrapper {
-		transform: scale(1.1);
-	}
-
-	.category-name {
-		font-size: 0.85rem;
-		font-weight: 600;
-		text-align: center;
-	}
-
-	/* Note input field */
-	.note-row {
-		margin-top: 8px;
-		padding: 0 8px;
-		justify-content: stretch;
-	}
-
-	.note-input {
-		width: 100%;
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		padding: 16px 20px;
-		border-radius: 20px;
-		font-size: 1rem;
+	.cat-label {
+		font-size: 0.75rem;
+		font-weight: 700;
 		color: var(--text-primary);
-		transition: all 0.2s;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.note-input:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-		box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+		text-align: center;
 	}
 </style>
