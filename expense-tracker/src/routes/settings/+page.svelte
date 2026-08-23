@@ -7,9 +7,12 @@
 		budgets,
 		categories,
 		wallets,
+		studentProfile,
+		healthScore,
 		exportData,
 		importData,
-		clearAllData
+		clearAllData,
+		formatCurrency
 	} from '$lib/stores';
 	import { lockApp, passwordExists } from '$lib/stores/auth';
 	import {
@@ -23,7 +26,12 @@
 		Trash2,
 		X,
 		Moon,
-		Sun
+		Sun,
+		Award,
+		GraduationCap,
+		Clock,
+		Coins,
+		Check
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
@@ -38,6 +46,41 @@
 	let importPreview = $state<any>(null);
 
 	let theme = $state<'light' | 'dark'>('light');
+
+	// Student Profile Form State
+	let editAllowance = $state('');
+	let editDay = $state('1');
+	let editWage = $state('200');
+	let editCollege = $state('');
+
+	$effect(() => {
+		if ($studentProfile) {
+			editAllowance = ($studentProfile.monthlyAllowance / 100).toString();
+			editDay = ($studentProfile.allowanceDay || 1).toString();
+			editWage = (($studentProfile.hourlyWageRate || 20000) / 100).toString();
+			editCollege = $studentProfile.collegeName || '';
+		}
+	});
+
+	async function handleSaveStudentProfile() {
+		const allowance = parseFloat(editAllowance);
+		const day = parseInt(editDay);
+		const wage = parseFloat(editWage);
+
+		if (isNaN(allowance) || allowance < 0) {
+			showSuccessToast('Please enter a valid allowance');
+			return;
+		}
+
+		await studentProfile.update({
+			monthlyAllowance: Math.round(allowance * 100),
+			allowanceDay: Math.min(31, Math.max(1, day || 1)),
+			hourlyWageRate: Math.round(wage * 100),
+			collegeName: editCollege.trim() || undefined
+		});
+
+		showSuccessToast('Student profile updated!');
+	}
 
 	onMount(() => {
 		// Initialize theme state
@@ -215,6 +258,68 @@
 					{/if}
 				</div>
 			</button>
+		</div>
+	</div>
+
+	<!-- Student Financial Intelligence Profile Section -->
+	<div class="section student-profile-section">
+		<h2 class="section-title">
+			<GraduationCap class="inline-icon" size={20} /> Student Financial Profile
+		</h2>
+		<p class="section-description">
+			Configure your monthly allowance cadence and hourly campus gig rate to power the Safe-to-Spend runway engine.
+		</p>
+
+		<div class="profile-inputs-grid">
+			<div class="p-field">
+				<label for="set-allowance">Monthly Allowance (₹)</label>
+				<input id="set-allowance" type="number" bind:value={editAllowance} placeholder="10000" />
+			</div>
+
+			<div class="p-field">
+				<label for="set-day">Allowance Date (1-31)</label>
+				<input id="set-day" type="number" min="1" max="31" bind:value={editDay} placeholder="1" />
+			</div>
+
+			<div class="p-field">
+				<label for="set-wage">Hourly Gig / Freelance Rate (₹/hr)</label>
+				<input id="set-wage" type="number" bind:value={editWage} placeholder="200" />
+			</div>
+
+			<div class="p-field">
+				<label for="set-college">College / University</label>
+				<input id="set-college" type="text" bind:value={editCollege} placeholder="e.g. IIT / BITS / DU" />
+			</div>
+		</div>
+
+		<button class="action-btn primary-save-btn" onclick={handleSaveStudentProfile}>
+			<Check size={18} />
+			<span>Save Profile & Recalculate Runway</span>
+		</button>
+	</div>
+
+	<!-- Achievement Badges Showcase -->
+	<div class="section badges-showcase-section">
+		<h2 class="section-title">
+			<Award class="inline-icon" size={20} /> Achievement Badges ({$healthScore.unlockedBadgesCount}/{$healthScore.badges.length})
+		</h2>
+		<p class="section-description">
+			Milestones unlocked through healthy student financial habits.
+		</p>
+
+		<div class="badges-showcase-grid">
+			{#each $healthScore.badges as badge}
+				<div class="badge-card-full" class:is-unlocked={badge.unlocked}>
+					<div class="badge-emoji-large">{badge.emoji}</div>
+					<div class="badge-meta">
+						<div class="badge-name">{badge.title}</div>
+						<div class="badge-desc-text">{badge.desc}</div>
+					</div>
+					<div class="badge-status-pill">
+						{badge.unlocked ? 'Unlocked ✨' : 'Locked 🔒'}
+					</div>
+				</div>
+			{/each}
 		</div>
 	</div>
 
@@ -881,5 +986,113 @@
 
 	.toggle-switch.checked .toggle-thumb {
 		transform: translateX(20px);
+	}
+
+	/* Student Profile Settings Styles */
+	.profile-inputs-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 12px;
+		margin-bottom: 16px;
+	}
+
+	.p-field {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.p-field label {
+		font-size: 0.74rem;
+		font-weight: 700;
+		color: var(--text-muted);
+		text-transform: uppercase;
+	}
+
+	.p-field input {
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		padding: 10px 14px;
+		border-radius: 12px;
+		font-size: 0.88rem;
+		font-weight: 600;
+		color: var(--text-primary);
+	}
+
+	.p-field input:focus {
+		outline: none;
+		border-color: var(--accent-primary);
+	}
+
+	.primary-save-btn {
+		background: var(--accent-gradient);
+		color: white;
+		border: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		font-weight: 700;
+		padding: 12px;
+		border-radius: 14px;
+		cursor: pointer;
+		box-shadow: 0 4px 15px var(--accent-glow);
+	}
+
+	/* Badges Showcase */
+	.badges-showcase-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: 12px;
+	}
+
+	.badge-card-full {
+		background: var(--bg-secondary);
+		border: 1px solid var(--border-color);
+		border-radius: 18px;
+		padding: 14px;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		opacity: 0.55;
+		transition: all 0.2s;
+	}
+
+	.badge-card-full.is-unlocked {
+		opacity: 1;
+		border-color: var(--accent-primary);
+		background: rgba(124, 58, 237, 0.05);
+	}
+
+	.badge-emoji-large {
+		font-size: 2rem;
+	}
+
+	.badge-meta {
+		flex: 1;
+	}
+
+	.badge-name {
+		font-size: 0.88rem;
+		font-weight: 800;
+		color: var(--text-primary);
+	}
+
+	.badge-desc-text {
+		font-size: 0.72rem;
+		color: var(--text-muted);
+		line-height: 1.3;
+	}
+
+	.badge-status-pill {
+		font-size: 0.68rem;
+		font-weight: 700;
+		color: var(--text-secondary);
+	}
+
+	@media (max-width: 600px) {
+		.profile-inputs-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

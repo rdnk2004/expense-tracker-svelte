@@ -31,6 +31,11 @@ function createProfileStore() {
             set(updated);
             return updated;
         },
+        update: async (updates: Partial<StudentProfile>) => {
+            const updated = await db.saveStudentProfile(updates);
+            set(updated);
+            return updated;
+        },
         setMonthlyAllowance: async (amountInPaise: number) => {
             const updated = await db.saveStudentProfile({ monthlyAllowance: amountInPaise });
             set(updated);

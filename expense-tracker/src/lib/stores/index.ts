@@ -17,6 +17,7 @@ import { buckets, setCategoryBucket, updateBucketSplit } from './buckets';
 import { subscriptions, subscriptionStats, getMonthlyNormalizedCost } from './subscriptions';
 import { goals, goalStats } from './goals';
 import { analytics } from './analytics';
+import { healthScore } from './healthScore';
 
 export {
     studentProfile,
@@ -30,7 +31,8 @@ export {
     getMonthlyNormalizedCost,
     goals,
     goalStats,
-    analytics
+    analytics,
+    healthScore
 };
 
 // ============================================================================

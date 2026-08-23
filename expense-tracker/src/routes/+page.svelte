@@ -38,6 +38,7 @@
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import SafeSpendCard from '$lib/components/SafeSpendCard.svelte';
+	import HealthScoreCard from '$lib/components/HealthScoreCard.svelte';
 
 	// Computed values
 	let upiWallet = $derived($wallets.find((w) => w.name.toLowerCase().includes('upi')));
@@ -167,7 +168,10 @@
 			</div>
 		</div>
 
-		<!-- 3. Student 3-Bucket Macro Pulse -->
+		<!-- 3. Student Financial Health Score & Badges -->
+		<HealthScoreCard />
+
+		<!-- 4. Student 3-Bucket Macro Pulse -->
 		<div class="section-card">
 			<div class="section-header-row">
 				<div class="section-title-group">
