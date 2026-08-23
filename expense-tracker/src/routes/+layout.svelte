@@ -32,7 +32,8 @@
 		Lock,
 		Plus, // FAB icon
 		User,
-		ChartPie
+		ChartPie,
+		Radio
 	} from 'lucide-svelte';
 
 	let { children } = $props();
@@ -48,6 +49,7 @@
 		{ icon: Receipt, label: 'Expenses', href: '/expenses' },
 		{ icon: Handshake, label: 'Debts', href: '/debts' },
 		{ icon: Target, label: 'Budgets', href: '/budgets' },
+		{ icon: Radio, label: 'Subscriptions', href: '/subscriptions' },
 		{ icon: ArrowLeftRight, label: 'Transfers', href: '/transfers' },
 		{ icon: Settings, label: 'Settings', href: '/settings' }
 	];

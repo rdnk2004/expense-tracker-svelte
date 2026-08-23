@@ -14,8 +14,19 @@ import * as db from '$lib/db';
 import { studentProfile } from './profile';
 import { runway, getAllowanceCycleDates } from './runway';
 import { buckets, setCategoryBucket, updateBucketSplit } from './buckets';
+import { subscriptions, subscriptionStats, getMonthlyNormalizedCost } from './subscriptions';
 
-export { studentProfile, runway, getAllowanceCycleDates, buckets, setCategoryBucket, updateBucketSplit };
+export {
+    studentProfile,
+    runway,
+    getAllowanceCycleDates,
+    buckets,
+    setCategoryBucket,
+    updateBucketSplit,
+    subscriptions,
+    subscriptionStats,
+    getMonthlyNormalizedCost
+};
 
 // ============================================================================
 // WRITABLE STORES
@@ -418,7 +429,8 @@ export async function initializeApp(): Promise<void> {
             loadDebts(),
             loadBudgets(),
             loadCategories(),
-            studentProfile.load()
+            studentProfile.load(),
+            subscriptions.load()
         ]);
 
         console.log('✅ App initialized successfully');
