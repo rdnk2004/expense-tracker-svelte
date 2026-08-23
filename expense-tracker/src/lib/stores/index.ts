@@ -11,11 +11,10 @@ import type {
     MonthlySummary
 } from '$lib/types';
 import * as db from '$lib/db';
-// Note: We need to ensure saveExpense is available on db.
-// In step 79, imports were "import * as db from '$lib/db'".
-// In step 79, imports were "import * as db from '$lib/db'".
-// But db.ts wasn't fully visible. I assume db has saveExpense based on addExpense.
-// Logic below uses db.saveExpense.
+import { studentProfile } from './profile';
+import { runway, getAllowanceCycleDates } from './runway';
+
+export { studentProfile, runway, getAllowanceCycleDates };
 
 // ============================================================================
 // WRITABLE STORES
@@ -417,7 +416,8 @@ export async function initializeApp(): Promise<void> {
             loadTransfers(),
             loadDebts(),
             loadBudgets(),
-            loadCategories()
+            loadCategories(),
+            studentProfile.load()
         ]);
 
         console.log('✅ App initialized successfully');

@@ -233,3 +233,38 @@ export function exportToCSV(transactions: Transaction[], filename: string = 'tra
     a.click();
     URL.revokeObjectURL(url);
 }
+
+// ============================================================================
+// STUDENT FINANCIAL UTILITIES
+// ============================================================================
+
+/**
+ * Converts an expense amount into hours/minutes of campus/freelance work
+ */
+export function calculateHoursOfWork(amountInPaise: number, hourlyWageInPaise: number = 20000): string {
+    if (hourlyWageInPaise <= 0 || amountInPaise <= 0) return '0 mins';
+    const hours = amountInPaise / hourlyWageInPaise;
+    if (hours < 1) {
+        const mins = Math.round(hours * 60);
+        return `${mins} min${mins === 1 ? '' : 's'}`;
+    }
+    const roundedHours = Math.round(hours * 10) / 10;
+    return `${roundedHours} hr${roundedHours === 1 ? '' : 's'}`;
+}
+
+/**
+ * Returns color token for burn rate status
+ */
+export function getBurnRateColor(status: 'safe' | 'caution' | 'critical'): string {
+    switch (status) {
+        case 'safe':
+            return 'var(--success, #10B981)';
+        case 'caution':
+            return 'var(--warning, #F59E0B)';
+        case 'critical':
+            return 'var(--danger, #FF3366)';
+        default:
+            return 'var(--accent-primary, #7C3AED)';
+    }
+}
+
