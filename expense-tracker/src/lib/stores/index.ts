@@ -16,6 +16,7 @@ import { runway, getAllowanceCycleDates } from './runway';
 import { buckets, setCategoryBucket, updateBucketSplit } from './buckets';
 import { subscriptions, subscriptionStats, getMonthlyNormalizedCost } from './subscriptions';
 import { goals, goalStats } from './goals';
+import { analytics } from './analytics';
 
 export {
     studentProfile,
@@ -28,7 +29,8 @@ export {
     subscriptionStats,
     getMonthlyNormalizedCost,
     goals,
-    goalStats
+    goalStats,
+    analytics
 };
 
 // ============================================================================

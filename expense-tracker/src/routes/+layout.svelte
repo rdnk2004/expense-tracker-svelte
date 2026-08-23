@@ -48,6 +48,7 @@
 		{ icon: LayoutDashboard, label: 'Dashboard', href: '/' },
 		{ icon: Wallet, label: 'Wallets', href: '/wallets' },
 		{ icon: Receipt, label: 'Expenses', href: '/expenses' },
+		{ icon: ChartPie, label: 'Analytics', href: '/analytics' },
 		{ icon: Handshake, label: 'Debts', href: '/debts' },
 		{ icon: Target, label: 'Budgets', href: '/budgets' },
 		{ icon: PiggyBank, label: 'Goals', href: '/goals' },
@@ -62,7 +63,7 @@
 		{ icon: LayoutDashboard, label: 'Home', href: '/' },
 		{ icon: ArrowLeftRight, label: 'Transfer', href: '/transfers' },
 		// Middle is FAB (handled separately in template)
-		{ icon: ChartPie, label: 'Analytics', href: '/budgets' },
+		{ icon: ChartPie, label: 'Analytics', href: '/analytics' },
 		{ icon: User, label: 'Profile', href: '/settings' }
 	];
 
