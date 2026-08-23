@@ -16,17 +16,24 @@
 		Smartphone,
 		Wifi,
 		Dumbbell,
-		CreditCard
+		CreditCard,
+		PiggyBank,
+		Receipt,
+		Sparkles,
+		ShieldCheck,
+		Compass,
+		Award
 	} from 'lucide-svelte';
 
 	// Props
 	interface Props {
 		icon: string;
 		size?: number;
+		color?: string;
 		class?: string;
 	}
 
-	let { icon, size = 24, class: className = '' }: Props = $props();
+	let { icon, size = 24, color = undefined, class: className = '' }: Props = $props();
 
 	// Map icon names to components
 	const iconMap: Record<string, any> = {
@@ -46,10 +53,16 @@
 		Smartphone: Smartphone,
 		Wifi: Wifi,
 		Dumbbell: Dumbbell,
-		CreditCard: CreditCard
+		CreditCard: CreditCard,
+		PiggyBank: PiggyBank,
+		Receipt: Receipt,
+		Sparkles: Sparkles,
+		ShieldCheck: ShieldCheck,
+		Compass: Compass,
+		Award: Award
 	};
 
 	let IconComponent = $derived(iconMap[icon] || Package);
 </script>
 
-<IconComponent {size} class={className} />
+<IconComponent {size} {color} class={className} />
