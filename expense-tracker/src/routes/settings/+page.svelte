@@ -31,10 +31,12 @@
 		GraduationCap,
 		Clock,
 		Coins,
-		Check
+		Check,
+		Sparkles
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
+	import { loadStudentDemoData } from '$lib/utils/mockData';
 
 	// UI State
 	let showToast = $state(false);
@@ -80,6 +82,19 @@
 		});
 
 		showSuccessToast('Student profile updated!');
+	}
+
+	async function handleLoadDemo() {
+		if (confirm('Load realistic college student demo data? This will populate the app with authentic campus allowance, subscriptions, sinking funds, debts, and expenses.')) {
+			try {
+				await loadStudentDemoData();
+				showSuccessToast('College demo data loaded successfully! 🎓');
+				goto('/');
+			} catch (err) {
+				console.error(err);
+				showSuccessToast('Failed to load demo data');
+			}
+		}
 	}
 
 	onMount(() => {
@@ -438,10 +453,20 @@
 				</div>
 			{/each}
 		</div>
-		<p class="help-text">
-			<Info size={14} class="inline" /> Category customization (add, edit, delete) coming soon in a future
-			update!
+	</div>
+
+	<!-- College Demo Data Generator Section -->
+	<div class="section demo-data-section">
+		<h2 class="section-title">
+			<Sparkles class="inline-icon" size={20} /> Campus Demo Showcase
+		</h2>
+		<p class="section-description">
+			Instantly populate the tracker with an authentic college student profile: ₹12,000 allowance, ₹250/hr gig wage, canteen treats, Goa trip sinking fund, Spotify & WiFi subscriptions, and friend split receivables.
 		</p>
+		<button class="action-btn secondary demo-load-btn" onclick={handleLoadDemo}>
+			<Sparkles size={18} />
+			<span>Load College Student Demo Data</span>
+		</button>
 	</div>
 
 	<!-- Danger Zone -->
@@ -1094,5 +1119,17 @@
 		.profile-inputs-grid {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.demo-load-btn {
+		background: rgba(124, 58, 237, 0.08);
+		border-color: rgba(124, 58, 237, 0.3);
+		color: var(--accent-primary);
+		font-weight: 700;
+	}
+
+	.demo-load-btn:hover {
+		background: var(--accent-primary);
+		color: white;
 	}
 </style>
