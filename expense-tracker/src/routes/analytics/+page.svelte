@@ -11,14 +11,7 @@
 		Sparkles,
 		GraduationCap,
 		Clock,
-		Smile,
-		Meh,
-		Frown,
-		PiggyBank,
-		AlertTriangle,
-		ArrowUpRight,
-		Receipt,
-		Compass
+		Receipt
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import AnalystNudgeCard from '$lib/components/AnalystNudgeCard.svelte';
@@ -32,29 +25,29 @@
 <div class="analytics-page">
 	<div class="page-header">
 		<div>
-			<span class="eyebrow">Behavioral Economics</span>
-			<h1 class="page-title">Spending Intelligence</h1>
+			<span class="campus-sub">Behavioral Economics</span>
+			<h1 class="page-title">Spending Intelligence & ROI</h1>
 		</div>
 	</div>
 
-	<!-- Analyst Nudge Pulse -->
+	<!-- Proactive Analyst Pulse -->
 	<AnalystNudgeCard />
 
-	<!-- 1. Emotional ROI Matrix (Worth It vs Regret) -->
-	<div class="card emotional-roi-card">
-		<div class="card-header">
-			<div class="header-title-wrap">
-				<Flame size={20} class="text-accent" />
-				<h2 class="card-title">Emotional ROI & Regret Audit</h2>
+	<!-- 1. Emotional ROI & Regret Audit Matrix -->
+	<div class="card emotional-card">
+		<div class="card-top-line">
+			<div class="card-title-wrap">
+				<Flame size={18} color="#F43F5E" />
+				<h3 class="card-heading">Post-Purchase Emotional ROI</h3>
 			</div>
-			<span class="pill-badge">Post-Purchase Audit</span>
+			<span class="matrix-tag">Satisfaction Audit</span>
 		</div>
 
-		<p class="section-desc">
-			Financial health isn't about hoarding every rupee—it's maximizing the happiness & growth generated per rupee spent.
+		<p class="card-desc">
+			FinTech isn't about extreme frugality—it's maximizing the joy and utility extracted per rupee spent.
 		</p>
 
-		<!-- Progress Bar for Satisfaction Breakdown -->
+		<!-- Progress Bar -->
 		<div class="satisfaction-bar">
 			<div class="sat-fill worth" style="width: {emotional.worthItPercent}%;"></div>
 			<div class="sat-fill neutral" style="width: {emotional.neutralPercent}%;"></div>
@@ -65,144 +58,138 @@
 			<div class="sat-box worth-box">
 				<div class="sat-top">
 					<span class="emoji">🔥</span>
-					<span class="sat-pct">{emotional.worthItPercent}%</span>
+					<span class="sat-pct tabular">{emotional.worthItPercent}%</span>
 				</div>
-				<span class="sat-val">{formatCurrency(emotional.worthItTotal)}</span>
-				<span class="sat-label">Worth It (Joy & Utility)</span>
+				<span class="sat-val tabular">{formatCurrency(emotional.worthItTotal)}</span>
+				<span class="sat-label">Worth It (High Joy)</span>
 			</div>
 
 			<div class="sat-box neutral-box">
 				<div class="sat-top">
 					<span class="emoji">😐</span>
-					<span class="sat-pct">{emotional.neutralPercent}%</span>
+					<span class="sat-pct tabular">{emotional.neutralPercent}%</span>
 				</div>
-				<span class="sat-val">{formatCurrency(emotional.neutralTotal)}</span>
-				<span class="sat-label">Neutral (Essentials)</span>
+				<span class="sat-val tabular">{formatCurrency(emotional.neutralTotal)}</span>
+				<span class="sat-label">Neutral (Necessities)</span>
 			</div>
 
 			<div class="sat-box regret-box">
 				<div class="sat-top">
 					<span class="emoji">💀</span>
-					<span class="sat-pct">{emotional.regretPercent}%</span>
+					<span class="sat-pct tabular">{emotional.regretPercent}%</span>
 				</div>
-				<span class="sat-val">{formatCurrency(emotional.regrettedTotal)}</span>
+				<span class="sat-val tabular">{formatCurrency(emotional.regrettedTotal)}</span>
 				<span class="sat-label">Regretted (Impulse)</span>
 			</div>
 		</div>
 
 		<!-- Regret Labor Callout -->
 		{#if emotional.regrettedTotal > 0}
-			<div class="regret-labor-alert">
-				<AlertTriangle size={18} class="alert-icon" />
-				<div>
-					<strong>Cost of Regret:</strong> You spent {formatCurrency(emotional.regrettedTotal)} on regretted expenses.
-					That is equivalent to <strong>{emotional.wastedLaborTime}</strong> of campus labor traded for zero fulfillment.
-				</div>
+			<div class="regret-callout-banner">
+				<span>💸 <strong>Cost of Regret:</strong> {formatCurrency(emotional.regrettedTotal)} spent on regretted impulse purchases = <strong class="tabular">{emotional.wastedLaborTime}</strong> of student work wasted for zero fulfillment.</span>
 			</div>
 		{/if}
 	</div>
 
-	<!-- 2. Needs vs Wants vs Growth Macro Distribution -->
-	<div class="card value-tags-card">
-		<div class="card-header">
-			<div class="header-title-wrap">
-				<Zap size={20} class="text-accent" />
-				<h2 class="card-title">Mindful Value Split</h2>
+	<!-- 2. Mindful Value Split (Need vs Want vs Growth) -->
+	<div class="card value-split-card">
+		<div class="card-top-line">
+			<div class="card-title-wrap">
+				<Zap size={18} color="var(--accent-primary)" />
+				<h3 class="card-heading">Mindful Value Split</h3>
 			</div>
-			<span class="pill-badge">Monthly Flow</span>
+			<span class="matrix-tag">Monthly Flow</span>
 		</div>
 
-		<div class="macro-split-track">
-			<div class="split-seg need-seg" style="width: {valueTags.needPercent}%;"></div>
-			<div class="split-seg want-seg" style="width: {valueTags.wantPercent}%;"></div>
-			<div class="split-seg growth-seg" style="width: {valueTags.growthPercent}%;"></div>
+		<div class="value-track">
+			<div class="v-seg need-seg" style="width: {valueTags.needPercent}%;"></div>
+			<div class="v-seg want-seg" style="width: {valueTags.wantPercent}%;"></div>
+			<div class="v-seg growth-seg" style="width: {valueTags.growthPercent}%;"></div>
 		</div>
 
 		<div class="value-tags-grid">
-			<div class="vtag-item need-tag">
+			<div class="vtag-box need-box">
 				<div class="vtag-header">
-					<Zap size={15} />
-					<span>Needs (50% target)</span>
+					<Zap size={14} color="#10B981" />
+					<span>⚡ Needs (50% target)</span>
 				</div>
-				<div class="vtag-amount">{formatCurrency(valueTags.needTotal)}</div>
-				<span class="vtag-pct">{valueTags.needPercent}% of spend</span>
+				<div class="vtag-amount tabular">{formatCurrency(valueTags.needTotal)}</div>
+				<span class="vtag-pct tabular">{valueTags.needPercent}% of spend</span>
 			</div>
 
-			<div class="vtag-item want-tag">
+			<div class="vtag-box want-box">
 				<div class="vtag-header">
-					<Sparkles size={15} />
-					<span>Wants (30% target)</span>
+					<Sparkles size={14} color="#38BDF8" />
+					<span>✨ Wants (30% target)</span>
 				</div>
-				<div class="vtag-amount">{formatCurrency(valueTags.wantTotal)}</div>
-				<span class="vtag-pct">{valueTags.wantPercent}% of spend</span>
+				<div class="vtag-amount tabular">{formatCurrency(valueTags.wantTotal)}</div>
+				<span class="vtag-pct tabular">{valueTags.wantPercent}% of spend</span>
 			</div>
 
-			<div class="vtag-item growth-tag">
+			<div class="vtag-box growth-box">
 				<div class="vtag-header">
-					<GraduationCap size={15} />
-					<span>Growth (20% target)</span>
+					<GraduationCap size={14} color="#818CF8" />
+					<span>📚 Growth (20% target)</span>
 				</div>
-				<div class="vtag-amount">{formatCurrency(valueTags.growthTotal)}</div>
-				<span class="vtag-pct">{valueTags.growthPercent}% of spend</span>
+				<div class="vtag-amount tabular">{formatCurrency(valueTags.growthTotal)}</div>
+				<span class="vtag-pct tabular">{valueTags.growthPercent}% of spend</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 3. Gig Labor Time-Valuation Converter -->
-	<div class="card labor-valuation-card">
-		<div class="card-header">
-			<div class="header-title-wrap">
-				<Clock size={20} class="text-accent" />
-				<h2 class="card-title">Campus Labor Time-Valuation</h2>
+	<!-- 3. Campus Labor Time-Valuation Converter -->
+	<div class="card labor-card">
+		<div class="card-top-line">
+			<div class="card-title-wrap">
+				<Clock size={18} color="var(--accent-primary)" />
+				<h3 class="card-heading">Campus Labor Time-Valuation</h3>
 			</div>
-			<span class="wage-rate-pill">₹{workVal.hourlyWageRate / 100}/hr rate</span>
+			<span class="wage-rate-pill tabular">₹{workVal.hourlyWageRate / 100}/hr gig wage</span>
 		</div>
 
-		<p class="section-desc">
-			Every purchase costs life energy. Here is how your time converts this month:
+		<p class="card-desc">
+			Every purchase costs finite life energy. Here is how your time converts this month:
 		</p>
 
-		<div class="labor-stats-row">
-			<div class="labor-box spent">
-				<span class="labor-label">Labor Consumed in Spend</span>
-				<div class="labor-value">{workVal.laborHoursSpent}</div>
-				<span class="labor-sub">{formatCurrency($analytics.totalExpenseAmount)} spent</span>
+		<div class="labor-boxes-grid">
+			<div class="labor-stat-card spent">
+				<span class="l-stat-lbl">Labor Consumed in Spend</span>
+				<div class="l-stat-val tabular">{workVal.laborHoursSpent}</div>
+				<span class="l-stat-sub tabular">{formatCurrency($analytics.totalExpenseAmount)} outlaid</span>
 			</div>
 
-			<div class="labor-box saved">
-				<span class="labor-label">Labor Preserved in Goals</span>
-				<div class="labor-value text-success">{workVal.laborHoursSaved}</div>
-				<span class="labor-sub">{formatCurrency(workVal.totalSavedInGoals)} stashed</span>
+			<div class="labor-stat-card saved">
+				<span class="l-stat-lbl">Labor Preserved in Sinking Funds</span>
+				<div class="l-stat-val text-success tabular">{workVal.laborHoursSaved}</div>
+				<span class="l-stat-sub tabular">{formatCurrency(workVal.totalSavedInGoals)} stashed</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 4. Category Spending Breakdown -->
-	<div class="card category-breakdown-card">
-		<h2 class="card-title">Category Outflows ({categories.length})</h2>
+	<!-- 4. Category Outflows Ranking -->
+	<div class="card categories-card">
+		<h3 class="card-heading">Category Spending Ranks ({categories.length})</h3>
 
-		<div class="cat-list-stack">
+		<div class="categories-list">
 			{#each categories as cat (cat.id)}
-				<div class="cat-row-item">
-					<div class="cat-row-left">
-						<div class="cat-icon-wrap" style="background: {cat.color}20; color: {cat.color};">
-							<CategoryIcon icon={cat.icon} size={18} />
+				<div class="cat-rank-row">
+					<div class="cat-rank-left">
+						<div class="cat-icon-frame" style="background: {cat.color}20; color: {cat.color};">
+							<CategoryIcon icon={cat.icon} size={16} />
 						</div>
 						<div>
-							<div class="cat-name">{cat.name}</div>
-							<div class="cat-count">{cat.count} transactions</div>
+							<strong class="cat-name">{cat.name}</strong>
+							<span class="cat-count-sub">{cat.count} txns</span>
 						</div>
 					</div>
 
-					<div class="cat-row-right">
-						<div class="cat-amount">{formatCurrency(cat.total)}</div>
-						<div class="cat-pct-bar-wrap">
-							<div class="cat-pct-fill" style="width: {cat.percent}%; background: {cat.color};"></div>
+					<div class="cat-rank-right">
+						<div class="cat-total-amt tabular">{formatCurrency(cat.total)}</div>
+						<div class="cat-pct-track">
+							<div class="cat-pct-bar" style="width: {cat.percent}%; background: {cat.color};"></div>
 						</div>
 					</div>
 				</div>
-			{:else}
-				<div class="empty-cat">No expenses recorded for this month yet.</div>
 			{/each}
 		</div>
 	</div>
@@ -210,104 +197,107 @@
 
 <style>
 	.analytics-page {
-		max-width: 620px;
+		max-width: 680px;
 		margin: 0 auto;
-		padding: 0 16px 120px 16px;
-		animation: fadeIn 0.4s ease-out;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
 	}
 
 	.page-header {
-		margin-bottom: 20px;
-		padding-top: 8px;
+		margin-bottom: 0.25rem;
 	}
 
-	.eyebrow {
-		font-size: 0.76rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+	.campus-sub {
 		display: block;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-primary);
 		margin-bottom: 2px;
 	}
 
 	.page-title {
-		font-size: 1.75rem;
+		font-size: 1.65rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.5px;
+		letter-spacing: -0.04em;
+		margin: 0;
 	}
 
-	.card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 24px;
-		padding: 20px;
-		margin-bottom: 20px;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.card-header {
+	/* Card Base Layout */
+	.card-top-line {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 10px;
+		margin-bottom: 0.5rem;
 	}
 
-	.header-title-wrap {
+	.card-title-wrap {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.card-title {
-		font-size: 1.05rem;
+	.card-heading {
+		font-size: 1rem;
 		font-weight: 800;
 		color: var(--text-primary);
+		margin: 0;
 	}
 
-	.pill-badge {
-		font-size: 0.7rem;
-		font-weight: 700;
-		padding: 3px 8px;
-		border-radius: 9999px;
-		background: var(--bg-primary);
-		color: var(--text-muted);
+	.matrix-tag {
+		font-size: 0.68rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 2px 6px;
+		border-radius: var(--border-radius-pill);
+		color: var(--text-secondary);
 	}
 
-	.section-desc {
+	.card-desc {
 		font-size: 0.78rem;
 		color: var(--text-muted);
-		margin-bottom: 16px;
-		line-height: 1.4;
+		margin-bottom: 0.85rem;
+		line-height: 1.45;
 	}
 
-	/* Satisfaction Bar */
+	/* Emotional ROI */
+	.emotional-card {
+		padding: 1.35rem;
+	}
+
 	.satisfaction-bar {
 		display: flex;
-		height: 10px;
-		border-radius: 9999px;
-		background: var(--bg-primary);
+		height: 8px;
+		border-radius: var(--border-radius-pill);
 		overflow: hidden;
-		margin-bottom: 14px;
+		background: var(--surface-2);
+		margin-bottom: 0.85rem;
+		border: 1px solid var(--border-subtle);
 	}
 
 	.sat-fill.worth { background: #F59E0B; }
-	.sat-fill.neutral { background: var(--accent-primary); }
-	.sat-fill.regret { background: #FF3366; }
+	.sat-fill.neutral { background: var(--surface-3); }
+	.sat-fill.regret { background: #F43F5E; }
 
 	.satisfaction-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-bottom: 14px;
+		gap: 6px;
+		margin-bottom: 0.85rem;
 	}
 
 	.sat-box {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		padding: 12px 10px;
-		border-radius: 16px;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-sm);
+		padding: 0.75rem 0.5rem;
+		text-align: center;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
@@ -315,21 +305,22 @@
 
 	.sat-top {
 		display: flex;
-		justify-content: space-between;
+		justify-content: center;
 		align-items: center;
+		gap: 4px;
+		margin-bottom: 2px;
 	}
 
 	.sat-pct {
-		font-size: 0.85rem;
-		font-weight: 800;
-		color: var(--text-primary);
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--text-muted);
 	}
 
 	.sat-val {
 		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-top: 4px;
 	}
 
 	.sat-label {
@@ -337,152 +328,156 @@
 		color: var(--text-muted);
 	}
 
-	.regret-labor-alert {
-		background: rgba(255, 51, 102, 0.08);
-		border: 1px solid rgba(255, 51, 102, 0.2);
-		border-radius: 14px;
-		padding: 12px;
-		display: flex;
-		gap: 10px;
-		align-items: flex-start;
+	.regret-callout-banner {
+		background: rgba(244, 63, 94, 0.08);
+		border: 1px solid rgba(244, 63, 94, 0.25);
+		border-radius: var(--border-radius);
+		padding: 0.75rem 1rem;
 		font-size: 0.78rem;
 		color: var(--text-primary);
-		line-height: 1.4;
+		line-height: 1.45;
 	}
 
-	:global(.alert-icon) {
-		color: #FF3366;
-		flex-shrink: 0;
-		margin-top: 2px;
+	/* Value Split */
+	.value-split-card {
+		padding: 1.35rem;
 	}
 
-	/* Macro Split */
-	.macro-split-track {
+	.value-track {
 		display: flex;
-		height: 10px;
-		border-radius: 9999px;
-		background: var(--bg-primary);
+		height: 8px;
+		border-radius: var(--border-radius-pill);
 		overflow: hidden;
-		margin-bottom: 14px;
+		background: var(--surface-2);
+		margin-bottom: 0.85rem;
+		border: 1px solid var(--border-subtle);
 	}
 
-	.split-seg.need-seg { background: #2563EB; }
-	.split-seg.want-seg { background: #DB2777; }
-	.split-seg.growth-seg { background: #059669; }
+	.v-seg.need-seg { background: #10B981; }
+	.v-seg.want-seg { background: #38BDF8; }
+	.v-seg.growth-seg { background: #818CF8; }
 
 	.value-tags-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.vtag-item {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		padding: 12px 10px;
-		border-radius: 16px;
+	.vtag-box {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-sm);
+		padding: 0.75rem 0.5rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
+		text-align: center;
 	}
 
 	.vtag-header {
-		display: flex;
-		align-items: center;
-		gap: 4px;
 		font-size: 0.68rem;
 		font-weight: 700;
+		color: var(--text-muted);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
 	}
-
-	.need-tag .vtag-header { color: #2563EB; }
-	.want-tag .vtag-header { color: #DB2777; }
-	.growth-tag .vtag-header { color: #059669; }
 
 	.vtag-amount {
 		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-top: 4px;
 	}
 
 	.vtag-pct {
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		color: var(--text-muted);
 	}
 
-	/* Labor Valuation */
+	/* Labor Card */
+	.labor-card {
+		padding: 1.35rem;
+	}
+
 	.wage-rate-pill {
-		background: rgba(124, 58, 237, 0.1);
-		color: var(--accent-primary);
-		padding: 4px 10px;
-		border-radius: 9999px;
 		font-size: 0.72rem;
 		font-weight: 700;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 2px 8px;
+		border-radius: var(--border-radius-pill);
+		color: var(--accent-primary);
 	}
 
-	.labor-stats-row {
+	.labor-boxes-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 10px;
+		gap: 8px;
 	}
 
-	.labor-box {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		padding: 14px;
-		border-radius: 16px;
-		text-align: center;
+	.labor-stat-card {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius);
+		padding: 1rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 
-	.labor-label {
-		font-size: 0.7rem;
+	.l-stat-lbl {
+		font-size: 0.68rem;
 		font-weight: 700;
-		color: var(--text-muted);
 		text-transform: uppercase;
+		color: var(--text-muted);
 	}
 
-	.labor-value {
-		font-size: 1.35rem;
+	.l-stat-val {
+		font-size: 1.55rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.labor-sub {
+	.l-stat-sub {
 		font-size: 0.72rem;
 		color: var(--text-muted);
 	}
 
-	/* Category Stack */
-	.cat-list-stack {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		margin-top: 14px;
+	/* Categories Card */
+	.categories-card {
+		padding: 1.35rem;
 	}
 
-	.cat-row-item {
+	.categories-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-top: 0.85rem;
+	}
+
+	.cat-rank-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 10px 12px;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		border-radius: 16px;
+		padding: 0.5rem 0.25rem;
+		border-bottom: 1px solid var(--border-subtle);
 	}
 
-	.cat-row-left {
+	.cat-rank-row:last-child {
+		border-bottom: none;
+	}
+
+	.cat-rank-left {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
 	}
 
-	.cat-icon-wrap {
-		width: 36px;
-		height: 36px;
-		border-radius: 12px;
+	.cat-icon-frame {
+		width: 32px;
+		height: 32px;
+		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -490,43 +485,36 @@
 
 	.cat-name {
 		font-size: 0.88rem;
-		font-weight: 700;
 		color: var(--text-primary);
+		display: block;
 	}
 
-	.cat-count {
-		font-size: 0.7rem;
+	.cat-count-sub {
+		font-size: 0.68rem;
 		color: var(--text-muted);
 	}
 
-	.cat-row-right {
+	.cat-rank-right {
 		text-align: right;
-		width: 110px;
+		width: 140px;
 	}
 
-	.cat-amount {
+	.cat-total-amt {
 		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 4px;
+		margin-bottom: 3px;
 	}
 
-	.cat-pct-bar-wrap {
+	.cat-pct-track {
 		height: 4px;
-		background: var(--border-color);
-		border-radius: 9999px;
+		background: var(--surface-2);
+		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 	}
 
-	.cat-pct-fill {
+	.cat-pct-bar {
 		height: 100%;
-		border-radius: 9999px;
-	}
-
-	.empty-cat {
-		text-align: center;
-		padding: 20px;
-		color: var(--text-muted);
-		font-size: 0.82rem;
+		border-radius: var(--border-radius-pill);
 	}
 </style>

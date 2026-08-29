@@ -17,23 +17,15 @@
 		Trash2,
 		X,
 		Check,
-		AlertCircle,
-		ShieldCheck,
-		Sparkles,
 		Flame,
-		Coffee,
-		Zap,
-		TrendingUp,
-		Clock,
-		Smartphone
+		Smartphone,
+		RefreshCw
 	} from 'lucide-svelte';
-	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 
 	let showAddModal = $state(false);
 	let showToast = $state(false);
 	let toastMessage = $state('');
 
-	// Add Form State
 	let formName = $state('');
 	let formAmount = $state('');
 	let formCycle = $state<SubscriptionCycle>('monthly');
@@ -42,15 +34,13 @@
 	let formCategoryId = $state($categories[0]?.id || '');
 	let formIsEssential = $state(false);
 
-	// Micro-Habit Calculator State
-	let dailyHabitCost = $state(30); // ₹30/day default (chai/coffee)
+	let dailyHabitCost = $state(30);
 	let habitName = $state('Campus Chai / Coffee');
 
 	let habitMonthly = $derived(Math.round(dailyHabitCost * 30.4));
 	let habitAnnual = $derived(Math.round(dailyHabitCost * 365));
 	let habitCollegeYears = $derived(Math.round(dailyHabitCost * 365 * 4));
 
-	// Leakage vs Allowance Ratio
 	let leakageRatio = $derived(
 		$studentProfile.monthlyAllowance > 0
 			? Math.round(($subscriptionStats.monthlyTotal / $studentProfile.monthlyAllowance) * 100)
@@ -65,7 +55,7 @@
 	async function handleAddSubscription() {
 		const amount = parseFloat(formAmount);
 		if (!formName.trim() || isNaN(amount) || amount <= 0) {
-			showSuccessToast('Please enter a valid subscription name and amount');
+			showToastMessage('Please enter a valid name and amount');
 			return;
 		}
 
@@ -84,7 +74,7 @@
 			formName = '';
 			formAmount = '';
 			showAddModal = false;
-			showSuccessToast('Subscription added to radar!');
+			showToastMessage('Subscription added to radar! 📡');
 		} catch (err) {
 			console.error('Failed to add subscription:', err);
 		}
@@ -93,7 +83,7 @@
 	async function handleDeleteSub(id: string) {
 		if (confirm('Remove this subscription?')) {
 			await subscriptions.delete(id);
-			showSuccessToast('Subscription removed');
+			showToastMessage('Subscription removed');
 		}
 	}
 
@@ -110,7 +100,7 @@
 				isRecurring: true,
 				subscriptionId: sub.id
 			});
-			showSuccessToast(`Logged ${sub.name} renewal to expenses!`);
+			showToastMessage(`Logged ${sub.name} renewal to expenses! ⚡`);
 		} catch (err) {
 			console.error('Failed to log renewal:', err);
 		}
@@ -121,176 +111,169 @@
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
 		target.setHours(0, 0, 0, 0);
-		const diff = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-		return diff;
+		return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 	}
 
-	function showSuccessToast(message: string) {
-		toastMessage = message;
+	function showToastMessage(msg: string) {
+		toastMessage = msg;
 		showToast = true;
-		setTimeout(() => {
-			showToast = false;
-		}, 3000);
+		setTimeout(() => (showToast = false), 3000);
 	}
 </script>
 
-<div class="subscriptions-page">
+<div class="subs-page">
 	{#if showToast}
-		<div class="toast">{toastMessage}</div>
+		<div class="toast-pill">{toastMessage}</div>
 	{/if}
 
 	<div class="page-header">
 		<div>
-			<span class="eyebrow">Recurring Drain Audit</span>
+			<span class="campus-sub">Recurring Drain Audit</span>
 			<h1 class="page-title">Subscriptions Radar</h1>
 		</div>
 		<button class="add-sub-btn" onclick={() => (showAddModal = true)}>
-			<Plus size={18} />
+			<Plus size={16} />
 			<span>Add Sub</span>
 		</button>
 	</div>
 
-	<!-- 1. Recurring Leakage Hero Metric -->
-	<div class="leakage-hero-card">
-		<div class="hero-top">
+	<!-- Monthly Recurring Drain Hero -->
+	<div class="card drain-hero-card">
+		<div class="hero-top-row">
 			<div>
-				<span class="leakage-label">Monthly Auto-Debit Drain</span>
-				<div class="leakage-amount">{formatCurrency($subscriptionStats.monthlyTotal)}<span class="sub-freq">/ mo</span></div>
+				<span class="hero-label">Monthly Auto-Debit Drain</span>
+				<div class="hero-amount tabular">{formatCurrency($subscriptionStats.monthlyTotal)}<small>/ mo</small></div>
 			</div>
 			<div class="ratio-pill" class:ratio-warn={leakageRatio > 25}>
-				<Radio size={14} class="pulse-icon" />
-				<span><strong>{leakageRatio}%</strong> of allowance</span>
+				<Radio size={14} color="var(--accent-primary)" />
+				<span><strong class="tabular">{leakageRatio}%</strong> of allowance</span>
 			</div>
 		</div>
 
-		<div class="leakage-sub-grid">
-			<div class="sub-col">
-				<span class="col-lbl">Annualized Drain</span>
-				<span class="col-val">{formatCurrency($subscriptionStats.annualTotal)}/yr</span>
+		<div class="drain-sub-grid">
+			<div class="drain-stat-col">
+				<span class="d-stat-lbl">Annualized Drain</span>
+				<span class="d-stat-val tabular">{formatCurrency($subscriptionStats.annualTotal)}/yr</span>
 			</div>
-			<div class="sub-col">
-				<span class="col-lbl">Essential vs Fun</span>
-				<span class="col-val">{formatCurrency($subscriptionStats.essentialMonthly)} / {formatCurrency($subscriptionStats.discretionaryMonthly)}</span>
+			<div class="drain-stat-col">
+				<span class="d-stat-lbl">Essential vs Fun</span>
+				<span class="d-stat-val tabular">{formatCurrency($subscriptionStats.essentialMonthly)} / {formatCurrency($subscriptionStats.discretionaryMonthly)}</span>
 			</div>
-			<div class="sub-col">
-				<span class="col-lbl">Active Subs</span>
-				<span class="col-val">{$subscriptionStats.count} services</span>
+			<div class="drain-stat-col">
+				<span class="d-stat-lbl">Active Services</span>
+				<span class="d-stat-val tabular">{$subscriptionStats.count} subs</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 2. Micro-Habit Compounding Multiplier Calculator -->
-	<div class="habit-calculator-card">
-		<div class="calc-header">
+	<!-- Micro-Habit Compounding Calculator -->
+	<div class="card habit-calc-card">
+		<div class="calc-header-row">
 			<div class="calc-title-wrap">
-				<Flame size={20} class="text-accent" />
-				<h3 class="calc-title">Micro-Habit Compounding Radar</h3>
+				<Flame size={18} color="#F59E0B" />
+				<h3 class="calc-heading">Micro-Habit Compounding Radar</h3>
 			</div>
-			<span class="calc-tag">The Hidden Drain</span>
+			<span class="calc-badge">Silent Campus Drain</span>
 		</div>
-		<p class="calc-desc">Small daily campus habits seem harmless, but silently compound into massive fortunes:</p>
+		<p class="calc-desc">Small daily habits compound into massive college fortunes:</p>
 
-		<!-- Preset Habit Buttons -->
-		<div class="preset-chips">
-			<button class="preset-chip" class:active={dailyHabitCost === 20} onclick={() => setPresetHabit('Canteen Chai', 20)}>
+		<!-- Habit Presets -->
+		<div class="habit-chips-row">
+			<button class="habit-chip" class:active={dailyHabitCost === 20} onclick={() => setPresetHabit('Canteen Chai', 20)}>
 				☕ Chai (₹20/d)
 			</button>
-			<button class="preset-chip" class:active={dailyHabitCost === 60} onclick={() => setPresetHabit('Iced Latte / Boba', 60)}>
+			<button class="habit-chip" class:active={dailyHabitCost === 60} onclick={() => setPresetHabit('Iced Latte / Boba', 60)}>
 				🧋 Boba (₹60/d)
 			</button>
-			<button class="preset-chip" class:active={dailyHabitCost === 120} onclick={() => setPresetHabit('Late Swiggy Snack', 120)}>
+			<button class="habit-chip" class:active={dailyHabitCost === 120} onclick={() => setPresetHabit('Late Swiggy Snack', 120)}>
 				🍟 Swiggy (₹120/d)
 			</button>
-			<button class="preset-chip" class:active={dailyHabitCost === 80} onclick={() => setPresetHabit('Vape / Smoking', 80)}>
+			<button class="habit-chip" class:active={dailyHabitCost === 80} onclick={() => setPresetHabit('Vape / Puff', 80)}>
 				💨 Vape (₹80/d)
 			</button>
 		</div>
 
-		<!-- Interactive Custom Amount Slider -->
-		<div class="habit-slider-row">
-			<div class="slider-info">
+		<!-- Daily Slider -->
+		<div class="habit-slider-container">
+			<div class="slider-val-line">
 				<span>Daily Cost:</span>
-				<strong>₹{dailyHabitCost}/day</strong>
+				<strong class="tabular">₹{dailyHabitCost}/day</strong>
 			</div>
-			<input type="range" min="10" max="300" step="5" bind:value={dailyHabitCost} />
+			<input type="range" min="10" max="300" step="5" bind:value={dailyHabitCost} class="range-slider" />
 		</div>
 
-		<!-- Compounding Projection Cards -->
-		<div class="compound-results-grid">
-			<div class="res-card">
-				<span class="res-time">1 Month</span>
-				<span class="res-amount">₹{habitMonthly.toLocaleString('en-IN')}</span>
-				<span class="res-sub">1 good textbook</span>
+		<!-- 3 Horizon Cards -->
+		<div class="horizon-cards-grid">
+			<div class="horizon-card">
+				<span class="h-time">1 Month</span>
+				<span class="h-amount tabular">₹{habitMonthly.toLocaleString('en-IN')}</span>
+				<span class="h-sub">1 textbook</span>
 			</div>
-			<div class="res-card">
-				<span class="res-time">1 Year</span>
-				<span class="res-amount text-warning">₹{habitAnnual.toLocaleString('en-IN')}</span>
-				<span class="res-sub">1 Goa road trip</span>
+			<div class="horizon-card">
+				<span class="h-time">1 Year</span>
+				<span class="h-amount text-warning tabular">₹{habitAnnual.toLocaleString('en-IN')}</span>
+				<span class="h-sub">1 Goa road trip</span>
 			</div>
-			<div class="res-card highlight">
-				<span class="res-time">4-Year Degree</span>
-				<span class="res-amount text-danger">₹{habitCollegeYears.toLocaleString('en-IN')}</span>
-				<span class="res-sub">1 New MacBook / Bike!</span>
+			<div class="horizon-card highlight">
+				<span class="h-time">4-Year Degree</span>
+				<span class="h-amount text-danger tabular">₹{habitCollegeYears.toLocaleString('en-IN')}</span>
+				<span class="h-sub">New MacBook / Bike!</span>
 			</div>
 		</div>
 	</div>
 
-	<!-- 3. Active Subscriptions List -->
-	<div class="subs-section">
-		<h2 class="section-title">Active Subscriptions ({$subscriptionStats.count})</h2>
+	<!-- Active Subscriptions List -->
+	<div class="card subs-ledger-card">
+		<h2 class="card-heading">Active Subscriptions ({$subscriptionStats.count})</h2>
 
-		<div class="subs-grid">
+		<div class="subs-grid-list">
 			{#each $subscriptions as sub (sub.id)}
 				{@const days = getDaysUntilRenewal(sub.nextRenewalDate)}
-				{@const cat = $categories.find(c => c.id === sub.categoryId)}
-				<div class="sub-card-item" class:inactive={!sub.active}>
-					<div class="sub-card-top">
-						<div class="sub-info-col">
+				<div class="sub-item-card">
+					<div class="sub-card-header">
+						<div class="sub-identity-group">
 							<div class="sub-icon-badge">
-								<Smartphone size={20} />
+								<Smartphone size={16} color="var(--accent-primary)" />
 							</div>
 							<div>
-								<div class="sub-name">{sub.name}</div>
-								<div class="sub-cycle-text">{sub.billingCycle} • {sub.isEssential ? '🛡️ Essential' : '✨ Nice-to-have'}</div>
+								<h3 class="sub-name">{sub.name}</h3>
+								<span class="sub-cycle-lbl">{sub.billingCycle} • {sub.isEssential ? '⚡ Essential' : '✨ Discretionary'}</span>
 							</div>
 						</div>
 
-						<div class="sub-amount-col">
-							<div class="sub-price">{formatCurrency(sub.amount)}</div>
-							<div class="sub-renewal-pill" class:due-soon={days <= 3 && days >= 0} class:overdue={days < 0}>
-								<Calendar size={12} />
-								{#if days < 0}
-									<span>Passed ({Math.abs(days)}d ago)</span>
-								{:else if days === 0}
-									<span>Renews Today!</span>
-								{:else}
-									<span>Renews in {days}d</span>
-								{/if}
-							</div>
+						<div class="sub-cost-val tabular">
+							{formatCurrency(sub.amount)}
 						</div>
 					</div>
 
-					<div class="sub-card-actions">
-						<button class="sub-action-btn log" onclick={() => handleQuickLogExpense(sub)}>
-							<Check size={13} />
-							<span>Auto-Log Expense</span>
-						</button>
-						<button class="sub-action-btn del" onclick={() => handleDeleteSub(sub.id)}>
-							<Trash2 size={13} />
-						</button>
+					<div class="sub-footer-line">
+						<div class="renewal-countdown" class:soon={days <= 3}>
+							<Calendar size={12} />
+							<span>{days > 0 ? `Renews in ${days} days` : days === 0 ? 'Renews today!' : 'Overdue for renewal'}</span>
+						</div>
+
+						<div class="sub-actions-row">
+							<button class="quick-log-renewal-btn" title="Log this renewal into expenses" onclick={() => handleQuickLogExpense(sub)}>
+								<RefreshCw size={12} />
+								<span>Log Bill</span>
+							</button>
+							<button class="delete-sub-btn" onclick={() => handleDeleteSub(sub.id)} aria-label="Delete subscription">
+								<Trash2 size={13} />
+							</button>
+						</div>
 					</div>
 				</div>
 			{:else}
-				<div class="empty-subs-card">
-					<Radio size={32} class="empty-icon" />
-					<p>No active subscriptions tracked. Keep your fixed leaks near zero!</p>
+				<div class="empty-subs">
+					<Radio size={32} color="var(--text-muted)" />
+					<p>No active subscriptions tracked yet.</p>
 				</div>
 			{/each}
 		</div>
 	</div>
 </div>
 
-<!-- Add Subscription Modal -->
+<!-- Add Subscription Bottom Sheet -->
 {#if showAddModal}
 	<div
 		class="modal-backdrop"
@@ -307,598 +290,493 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
-				<h3 class="modal-title">Track Recurring Subscription</h3>
+			<div class="sheet-top-row">
+				<h3>Add Subscription to Radar</h3>
 				<button class="close-btn" onclick={() => (showAddModal = false)}>✕</button>
 			</div>
 
-			<div class="modal-form-stack">
-				<div class="form-row">
-					<div class="field-col flex-2">
-						<label for="sub-name">Service / App Name *</label>
-						<input id="sub-name" type="text" placeholder="e.g. Spotify Student, Netflix, WiFi" bind:value={formName} />
-					</div>
-					<div class="field-col flex-1">
-						<label for="sub-amount">Amount (₹) *</label>
-						<input id="sub-amount" type="number" placeholder="149" bind:value={formAmount} step="1" min="0" />
-					</div>
-				</div>
-
-				<div class="form-row">
-					<div class="field-col flex-1">
-						<label for="sub-cycle">Billing Frequency</label>
-						<select id="sub-cycle" bind:value={formCycle}>
-							<option value="monthly">Monthly</option>
-							<option value="quarterly">Quarterly (3 Mo)</option>
-							<option value="annual">Annual (12 Mo)</option>
-							<option value="weekly">Weekly</option>
-						</select>
-					</div>
-					<div class="field-col flex-1">
-						<label for="sub-date">Next Renewal Date</label>
-						<input id="sub-date" type="date" bind:value={formNextDate} />
-					</div>
-				</div>
-
-				<div class="form-row">
-					<div class="field-col flex-1">
-						<label for="sub-wallet">Auto-Debit Wallet</label>
-						<select id="sub-wallet" bind:value={formWalletId}>
-							{#each $wallets as w}
-								<option value={w.id}>{w.name}</option>
-							{/each}
-						</select>
-					</div>
-				</div>
-
-				<label class="checkbox-row">
-					<input type="checkbox" bind:checked={formIsEssential} />
-					<span>This is an Essential requirement (e.g. WiFi, Phone SIM, Course)</span>
-				</label>
-
-				<div class="modal-actions">
-					<button class="secondary-btn" onclick={() => (showAddModal = false)}>Cancel</button>
-					<button class="primary-btn" onclick={handleAddSubscription}>Save to Radar</button>
-				</div>
+			<div class="form-group-custom">
+				<label for="sub-n">Service / Subscription Name</label>
+				<input id="sub-n" type="text" placeholder="Spotify, Netflix, Hostel WiFi..." bind:value={formName} />
 			</div>
+
+			<div class="form-group-custom">
+				<label for="sub-a">Renewal Cost (₹)</label>
+				<input id="sub-a" type="number" placeholder="179" bind:value={formAmount} class="tabular" />
+			</div>
+
+			<div class="form-group-custom">
+				<label for="sub-c">Billing Cycle</label>
+				<select id="sub-c" bind:value={formCycle}>
+					<option value="monthly">Monthly</option>
+					<option value="quarterly">Quarterly</option>
+					<option value="annual">Annual</option>
+					<option value="weekly">Weekly</option>
+				</select>
+			</div>
+
+			<div class="form-group-custom">
+				<label for="sub-d">Next Renewal Date</label>
+				<input id="sub-d" type="date" bind:value={formNextDate} />
+			</div>
+
+			<label class="essential-check-label">
+				<input type="checkbox" bind:checked={formIsEssential} />
+				<span>Essential necessity (e.g. WiFi, SIM Plan)</span>
+			</label>
+
+			<button class="primary-btn-full" onclick={handleAddSubscription}>
+				Activate on Radar
+			</button>
 		</div>
 	</div>
 {/if}
 
 <style>
-	.subscriptions-page {
-		max-width: 620px;
+	.subs-page {
+		max-width: 680px;
 		margin: 0 auto;
-		padding: 0 16px 120px 16px;
-		animation: fadeIn 0.4s ease-out;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
+	}
+
+	.toast-pill {
+		position: fixed;
+		top: 1.25rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #10B981;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.85rem;
+		padding: 0.55rem 1.25rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: var(--shadow-lg);
+		z-index: 10000;
 	}
 
 	.page-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 20px;
-		padding-top: 8px;
 	}
 
-	.eyebrow {
-		font-size: 0.76rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+	.campus-sub {
 		display: block;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-primary);
 		margin-bottom: 2px;
 	}
 
 	.page-title {
-		font-size: 1.75rem;
+		font-size: 1.65rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.5px;
+		letter-spacing: -0.04em;
+		margin: 0;
 	}
 
 	.add-sub-btn {
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 9px 16px;
-		border-radius: 9999px;
-		font-weight: 700;
-		font-size: 0.82rem;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		box-shadow: 0 4px 15px var(--accent-glow);
-		cursor: pointer;
+		background: var(--accent-primary);
+		color: #080C14;
+		padding: 0.55rem 1rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
+		font-weight: 700;
+		box-shadow: 0 4px 14px var(--accent-glow);
 	}
 
-	/* Leakage Hero Card */
-	.leakage-hero-card {
-		background: var(--hero-gradient);
-		border-radius: 26px;
-		padding: 22px;
-		color: white;
-		margin-bottom: 20px;
-		box-shadow: 0 15px 35px rgba(31, 38, 135, 0.3);
+	/* Drain Hero Card */
+	.drain-hero-card {
+		padding: 1.35rem;
+		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
-	.hero-top {
+	.hero-top-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		margin-bottom: 18px;
+		margin-bottom: 1.15rem;
 	}
 
-	.leakage-label {
-		font-size: 0.78rem;
-		font-weight: 600;
-		opacity: 0.8;
+	.hero-label {
+		font-size: 0.72rem;
+		font-weight: 700;
 		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
 	}
 
-	.leakage-amount {
-		font-size: 2.2rem;
+	.hero-amount {
+		font-size: 2rem;
 		font-weight: 800;
-		letter-spacing: -0.5px;
-		display: flex;
-		align-items: baseline;
-		gap: 4px;
+		color: var(--text-primary);
+		line-height: 1.1;
 	}
 
-	.sub-freq {
-		font-size: 0.85rem;
-		opacity: 0.7;
+	.hero-amount small {
+		font-size: 0.88rem;
+		font-weight: 600;
+		color: var(--text-muted);
 	}
 
 	.ratio-pill {
-		background: rgba(255, 255, 255, 0.15);
-		border: 1px solid rgba(255, 255, 255, 0.2);
-		padding: 6px 12px;
-		border-radius: 9999px;
-		font-size: 0.76rem;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		backdrop-filter: blur(10px);
+		gap: 5px;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 0.35rem 0.75rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.76rem;
+		color: var(--text-secondary);
 	}
 
 	.ratio-warn {
-		background: rgba(255, 51, 102, 0.25);
-		border-color: #FF3366;
+		border-color: var(--danger-border);
+		color: var(--danger);
 	}
 
-	.leakage-sub-grid {
+	.drain-sub-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 12px;
-		border-top: 1px solid rgba(255, 255, 255, 0.15);
-		padding-top: 14px;
+		gap: 0.65rem;
+		border-top: 1px solid var(--border-subtle);
+		padding-top: 0.85rem;
 	}
 
-	.sub-col {
+	.drain-stat-col {
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 
-	.col-lbl {
-		font-size: 0.7rem;
-		opacity: 0.75;
+	.d-stat-lbl {
+		font-size: 0.65rem;
+		font-weight: 700;
 		text-transform: uppercase;
+		color: var(--text-muted);
 	}
 
-	.col-val {
-		font-size: 0.92rem;
+	.d-stat-val {
+		font-size: 0.84rem;
 		font-weight: 700;
+		color: var(--text-primary);
 	}
 
 	/* Habit Calculator */
-	.habit-calculator-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 24px;
-		padding: 20px;
-		margin-bottom: 24px;
-		box-shadow: var(--shadow-sm);
+	.habit-calc-card {
+		padding: 1.35rem;
 	}
 
-	.calc-header {
+	.calc-header-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 6px;
+		margin-bottom: 0.35rem;
 	}
 
 	.calc-title-wrap {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.calc-title {
-		font-size: 1rem;
+	.calc-heading {
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
+		margin: 0;
 	}
 
-	.calc-tag {
-		font-size: 0.7rem;
-		font-weight: 700;
-		padding: 3px 8px;
-		border-radius: 9999px;
-		background: rgba(245, 158, 11, 0.12);
-		color: #D97706;
+	.calc-badge {
+		font-size: 0.68rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		background: rgba(245, 158, 11, 0.15);
+		color: #F59E0B;
+		padding: 2px 6px;
+		border-radius: var(--border-radius-pill);
 	}
 
 	.calc-desc {
 		font-size: 0.78rem;
 		color: var(--text-muted);
-		margin-bottom: 14px;
+		margin-bottom: 0.75rem;
 	}
 
-	.preset-chips {
+	.habit-chips-row {
 		display: flex;
 		gap: 6px;
 		overflow-x: auto;
-		padding-bottom: 6px;
-		margin-bottom: 14px;
+		padding-bottom: 4px;
+		margin-bottom: 0.85rem;
 	}
 
-	.preset-chip {
-		padding: 6px 12px;
-		border-radius: 9999px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		font-size: 0.76rem;
+	.habit-chip {
+		padding: 0.35rem 0.75rem;
+		border-radius: var(--border-radius-pill);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		font-size: 0.74rem;
 		font-weight: 700;
 		color: var(--text-secondary);
-		cursor: pointer;
 		white-space: nowrap;
-		transition: all 0.2s;
 	}
 
-	.preset-chip.active {
-		background: var(--accent-primary);
-		color: white;
-		border-color: var(--accent-primary);
+	.habit-chip.active {
+		background: var(--text-primary);
+		color: var(--bg-primary);
+		border-color: var(--text-primary);
 	}
 
-	.habit-slider-row {
-		background: var(--bg-primary);
-		padding: 12px 14px;
-		border-radius: 16px;
-		border: 1px solid var(--border-color);
-		margin-bottom: 14px;
+	.habit-slider-container {
+		background: var(--surface-2);
+		border-radius: var(--border-radius);
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--border-subtle);
+		margin-bottom: 0.85rem;
 	}
 
-	.slider-info {
+	.slider-val-line {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.82rem;
-		margin-bottom: 6px;
-		color: var(--text-primary);
+		font-size: 0.78rem;
+		margin-bottom: 0.35rem;
 	}
 
-	.habit-slider-row input[type='range'] {
+	.range-slider {
 		width: 100%;
 		accent-color: var(--accent-primary);
 	}
 
-	.compound-results-grid {
+	.horizon-cards-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.res-card {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		padding: 10px;
-		border-radius: 14px;
+	.horizon-card {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-sm);
+		padding: 0.65rem 0.5rem;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 
-	.res-card.highlight {
-		border-color: var(--accent-primary);
-		background: rgba(124, 58, 237, 0.06);
+	.horizon-card.highlight {
+		border-color: var(--danger-border);
+		background: rgba(244, 63, 94, 0.05);
 	}
 
-	.res-time {
+	.h-time {
 		font-size: 0.68rem;
 		font-weight: 700;
-		color: var(--text-muted);
 		text-transform: uppercase;
+		color: var(--text-muted);
 	}
 
-	.res-amount {
-		font-size: 1.05rem;
+	.h-amount {
+		font-size: 1rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.res-sub {
+	.h-sub {
 		font-size: 0.65rem;
 		color: var(--text-muted);
 	}
 
-	/* Subs List */
-	.subs-section {
-		margin-top: 10px;
+	/* Subs Ledger */
+	.subs-ledger-card {
+		padding: 1.35rem;
 	}
 
-	.section-title {
-		font-size: 1.05rem;
+	.card-heading {
+		font-size: 1rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 12px;
+		margin-bottom: 1rem;
 	}
 
-	.subs-grid {
+	.subs-grid-list {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 0.75rem;
 	}
 
-	.sub-card-item {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 20px;
-		padding: 16px;
-		box-shadow: var(--shadow-sm);
+	.sub-item-card {
+		background: var(--surface-2);
+		border-radius: var(--border-radius);
+		padding: 0.95rem;
+		border: 1px solid var(--border-subtle);
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
 	}
 
-	.sub-card-top {
+	.sub-card-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-start;
-		margin-bottom: 12px;
+		align-items: center;
 	}
 
-	.sub-info-col {
+	.sub-identity-group {
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 8px;
 	}
 
 	.sub-icon-badge {
-		width: 42px;
-		height: 42px;
-		border-radius: 14px;
-		background: var(--bg-primary);
+		width: 34px;
+		height: 34px;
+		border-radius: var(--border-radius-xs);
+		background: var(--bg-card);
+		border: 1px solid var(--border-subtle);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--accent-primary);
 	}
 
 	.sub-name {
+		font-size: 0.92rem;
 		font-weight: 800;
-		font-size: 0.98rem;
 		color: var(--text-primary);
+		margin: 0;
 	}
 
-	.sub-cycle-text {
-		font-size: 0.75rem;
-		color: var(--text-muted);
-		text-transform: capitalize;
-	}
-
-	.sub-amount-col {
-		text-align: right;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		gap: 4px;
-	}
-
-	.sub-price {
-		font-weight: 800;
-		font-size: 1.1rem;
-		color: var(--text-primary);
-	}
-
-	.sub-renewal-pill {
+	.sub-cycle-lbl {
 		font-size: 0.7rem;
-		font-weight: 700;
-		padding: 3px 8px;
-		border-radius: 9999px;
-		background: var(--bg-primary);
-		color: var(--text-secondary);
-		display: flex;
-		align-items: center;
-		gap: 4px;
-	}
-
-	.sub-renewal-pill.due-soon {
-		background: rgba(245, 158, 11, 0.15);
-		color: #D97706;
-	}
-
-	.sub-renewal-pill.overdue {
-		background: rgba(255, 51, 102, 0.15);
-		color: #FF3366;
-	}
-
-	.sub-card-actions {
-		display: flex;
-		gap: 8px;
-		border-top: 1px solid var(--border-color);
-		padding-top: 10px;
-		justify-content: flex-end;
-	}
-
-	.sub-action-btn {
-		padding: 6px 12px;
-		border-radius: 10px;
-		font-size: 0.74rem;
-		font-weight: 700;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		gap: 4px;
-	}
-
-	.sub-action-btn.log {
-		background: var(--accent-primary);
-		color: white;
-		border: none;
-	}
-
-	.sub-action-btn.del {
-		background: transparent;
-		border: 1px solid var(--border-color);
-		color: var(--danger);
-	}
-
-	.empty-subs-card {
-		text-align: center;
-		padding: 40px 20px;
-		background: var(--bg-card);
-		border-radius: 20px;
-		border: 1px dashed var(--border-color);
 		color: var(--text-muted);
 	}
 
-	/* Modal */
-	.modal-backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.65);
-		backdrop-filter: blur(5px);
-		z-index: 1000;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
+	.sub-cost-val {
+		font-size: 1.05rem;
+		font-weight: 800;
+		color: var(--text-primary);
 	}
 
-	.modal-sheet {
-		background: var(--bg-card);
-		border-radius: 28px 28px 0 0;
-		padding: 24px;
-		width: 100%;
-		max-width: 600px;
-		max-height: 85vh;
-		overflow-y: auto;
-		border: 1px solid var(--border-color);
-	}
-
-	.modal-header {
+	.sub-footer-line {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16px;
+		border-top: 1px solid var(--border-subtle);
+		padding-top: 0.5rem;
 	}
 
-	.modal-title {
-		font-size: 1.15rem;
-		font-weight: 800;
-		color: var(--text-primary);
-	}
-
-	.close-btn {
-		background: transparent;
-		border: none;
-		font-size: 1.2rem;
-		color: var(--text-muted);
-		cursor: pointer;
-	}
-
-	.modal-form-stack {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-	}
-
-	.form-row {
-		display: flex;
-		gap: 10px;
-	}
-
-	.field-col {
-		display: flex;
-		flex-direction: column;
+	.renewal-countdown {
+		display: inline-flex;
+		align-items: center;
 		gap: 4px;
-	}
-
-	.flex-2 { flex: 2; }
-	.flex-1 { flex: 1; }
-
-	label {
 		font-size: 0.72rem;
-		font-weight: 700;
 		color: var(--text-muted);
-		text-transform: uppercase;
 	}
 
-	input, select {
-		padding: 10px 14px;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		color: var(--text-primary);
-		font-size: 0.88rem;
-		font-weight: 600;
+	.renewal-countdown.soon {
+		color: var(--warning);
+		font-weight: 700;
 	}
 
-	input:focus, select:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-	}
-
-	.checkbox-row {
+	.sub-actions-row {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		font-size: 0.8rem;
-		color: var(--text-secondary);
-		cursor: pointer;
-		font-weight: 600;
+		gap: 6px;
 	}
 
-	.modal-actions {
-		display: flex;
-		gap: 10px;
-		margin-top: 10px;
-	}
-
-	.secondary-btn {
-		flex: 1;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
+	.quick-log-renewal-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		background: var(--bg-card);
+		border: 1px solid var(--border-subtle);
 		color: var(--text-primary);
-		padding: 12px;
-		border-radius: 14px;
+		font-size: 0.72rem;
 		font-weight: 700;
-		cursor: pointer;
+		padding: 0.25rem 0.55rem;
+		border-radius: var(--border-radius-pill);
 	}
 
-	.primary-btn {
-		flex: 2;
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 12px;
-		border-radius: 14px;
+	.delete-sub-btn {
+		color: var(--text-muted);
+		background: transparent;
+		padding: 3px;
+	}
+
+	.delete-sub-btn:hover {
+		color: var(--danger);
+	}
+
+	.empty-subs {
+		text-align: center;
+		padding: 2.5rem 1rem;
+		color: var(--text-muted);
+		font-size: 0.84rem;
+	}
+
+	/* Sheet */
+	.sheet-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.15rem;
+	}
+
+	.sheet-top-row h3 {
+		font-size: 1.15rem;
 		font-weight: 800;
-		cursor: pointer;
 	}
 
-	.toast {
-		position: fixed;
-		top: 24px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: var(--accent-primary);
-		color: white;
-		padding: 10px 20px;
-		border-radius: 9999px;
-		font-size: 0.85rem;
+	.form-group-custom {
+		margin-bottom: 1rem;
+	}
+
+	.form-group-custom label {
+		display: block;
+		font-size: 0.76rem;
 		font-weight: 700;
-		box-shadow: var(--shadow-md);
-		z-index: 1001;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
+		margin-bottom: 0.35rem;
+	}
+
+	.essential-check-label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.82rem;
+		color: var(--text-primary);
+		cursor: pointer;
+		margin-bottom: 1rem;
+		text-transform: none;
+		letter-spacing: normal;
+	}
+
+	.essential-check-label input {
+		width: 16px;
+		height: 16px;
+		min-height: auto;
+	}
+
+	.primary-btn-full {
+		width: 100%;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.95rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
 	}
 </style>

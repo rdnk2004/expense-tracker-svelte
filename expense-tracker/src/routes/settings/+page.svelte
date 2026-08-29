@@ -22,15 +22,12 @@
 		Upload,
 		Lock,
 		FolderOpen,
-		TriangleAlert,
 		Trash2,
 		X,
 		Moon,
 		Sun,
 		Award,
 		GraduationCap,
-		Clock,
-		Coins,
 		Check,
 		Sparkles
 	} from 'lucide-svelte';
@@ -38,7 +35,6 @@
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import { loadStudentDemoData } from '$lib/utils/mockData';
 
-	// UI State
 	let showToast = $state(false);
 	let toastMessage = $state('');
 	let showResetModal = $state(false);
@@ -47,9 +43,8 @@
 	let importFileInput: HTMLInputElement;
 	let importPreview = $state<any>(null);
 
-	let theme = $state<'light' | 'dark'>('light');
+	let theme = $state<'light' | 'dark'>('dark');
 
-	// Student Profile Form State
 	let editAllowance = $state('');
 	let editDay = $state('1');
 	let editWage = $state('200');
@@ -70,7 +65,7 @@
 		const wage = parseFloat(editWage);
 
 		if (isNaN(allowance) || allowance < 0) {
-			showSuccessToast('Please enter a valid allowance');
+			showToastMessage('Please enter a valid allowance');
 			return;
 		}
 
@@ -81,24 +76,23 @@
 			collegeName: editCollege.trim() || undefined
 		});
 
-		showSuccessToast('Student profile updated!');
+		showToastMessage('Student profile & runway recalibrated! 🎓');
 	}
 
 	async function handleLoadDemo() {
-		if (confirm('Load realistic college student demo data? This will populate the app with authentic campus allowance, subscriptions, sinking funds, debts, and expenses.')) {
+		if (confirm('Load authentic college student demo data? (Includes realistic UPI wallets, chai habits, group splits, and semester trip goals)')) {
 			try {
 				await loadStudentDemoData();
-				showSuccessToast('College demo data loaded successfully! 🎓');
+				showToastMessage('College demo data loaded successfully! 🎓');
 				goto('/');
 			} catch (err) {
 				console.error(err);
-				showSuccessToast('Failed to load demo data');
+				showToastMessage('Failed to load demo data');
 			}
 		}
 	}
 
 	onMount(() => {
-		// Initialize theme state
 		const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
 		if (savedTheme) {
 			theme = savedTheme;
@@ -112,32 +106,19 @@
 		document.documentElement.setAttribute('data-theme', theme);
 		localStorage.setItem('theme', theme);
 	}
+
 	let totalExpensesCount = $derived($expenses.length);
 	let totalDebtsCount = $derived($debts.length);
 	let totalTransfersCount = $derived($transfers.length);
 	let totalBudgetsCount = $derived($budgets.length);
 
-	let dateRange = $derived(() => {
-		const allDates = [
-			...$expenses.map((e) => new Date(e.date)),
-			...$debts.map((d) => new Date(d.date))
-		].sort((a, b) => a.getTime() - b.getTime());
-
-		if (allDates.length === 0) return null;
-
-		return {
-			first: allDates[0].toLocaleDateString(),
-			last: allDates[allDates.length - 1].toLocaleDateString()
-		};
-	});
-
 	async function handleExportData() {
 		try {
 			await exportData();
-			showSuccessToast('Data exported successfully!');
+			showToastMessage('Data exported successfully! 💾');
 		} catch (error) {
 			console.error('Export failed:', error);
-			showSuccessToast('Export failed ❌');
+			showToastMessage('Export failed ❌');
 		}
 	}
 
@@ -155,12 +136,10 @@
 			const text = await file.text();
 			const data = JSON.parse(text);
 
-			// Validate data structure
 			if (!data.expenses || !data.wallets || !data.categories) {
 				throw new Error('Invalid data format');
 			}
 
-			// Set preview
 			importPreview = {
 				expenses: data.expenses?.length || 0,
 				wallets: data.wallets?.length || 0,
@@ -173,10 +152,9 @@
 			showImportModal = true;
 		} catch (error) {
 			console.error('Failed to parse file:', error);
-			showSuccessToast('Invalid file format ❌');
+			showToastMessage('Invalid file format ❌');
 		}
 
-		// Reset input
 		target.value = '';
 	}
 
@@ -190,10 +168,10 @@
 
 			showImportModal = false;
 			importPreview = null;
-			showSuccessToast('Data imported successfully!');
+			showToastMessage('Data imported successfully! ⚡');
 		} catch (error) {
 			console.error('Import failed:', error);
-			showSuccessToast('Import failed ❌');
+			showToastMessage('Import failed ❌');
 		}
 	}
 
@@ -204,7 +182,7 @@
 
 	async function confirmReset() {
 		if (resetConfirmText !== 'DELETE') {
-			showSuccessToast('Please type DELETE to confirm ❌');
+			showToastMessage('Please type DELETE to confirm ❌');
 			return;
 		}
 
@@ -212,918 +190,561 @@
 			await clearAllData();
 			showResetModal = false;
 			resetConfirmText = '';
-			showSuccessToast('All data cleared successfully!');
+			showToastMessage('All data reset to blank state!');
 		} catch (error) {
 			console.error('Reset failed:', error);
-			showSuccessToast('Reset failed ❌');
+			showToastMessage('Reset failed ❌');
 		}
 	}
 
 	function handleLockApp() {
 		lockApp();
-		showSuccessToast('App locked');
+		showToastMessage('App locked');
 		setTimeout(() => {
 			goto('/login');
 		}, 1000);
 	}
 
-	function showSuccessToast(message: string) {
-		toastMessage = message;
+	function showToastMessage(msg: string) {
+		toastMessage = msg;
 		showToast = true;
-		setTimeout(() => {
-			showToast = false;
-		}, 3000);
+		setTimeout(() => (showToast = false), 3000);
 	}
 </script>
 
 <div class="settings-page">
-	<!-- Toast Notification -->
 	{#if showToast}
-		<div class="toast">{toastMessage}</div>
+		<div class="toast-pill">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">
-		<Settings class="inline-icon" size={32} /> Settings
-	</h1>
+	<div class="page-header">
+		<div>
+			<span class="campus-sub">System Engine</span>
+			<h1 class="page-title">Settings & Profile</h1>
+		</div>
+	</div>
 
-	<!-- Appearance Section -->
-	<div class="section">
-		<h2 class="section-title">
-			<Sun class="inline-icon" size={20} /> Appearance
-		</h2>
-		<p class="section-description">Customize the look and feel of the application.</p>
-		<div class="appearance-row">
-			<div class="appearance-label-group">
-				<span class="label-main">Dark Mode</span>
-				<span class="label-sub">Switch between light and dark themes</span>
+	<!-- 1. Student Financial Profile Card -->
+	<div class="card profile-card">
+		<div class="card-header-line">
+			<div class="c-title-wrap">
+				<GraduationCap size={20} color="var(--accent-primary)" />
+				<h3 class="card-heading">Campus Student Profile</h3>
 			</div>
-			<button
-				class="toggle-switch"
-				class:checked={theme === 'dark'}
-				onclick={toggleTheme}
-				aria-label="Toggle dark mode"
-				role="switch"
-				aria-checked={theme === 'dark'}
-			>
-				<div class="toggle-thumb">
-					{#if theme === 'dark'}
-						<Moon size={12} color="#000" />
-					{:else}
-						<Sun size={12} color="#FDB813" />
-					{/if}
-				</div>
+			<button class="demo-pill-btn" onclick={handleLoadDemo}>
+				<Sparkles size={13} />
+				<span>Load Demo Data</span>
+			</button>
+		</div>
+		<p class="card-desc">
+			Configures your monthly allowance cadence and hourly campus gig rate to calculate the daily Safe-to-Spend runway.
+		</p>
+
+		<div class="form-grid-two">
+			<div class="form-col">
+				<label for="p-allowance">Monthly Allowance (₹)</label>
+				<input id="p-allowance" type="number" bind:value={editAllowance} placeholder="10000" class="tabular" />
+			</div>
+
+			<div class="form-col">
+				<label for="p-day">Cycle Reset Day (1-31)</label>
+				<input id="p-day" type="number" min="1" max="31" bind:value={editDay} placeholder="1" class="tabular" />
+			</div>
+		</div>
+
+		<div class="form-grid-two">
+			<div class="form-col">
+				<label for="p-wage">Hourly Freelance / Gig Rate (₹/hr)</label>
+				<input id="p-wage" type="number" bind:value={editWage} placeholder="200" class="tabular" />
+			</div>
+
+			<div class="form-col">
+				<label for="p-college">College / University Name</label>
+				<input id="p-college" type="text" bind:value={editCollege} placeholder="e.g. IIT Bombay / DU / BITS" />
+			</div>
+		</div>
+
+		<button class="save-profile-btn" onclick={handleSaveStudentProfile}>
+			<Check size={16} />
+			<span>Save Profile & Recalibrate Runway</span>
+		</button>
+	</div>
+
+	<!-- 2. Appearance & Theme -->
+	<div class="card theme-card">
+		<div class="theme-switch-row">
+			<div class="theme-info">
+				<span class="theme-title">Dark Mode Appearance</span>
+				<span class="theme-sub">Obsidian theme with electric emerald & neon accents</span>
+			</div>
+			<button class="theme-toggle-btn" onclick={toggleTheme} aria-label="Toggle Theme">
+				{#if theme === 'dark'}
+					<Moon size={18} color="var(--accent-primary)" />
+				{:else}
+					<Sun size={18} color="#F59E0B" />
+				{/if}
 			</button>
 		</div>
 	</div>
 
-	<!-- Student Financial Intelligence Profile Section -->
-	<div class="section student-profile-section">
-		<h2 class="section-title">
-			<GraduationCap class="inline-icon" size={20} /> Student Financial Profile
-		</h2>
-		<p class="section-description">
-			Configure your monthly allowance cadence and hourly campus gig rate to power the Safe-to-Spend runway engine.
-		</p>
-
-		<div class="profile-inputs-grid">
-			<div class="p-field">
-				<label for="set-allowance">Monthly Allowance (₹)</label>
-				<input id="set-allowance" type="number" bind:value={editAllowance} placeholder="10000" />
-			</div>
-
-			<div class="p-field">
-				<label for="set-day">Allowance Date (1-31)</label>
-				<input id="set-day" type="number" min="1" max="31" bind:value={editDay} placeholder="1" />
-			</div>
-
-			<div class="p-field">
-				<label for="set-wage">Hourly Gig / Freelance Rate (₹/hr)</label>
-				<input id="set-wage" type="number" bind:value={editWage} placeholder="200" />
-			</div>
-
-			<div class="p-field">
-				<label for="set-college">College / University</label>
-				<input id="set-college" type="text" bind:value={editCollege} placeholder="e.g. IIT / BITS / DU" />
+	<!-- 3. Achievement Badges Grid -->
+	<div class="card badges-card">
+		<div class="card-header-line">
+			<div class="c-title-wrap">
+				<Award size={20} color="var(--accent-primary)" />
+				<h3 class="card-heading">Achievement Badges ({$healthScore.unlockedBadgesCount}/{$healthScore.badges.length})</h3>
 			</div>
 		</div>
+		<p class="card-desc">Milestones unlocked through healthy student financial discipline:</p>
 
-		<button class="action-btn primary-save-btn" onclick={handleSaveStudentProfile}>
-			<Check size={18} />
-			<span>Save Profile & Recalculate Runway</span>
-		</button>
-	</div>
-
-	<!-- Achievement Badges Showcase -->
-	<div class="section badges-showcase-section">
-		<h2 class="section-title">
-			<Award class="inline-icon" size={20} /> Achievement Badges ({$healthScore.unlockedBadgesCount}/{$healthScore.badges.length})
-		</h2>
-		<p class="section-description">
-			Milestones unlocked through healthy student financial habits.
-		</p>
-
-		<div class="badges-showcase-grid">
+		<div class="badges-grid">
 			{#each $healthScore.badges as badge}
-				<div class="badge-card-full" class:is-unlocked={badge.unlocked}>
-					<div class="badge-emoji-large">{badge.emoji}</div>
-					<div class="badge-meta">
-						<div class="badge-name">{badge.title}</div>
-						<div class="badge-desc-text">{badge.desc}</div>
+				<div class="badge-item-box" class:unlocked={badge.unlocked}>
+					<span class="badge-emoji">{badge.emoji}</span>
+					<div class="badge-texts">
+						<strong class="badge-name">{badge.title}</strong>
+						<span class="badge-desc">{badge.desc}</span>
 					</div>
-					<div class="badge-status-pill">
+					<span class="badge-status-tag">
 						{badge.unlocked ? 'Unlocked ✨' : 'Locked 🔒'}
-					</div>
+					</span>
 				</div>
 			{/each}
 		</div>
 	</div>
 
-	<!-- App Info Section -->
-	<div class="section">
-		<h2 class="section-title">
-			<Info class="inline-icon" size={20} /> App Information
-		</h2>
-		<div class="info-grid">
-			<div class="info-item">
-				<span class="info-label">Version</span>
-				<span class="info-value">1.0.0</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Schema Version</span>
-				<span class="info-value">1</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Total Expenses</span>
-				<span class="info-value">{totalExpensesCount}</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Total Debts</span>
-				<span class="info-value">{totalDebtsCount}</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Total Transfers</span>
-				<span class="info-value">{totalTransfersCount}</span>
-			</div>
-			<div class="info-item">
-				<span class="info-label">Total Budgets</span>
-				<span class="info-value">{totalBudgetsCount}</span>
-			</div>
-			{#if dateRange()}
-				{@const range = dateRange()}
-				<div class="info-item full-width">
-					<span class="info-label">Date Range</span>
-					<span class="info-value">{range?.first} → {range?.last}</span>
-				</div>
-			{/if}
-		</div>
-	</div>
+	<!-- 4. Data Management & Backup -->
+	<div class="card data-card">
+		<h3 class="card-heading">Data Backup & Reset</h3>
+		<p class="card-desc">Export full JSON backups or restore previous data snapshots:</p>
 
-	<!-- Export Data Section -->
-	<div class="section">
-		<h2 class="section-title">
-			<Download class="inline-icon" size={20} /> Export Data
-		</h2>
-		<p class="section-description">
-			Download a complete backup of all your financial data as a JSON file.
-		</p>
-		<button class="action-btn primary" onclick={handleExportData}>
-			<Download size={20} />
-			<span>Export All Data</span>
-		</button>
-	</div>
+		<div class="data-actions-row">
+			<button class="data-btn export" onclick={handleExportData}>
+				<Download size={16} />
+				<span>Export JSON Backup</span>
+			</button>
 
-	<!-- Import Data Section -->
-	<div class="section">
-		<h2 class="section-title">
-			<Upload class="inline-icon" size={20} /> Import Data
-		</h2>
-		<p class="section-description">
-			Import data from a previously exported JSON file. This will overwrite all existing data.
-		</p>
-		<input
-			type="file"
-			accept=".json"
-			bind:this={importFileInput}
-			onchange={handleFileSelect}
-			style="display: none;"
-		/>
-		<button class="action-btn secondary" onclick={handleImportClick}>
-			<Upload size={20} />
-			<span>Select File to Import</span>
-		</button>
-	</div>
+			<input
+				type="file"
+				accept=".json"
+				bind:this={importFileInput}
+				onchange={handleFileSelect}
+				style="display: none;"
+			/>
 
-	<!-- Security Section -->
-	{#if $passwordExists}
-		<div class="section">
-			<h2 class="section-title">
-				<Lock class="inline-icon" size={20} /> Security
-			</h2>
-			<p class="section-description">
-				Lock the app to require password authentication. You'll need to enter your password to
-				unlock.
-			</p>
-			<button class="action-btn secondary" onclick={handleLockApp}>
-				<Lock size={20} />
-				<span>Lock App Now</span>
+			<button class="data-btn import" onclick={handleImportClick}>
+				<Upload size={16} />
+				<span>Import JSON Backup</span>
 			</button>
 		</div>
-	{/if}
 
-	<!-- Category Management Section -->
-	<div class="section">
-		<h2 class="section-title">
-			<FolderOpen class="inline-icon" size={20} /> Category Management
-		</h2>
-		<div class="categories-list">
-			{#each $categories as category}
-				<div class="category-item">
-					<div class="category-icon">
-						<CategoryIcon icon={category.icon} size={32} />
-					</div>
-					<div class="category-details">
-						<div class="category-name">{category.name}</div>
-						{#if category.subcategories.length > 0}
-							<div class="category-subcategories">
-								{category.subcategories.join(', ')}
-							</div>
-						{/if}
-					</div>
-					<div class="category-color" style="background: {category.color};"></div>
-				</div>
-			{/each}
-		</div>
-	</div>
-
-	<!-- College Demo Data Generator Section -->
-	<div class="section demo-data-section">
-		<h2 class="section-title">
-			<Sparkles class="inline-icon" size={20} /> Campus Demo Showcase
-		</h2>
-		<p class="section-description">
-			Instantly populate the tracker with an authentic college student profile: ₹12,000 allowance, ₹250/hr gig wage, canteen treats, Goa trip sinking fund, Spotify & WiFi subscriptions, and friend split receivables.
-		</p>
-		<button class="action-btn secondary demo-load-btn" onclick={handleLoadDemo}>
-			<Sparkles size={18} />
-			<span>Load College Student Demo Data</span>
-		</button>
-	</div>
-
-	<!-- Danger Zone -->
-	<div class="section danger-zone">
-		<h2 class="section-title">
-			<TriangleAlert class="inline-icon" size={20} /> Danger Zone
-		</h2>
-		<p class="section-description">
-			Irreversible actions. Please be careful. All data will be permanently deleted.
-		</p>
-		<button class="action-btn danger" onclick={openResetModal}>
-			<Trash2 size={20} />
-			<span>Clear All Data</span>
-		</button>
-	</div>
-
-	<!-- Import Modal -->
-	{#if showImportModal && importPreview}
-		<div
-			class="modal-overlay"
-			onclick={() => (showImportModal = false)}
-			onkeydown={(e) => e.key === 'Escape' && (showImportModal = false)}
-			role="button"
-			tabindex="0"
-			aria-label="Close modal"
-		>
-			<div
-				class="modal"
-				onclick={(e) => e.stopPropagation()}
-				onkeydown={(e) => e.stopPropagation()}
-				role="dialog"
-				aria-modal="true"
-				tabindex="-1"
-			>
-				<h2 class="modal-title">
-					<Upload class="inline-icon" size={24} /> Import Data
-				</h2>
-
-				<div class="modal-warning">
-					<strong>Warning:</strong> This will overwrite all existing data!
-				</div>
-
-				<div class="import-preview">
-					<h3>Preview:</h3>
-					<ul>
-						<li>Expenses: {importPreview.expenses}</li>
-						<li>Wallets: {importPreview.wallets}</li>
-						<li>Debts: {importPreview.debts}</li>
-						<li>Transfers: {importPreview.transfers}</li>
-						<li>Budgets: {importPreview.budgets}</li>
-						<li>Categories: {importPreview.categories}</li>
-					</ul>
-				</div>
-
-				<div class="modal-actions">
-					<button class="modal-btn danger" onclick={confirmImport}> Import & Overwrite </button>
-					<button class="modal-btn secondary" onclick={() => (showImportModal = false)}>
-						Cancel
-					</button>
-				</div>
+		{#if $passwordExists}
+			<div class="lock-row">
+				<button class="data-btn lock" onclick={handleLockApp}>
+					<Lock size={16} />
+					<span>Lock App (Biometrics/PIN)</span>
+				</button>
 			</div>
-		</div>
-	{/if}
+		{/if}
 
-	<!-- Reset Modal -->
-	{#if showResetModal}
-		<div
-			class="modal-overlay"
-			onclick={() => (showResetModal = false)}
-			onkeydown={(e) => e.key === 'Escape' && (showResetModal = false)}
-			role="button"
-			tabindex="0"
-			aria-label="Close modal"
-		>
-			<div
-				class="modal"
-				onclick={(e) => e.stopPropagation()}
-				onkeydown={(e) => e.stopPropagation()}
-				role="dialog"
-				aria-modal="true"
-				tabindex="-1"
-			>
-				<h2 class="modal-title">
-					<TriangleAlert class="inline-icon" size={24} /> Clear All Data
-				</h2>
-
-				<div class="modal-warning">
-					<strong>Warning:</strong> This action cannot be undone!
-					<br />
-					All expenses, debts, transfers, budgets, and custom data will be permanently deleted.
-				</div>
-
-				<div class="confirmation-input">
-					<label for="confirm-text">Type <strong>DELETE</strong> to confirm:</label>
-					<input type="text" id="confirm-text" bind:value={resetConfirmText} placeholder="DELETE" />
-				</div>
-
-				<div class="modal-actions">
-					<button
-						class="modal-btn danger"
-						onclick={confirmReset}
-						disabled={resetConfirmText !== 'DELETE'}
-					>
-						Clear All Data
-					</button>
-					<button class="modal-btn secondary" onclick={() => (showResetModal = false)}>
-						Cancel
-					</button>
-				</div>
+		<div class="danger-zone-box">
+			<div>
+				<strong class="danger-title">Wipe Local Database</strong>
+				<span class="danger-sub">Irreversibly clears all wallets, tabs, and expenses</span>
 			</div>
+			<button class="danger-btn" onclick={openResetModal}>
+				<Trash2 size={14} />
+				<span>Reset</span>
+			</button>
 		</div>
-	{/if}
+	</div>
 </div>
+
+<!-- Reset Modal -->
+{#if showResetModal}
+	<div
+		class="modal-backdrop"
+		onclick={() => (showResetModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showResetModal = false)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
+			<div class="sheet-top-row">
+				<h3 style="color: var(--danger);">Reset All Data</h3>
+				<button class="close-btn" onclick={() => (showResetModal = false)}>✕</button>
+			</div>
+
+			<p class="sheet-desc">
+				Type <strong>DELETE</strong> below to confirm wiping all records from this browser.
+			</p>
+
+			<div class="form-col" style="margin-bottom: 1rem;">
+				<input type="text" placeholder="Type DELETE to confirm" bind:value={resetConfirmText} />
+			</div>
+
+			<button class="danger-btn-full" onclick={confirmReset}>
+				Permanently Clear All Records
+			</button>
+		</div>
+	</div>
+{/if}
+
+<!-- Import Modal Preview -->
+{#if showImportModal && importPreview}
+	<div
+		class="modal-backdrop"
+		onclick={() => (showImportModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showImportModal = false)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
+			<div class="sheet-top-row">
+				<h3>Confirm Data Restore</h3>
+				<button class="close-btn" onclick={() => (showImportModal = false)}>✕</button>
+			</div>
+
+			<p class="sheet-desc">
+				Found {importPreview.expenses} expenses, {importPreview.wallets} wallets, and {importPreview.debts} debts in this file. Overwrite current data?
+			</p>
+
+			<button class="primary-btn-full" onclick={confirmImport}>
+				Confirm Restore
+			</button>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.settings-page {
-		animation: fadeIn 0.3s ease-out;
-		max-width: 900px;
+		max-width: 680px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
 	}
 
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* Toast */
-	.toast {
+	.toast-pill {
 		position: fixed;
-		top: 2rem;
-		right: 2rem;
-		background: var(--success);
-		color: white;
-		padding: 1rem 1.5rem;
-		border-radius: var(--border-radius);
+		top: 1.25rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #10B981;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.85rem;
+		padding: 0.55rem 1.25rem;
+		border-radius: var(--border-radius-pill);
 		box-shadow: var(--shadow-lg);
-		z-index: 1000;
-		animation: slideIn 0.3s ease-out;
+		z-index: 10000;
 	}
 
-	@keyframes slideIn {
-		from {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	/* Page Title */
-	.page-title {
-		font-size: 2rem;
-		font-weight: 700;
-		margin-bottom: 2rem;
-		color: var(--text-primary);
-	}
-
-	/* Section */
-	.section {
-		background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-		box-shadow: var(--shadow-md);
-	}
-
-	.section.danger-zone {
-		border-color: var(--danger);
-		background: linear-gradient(135deg, var(--danger-bg) 0%, var(--bg-card) 100%);
-	}
-
-	.section-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin-bottom: 1rem;
-		color: var(--text-primary);
-	}
-
-	.section-description {
-		color: var(--text-secondary);
-		margin-bottom: 1.5rem;
-		line-height: 1.6;
-	}
-
-
-	/* Info Grid */
-	.info-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-	}
-
-	.info-item {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.info-item.full-width {
-		grid-column: 1 / -1;
-	}
-
-	.info-label {
-		font-size: 0.75rem;
-		color: var(--text-secondary);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.info-value {
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: var(--accent-primary);
-	}
-
-	/* Action Buttons */
-	.action-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		padding: 1rem 1.5rem;
-		border: none;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.action-btn.primary {
-		background: var(--accent-primary);
-		color: var(--bg-primary);
-	}
-
-	.action-btn.primary:hover {
-		background: var(--accent-hover);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
-	}
-
-	.action-btn.secondary {
-		background: var(--bg-secondary);
-		color: var(--text-primary);
-		border: 1px solid var(--border-color);
-	}
-
-	.action-btn.secondary:hover {
-		background: var(--bg-hover);
-		border-color: var(--accent-secondary);
-	}
-
-	.action-btn.danger {
-		background: var(--danger);
-		color: white;
-	}
-
-	.action-btn.danger:hover {
-		background: #dc2626;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
-	}
-
-	/* Categories List */
-	.categories-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.category-item {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 1rem;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		transition: all 0.2s;
-	}
-
-	.category-item:hover {
-		background: var(--bg-hover);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.category-icon {
-		font-size: 2rem;
-		flex-shrink: 0;
-	}
-
-	.category-details {
-		flex: 1;
-	}
-
-	.category-name {
-		font-weight: 600;
-		color: var(--text-primary);
+	.page-header {
 		margin-bottom: 0.25rem;
 	}
 
-	.category-subcategories {
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-	}
-
-	.category-color {
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		border: 2px solid var(--border-color);
-		flex-shrink: 0;
-	}
-
-	/* Modal */
-	.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.8);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 1000;
-		padding: 1rem;
-		backdrop-filter: blur(4px);
-	}
-
-	.modal {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		max-width: 500px;
-		width: 100%;
-		box-shadow: var(--shadow-lg);
-	}
-
-	.modal-title {
-		font-size: 1.5rem;
+	.campus-sub {
+		display: block;
+		font-size: 0.72rem;
 		font-weight: 700;
-		margin-bottom: 1.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-primary);
+		margin-bottom: 2px;
+	}
+
+	.page-title {
+		font-size: 1.65rem;
+		font-weight: 800;
 		color: var(--text-primary);
-	}
-
-	.modal-warning {
-		background: rgba(248, 113, 113, 0.1);
-		border: 1px solid var(--danger);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		margin-bottom: 1.5rem;
-		color: var(--text-primary);
-		line-height: 1.6;
-	}
-
-	.import-preview {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.import-preview h3 {
-		font-size: 1rem;
-		font-weight: 600;
-		margin-bottom: 0.75rem;
-		color: var(--text-primary);
-	}
-
-	.import-preview ul {
-		list-style: none;
-		padding: 0;
+		letter-spacing: -0.04em;
 		margin: 0;
 	}
 
-	.import-preview li {
-		padding: 0.5rem 0;
-		color: var(--text-secondary);
-		border-bottom: 1px solid var(--border-color);
-	}
-
-	.import-preview li:last-child {
-		border-bottom: none;
-	}
-
-	.confirmation-input {
-		margin-bottom: 1.5rem;
-	}
-
-	.confirmation-input label {
-		display: block;
-		margin-bottom: 0.5rem;
-		color: var(--text-secondary);
-		font-size: 0.875rem;
-	}
-
-	.confirmation-input input {
-		width: 100%;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-	}
-
-	.confirmation-input input:focus {
-		outline: none;
-		border-color: var(--danger);
-		box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
-	}
-
-	.modal-actions {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.modal-btn {
-		padding: 1rem;
-		border: none;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.modal-btn.danger {
-		background: var(--danger);
-		color: white;
-	}
-
-	.modal-btn.danger:hover:not(:disabled) {
-		background: #dc2626;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(248, 113, 113, 0.3);
-	}
-
-	.modal-btn.danger:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.modal-btn.secondary {
-		background: var(--bg-secondary);
-		color: var(--text-secondary);
-		border: 1px solid var(--border-color);
-	}
-
-	.modal-btn.secondary:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-	}
-
-	/* Responsive */
-	@media (max-width: 768px) {
-		.info-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		.modal {
-			padding: 1.5rem;
-		}
-	}
-
-	/* Toggle Switch */
-	.appearance-row {
+	.card-header-line {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.5rem 0;
+		margin-bottom: 0.5rem;
 	}
 
-	.appearance-label-group {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.label-main {
-		font-weight: 600;
-		color: var(--text-primary);
-	}
-
-	.label-sub {
-		font-size: 0.85rem;
-		color: var(--text-secondary);
-	}
-
-	.toggle-switch {
-		width: 50px;
-		height: 30px;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: 15px;
-		position: relative;
-		cursor: pointer;
-		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-		padding: 2px;
-	}
-
-	.toggle-switch.checked {
-		background: var(--accent-primary);
-		border-color: var(--accent-primary);
-	}
-
-	.toggle-thumb {
-		width: 24px;
-		height: 24px;
-		background: white;
-		border-radius: 50%;
-		position: absolute;
-		top: 2px;
-		left: 2px;
-		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	.c-title-wrap {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		gap: 6px;
 	}
 
-	.toggle-switch.checked .toggle-thumb {
-		transform: translateX(20px);
+	.card-heading {
+		font-size: 1rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		margin: 0;
 	}
 
-	/* Student Profile Settings Styles */
-	.profile-inputs-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 12px;
-		margin-bottom: 16px;
-	}
-
-	.p-field {
-		display: flex;
-		flex-direction: column;
+	.demo-pill-btn {
+		display: inline-flex;
+		align-items: center;
 		gap: 4px;
+		background: rgba(16, 185, 129, 0.15);
+		border: 1px solid rgba(16, 185, 129, 0.3);
+		color: var(--accent-primary);
+		padding: 0.35rem 0.75rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.72rem;
+		font-weight: 800;
 	}
 
-	.p-field label {
-		font-size: 0.74rem;
-		font-weight: 700;
+	.card-desc {
+		font-size: 0.78rem;
 		color: var(--text-muted);
-		text-transform: uppercase;
+		margin-bottom: 0.85rem;
+		line-height: 1.45;
 	}
 
-	.p-field input {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		padding: 10px 14px;
-		border-radius: 12px;
-		font-size: 0.88rem;
-		font-weight: 600;
-		color: var(--text-primary);
+	/* Profile Card */
+	.profile-card {
+		padding: 1.35rem;
 	}
 
-	.p-field input:focus {
-		outline: none;
-		border-color: var(--accent-primary);
+	.form-grid-two {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-bottom: 0.75rem;
 	}
 
-	.primary-save-btn {
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
+	.form-col {
 		display: flex;
+		flex-direction: column;
+	}
+
+	.save-profile-btn {
+		width: 100%;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 8px;
-		font-weight: 700;
-		padding: 12px;
-		border-radius: 14px;
-		cursor: pointer;
-		box-shadow: 0 4px 15px var(--accent-glow);
+		gap: 6px;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.92rem;
+		padding: 0.8rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
+		margin-top: 0.45rem;
 	}
 
-	/* Badges Showcase */
-	.badges-showcase-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-		gap: 12px;
+	/* Theme Card */
+	.theme-card {
+		padding: 1.15rem 1.35rem;
 	}
 
-	.badge-card-full {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: 18px;
-		padding: 14px;
+	.theme-switch-row {
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
-		gap: 12px;
-		opacity: 0.55;
-		transition: all 0.2s;
 	}
 
-	.badge-card-full.is-unlocked {
-		opacity: 1;
-		border-color: var(--accent-primary);
-		background: rgba(124, 58, 237, 0.05);
+	.theme-info {
+		display: flex;
+		flex-direction: column;
 	}
 
-	.badge-emoji-large {
-		font-size: 2rem;
-	}
-
-	.badge-meta {
-		flex: 1;
-	}
-
-	.badge-name {
+	.theme-title {
 		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.badge-desc-text {
+	.theme-sub {
 		font-size: 0.72rem;
 		color: var(--text-muted);
-		line-height: 1.3;
 	}
 
-	.badge-status-pill {
+	.theme-toggle-btn {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* Badges */
+	.badges-card {
+		padding: 1.35rem;
+	}
+
+	.badges-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+	}
+
+	.badge-item-box {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius);
+		padding: 0.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		opacity: 0.55;
+	}
+
+	.badge-item-box.unlocked {
+		opacity: 1;
+		border-color: rgba(16, 185, 129, 0.3);
+		background: rgba(16, 185, 129, 0.05);
+	}
+
+	.badge-emoji {
+		font-size: 1.35rem;
+	}
+
+	.badge-name {
+		font-size: 0.82rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		display: block;
+	}
+
+	.badge-desc {
 		font-size: 0.68rem;
+		color: var(--text-muted);
+		display: block;
+	}
+
+	.badge-status-tag {
+		font-size: 0.65rem;
 		font-weight: 700;
+		margin-top: 4px;
 		color: var(--text-secondary);
 	}
 
-	@media (max-width: 600px) {
-		.profile-inputs-grid {
+	/* Data Card */
+	.data-card {
+		padding: 1.35rem;
+	}
+
+	.data-actions-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-bottom: 0.85rem;
+	}
+
+	.data-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 6px;
+		padding: 0.65rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
+		font-weight: 700;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-primary);
+	}
+
+	.lock-row {
+		margin-bottom: 0.85rem;
+	}
+
+	.data-btn.lock {
+		width: 100%;
+	}
+
+	.danger-zone-box {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-top: 1px solid var(--border-subtle);
+		padding-top: 0.85rem;
+	}
+
+	.danger-title {
+		font-size: 0.84rem;
+		color: var(--danger);
+		display: block;
+	}
+
+	.danger-sub {
+		font-size: 0.7rem;
+		color: var(--text-muted);
+	}
+
+	.danger-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		background: var(--danger-bg);
+		border: 1px solid var(--danger-border);
+		color: var(--danger);
+		font-size: 0.74rem;
+		font-weight: 800;
+		padding: 0.35rem 0.75rem;
+		border-radius: var(--border-radius-pill);
+	}
+
+	/* Modal */
+	.sheet-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.85rem;
+	}
+
+	.sheet-desc {
+		font-size: 0.82rem;
+		color: var(--text-muted);
+		margin-bottom: 1rem;
+		line-height: 1.45;
+	}
+
+	.danger-btn-full {
+		width: 100%;
+		background: var(--danger);
+		color: white;
+		font-weight: 800;
+		font-size: 0.92rem;
+		padding: 0.8rem;
+		border-radius: var(--border-radius-pill);
+	}
+
+	.primary-btn-full {
+		width: 100%;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.92rem;
+		padding: 0.8rem;
+		border-radius: var(--border-radius-pill);
+	}
+
+	@media (max-width: 520px) {
+		.form-grid-two,
+		.badges-grid,
+		.data-actions-row {
 			grid-template-columns: 1fr;
 		}
-	}
-
-	.demo-load-btn {
-		background: rgba(124, 58, 237, 0.08);
-		border-color: rgba(124, 58, 237, 0.3);
-		color: var(--accent-primary);
-		font-weight: 700;
-	}
-
-	.demo-load-btn:hover {
-		background: var(--accent-primary);
-		color: white;
 	}
 </style>
