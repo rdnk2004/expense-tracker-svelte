@@ -14,17 +14,9 @@
 		Handshake,
 		ArrowUpRight,
 		ArrowDownLeft,
-		TrendingUp,
-		TrendingDown,
 		Check,
 		X,
-		Banknote,
-		Smartphone,
-		Loader2,
-		Ban,
 		Plus,
-		ChevronDown,
-		ChevronRight,
 		Users,
 		Share2,
 		QrCode,
@@ -32,7 +24,6 @@
 	} from 'lucide-svelte';
 	import BillSplitModal from '$lib/components/BillSplitModal.svelte';
 
-	// Form state
 	let formData = $state({
 		person: '',
 		amount: '',
@@ -45,7 +36,6 @@
 	let isSubmitting = $state(false);
 	let showSplitModal = $state(false);
 
-	// Modal state
 	let settlementModal = $state<{
 		open: boolean;
 		debt: Debt | null;
@@ -60,12 +50,10 @@
 		settleAmount: ''
 	});
 
-	// UI state
 	let showSettled = $state(false);
 	let showToast = $state(false);
 	let toastMessage = $state('');
 
-	// Computed values
 	let unsettledDebts = $derived($debts.filter((d) => !d.isSettled));
 	let settledDebts = $derived($debts.filter((d) => d.isSettled));
 
@@ -75,10 +63,6 @@
 	let totalYouOwe = $derived(debtsYouOwe.reduce((sum, d) => sum + d.amount, 0));
 	let totalOwedToYou = $derived(debtsOwedToYou.reduce((sum, d) => sum + d.amount, 0));
 	let netPosition = $derived(totalOwedToYou - totalYouOwe);
-
-	let selectedWallet = $derived(
-		settlementModal.walletId ? $wallets.find((w) => w.id === settlementModal.walletId) : null
-	);
 
 	let settleAmountValue = $derived(
 		settlementModal.settleAmount ? Math.round(parseFloat(settlementModal.settleAmount) * 100) : 0
@@ -121,7 +105,7 @@
 				note: ''
 			};
 
-			showSuccessToast('Debt recorded successfully!');
+			showSuccessToast('Campus tab logged! 🤝');
 		} catch (error) {
 			console.error('Failed to add debt:', error);
 			showSuccessToast('Failed to record debt');
@@ -135,7 +119,7 @@
 			open: true,
 			debt,
 			step: 'options',
-			walletId: null,
+			walletId: $wallets[0]?.id || null,
 			settleAmount: (debt.amount / 100).toFixed(2)
 		};
 	}
@@ -150,7 +134,7 @@
 				settlementModal.walletId
 			);
 			settlementModal.open = false;
-			showSuccessToast('Debt settled & wallet adjusted!');
+			showSuccessToast('Tab settled & wallet updated! ⚡');
 		} catch (error) {
 			console.error('Failed to settle debt:', error);
 			showSuccessToast('Failed to settle debt');
@@ -163,7 +147,7 @@
 		try {
 			await settleDebt(settlementModal.debt.id, settlementModal.debt.amount);
 			settlementModal.open = false;
-			showSuccessToast('Marked as settled!');
+			showSuccessToast('Marked as settled! 🎯');
 		} catch (error) {
 			console.error('Failed to settle debt:', error);
 			showSuccessToast('Failed to settle debt');
@@ -179,15 +163,13 @@
 	}
 
 	function shareReminder(debt: Debt) {
-		const amount = formatCurrency(debt.amount);
-		const note = debt.note ? ` for "${debt.note}"` : '';
-		const text = `Hey ${debt.person}, friendly reminder for ₹${debt.amount / 100}${note}. You can GPay/PhonePe to settle!`;
+		const text = `Hey ${debt.person}, friendly reminder for ₹${debt.amount / 100}${debt.note ? ` (${debt.note})` : ''}. Settle via UPI whenever free!`;
 
-		if (navigator.share) {
+		if (typeof navigator !== 'undefined' && navigator.share) {
 			navigator.share({ title: 'Campus Split Reminder', text }).catch(() => {});
-		} else {
+		} else if (typeof navigator !== 'undefined' && navigator.clipboard) {
 			navigator.clipboard.writeText(text);
-			showSuccessToast('Reminder copied to clipboard!');
+			showSuccessToast('Reminder copied to clipboard! 📋');
 		}
 	}
 
@@ -202,182 +184,194 @@
 
 <div class="debts-page">
 	{#if showToast}
-		<div class="toast">{toastMessage}</div>
+		<div class="toast-pill">{toastMessage}</div>
 	{/if}
 
+	<!-- Header -->
 	<div class="page-header">
 		<div>
-			<span class="eyebrow">Social Ledgers</span>
+			<span class="campus-sub">Social Ledgers</span>
 			<h1 class="page-title">Campus Debts & Splits</h1>
 		</div>
 		<button class="split-bill-hero-btn" onclick={() => (showSplitModal = true)}>
-			<Users size={17} />
-			<span>Split Bill</span>
+			<Users size={16} />
+			<span>Split Group Bill</span>
 		</button>
 	</div>
 
 	<!-- Net Squad Balance Hero Card -->
-	<div class="net-position-card" class:positive={netPosition > 0} class:negative={netPosition < 0}>
-		<div class="net-header">
-			<span class="net-title">Net Friend Position</span>
-			<span class="net-badge">
+	<div class="net-position-card" class:positive={netPosition >= 0} class:negative={netPosition < 0}>
+		<div class="net-top-line">
+			<span class="net-title-eyebrow">Net Friend Balance</span>
+			<span class="net-status-pill">
 				{netPosition >= 0 ? 'Net Receivable' : 'Net Owed'}
 			</span>
 		</div>
-		<div class="net-amount">
+
+		<div class="net-amount-hero tabular">
 			{formatCurrency(Math.abs(netPosition))}
 		</div>
 
-		<div class="position-split-row">
-			<div class="pos-item">
-				<div class="pos-label">
-					<ArrowDownLeft size={14} class="text-success" /> Friends Owe You
+		<div class="position-stats-grid">
+			<div class="pos-stat-box">
+				<div class="pos-lbl">
+					<ArrowDownLeft size={13} color="#10B981" />
+					<span>Friends Owe You</span>
 				</div>
-				<div class="pos-val text-success">{formatCurrency(totalOwedToYou)}</div>
+				<div class="pos-val text-success tabular">{formatCurrency(totalOwedToYou)}</div>
 			</div>
-			<div class="pos-item">
-				<div class="pos-label">
-					<ArrowUpRight size={14} class="text-danger" /> You Owe Friends
+			<div class="pos-stat-box">
+				<div class="pos-lbl">
+					<ArrowUpRight size={13} color="#F43F5E" />
+					<span>You Owe Friends</span>
 				</div>
-				<div class="pos-val text-danger">{formatCurrency(totalYouOwe)}</div>
+				<div class="pos-val text-danger tabular">{formatCurrency(totalYouOwe)}</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Quick Record Single Debt Form -->
-	<div class="card add-debt-card">
-		<h2 class="card-title">
-			<Plus size={18} class="text-accent" /> Quick Record Tab / IOU
-		</h2>
+	<!-- Quick Record Single Tab Form -->
+	<div class="card quick-tab-card">
+		<h3 class="card-heading">Quick Record Single Tab / IOU</h3>
 
 		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-			<div class="form-row">
-				<div class="input-group flex-2">
-					<label for="debt-person">Friend's Name *</label>
-					<input id="debt-person" type="text" placeholder="e.g. Rohan, Priya" bind:value={formData.person} />
-					{#if errors.person}<span class="error-msg">{errors.person}</span>{/if}
-				</div>
-				<div class="input-group flex-1">
-					<label for="debt-amount">Amount (₹) *</label>
-					<input id="debt-amount" type="number" placeholder="250" bind:value={formData.amount} step="1" min="0" />
-					{#if errors.amount}<span class="error-msg">{errors.amount}</span>{/if}
-				</div>
-			</div>
-
 			<div class="direction-toggle-row">
 				<button
 					type="button"
-					class="dir-btn receive"
-					class:selected={formData.direction === 'receive'}
+					class="dir-toggle-btn"
+					class:active={formData.direction === 'receive'}
 					onclick={() => (formData.direction = 'receive')}
 				>
-					<ArrowDownLeft size={15} />
-					<span>They Owe Me (+₹)</span>
+					<ArrowDownLeft size={14} />
+					<span>They Owe Me</span>
 				</button>
 				<button
 					type="button"
-					class="dir-btn give"
-					class:selected={formData.direction === 'give'}
+					class="dir-toggle-btn"
+					class:active={formData.direction === 'give'}
 					onclick={() => (formData.direction = 'give')}
 				>
-					<ArrowUpRight size={15} />
-					<span>I Owe Them (-₹)</span>
+					<ArrowUpRight size={14} />
+					<span>I Owe Them</span>
 				</button>
 			</div>
 
-			<div class="form-row">
-				<div class="input-group flex-1">
-					<label for="debt-upi">UPI ID (Optional for 1-click Pay)</label>
-					<input id="debt-upi" type="text" placeholder="e.g. rahul@okaxis" bind:value={formData.upiId} />
+			<div class="form-inputs-grid">
+				<div class="form-field-col">
+					<label for="debt-person">Friend's Name *</label>
+					<input id="debt-person" type="text" placeholder="e.g. Aryan, Sneha..." bind:value={formData.person} />
+					{#if errors.person}
+						<span class="err-txt">{errors.person}</span>
+					{/if}
 				</div>
-				<div class="input-group flex-1">
-					<label for="debt-note">Description / Context</label>
-					<input id="debt-note" type="text" placeholder="e.g. Canteen lunch split" bind:value={formData.note} />
+
+				<div class="form-field-col">
+					<label for="debt-amt">Amount (₹) *</label>
+					<input id="debt-amt" type="number" step="0.01" placeholder="0.00" bind:value={formData.amount} class="tabular" />
+					{#if errors.amount}
+						<span class="err-txt">{errors.amount}</span>
+					{/if}
 				</div>
 			</div>
 
-			<button type="submit" class="submit-btn" disabled={isSubmitting}>
-				{isSubmitting ? 'Recording...' : 'Record Debt'}
+			<div class="form-inputs-grid">
+				<div class="form-field-col">
+					<label for="debt-upi">Friend's UPI ID (optional)</label>
+					<input id="debt-upi" type="text" placeholder="username@okhdfcbank" bind:value={formData.upiId} />
+				</div>
+
+				<div class="form-field-col">
+					<label for="debt-note">Note / Event</label>
+					<input id="debt-note" type="text" placeholder="Chai, Canteen, Movie..." bind:value={formData.note} />
+				</div>
+			</div>
+
+			<button type="submit" class="primary-btn-full" disabled={isSubmitting}>
+				{isSubmitting ? 'Recording...' : 'Log Campus Tab'}
 			</button>
 		</form>
 	</div>
 
-	<!-- Active Debts Ledger List -->
-	<div class="debts-list-section">
-		<div class="section-title-row">
-			<h2 class="section-title">Active Tabs ({unsettledDebts.length})</h2>
-			<button class="toggle-settled-btn" onclick={() => (showSettled = !showSettled)}>
-				{showSettled ? 'Hide Settled' : `View Settled (${settledDebts.length})`}
+	<!-- Unsettled Debts Ledger -->
+	<div class="card debts-ledger-card">
+		<div class="ledger-header">
+			<h3 class="card-heading">Active Tabs ({unsettledDebts.length})</h3>
+			<button class="toggle-settled-link" onclick={() => (showSettled = !showSettled)}>
+				{showSettled ? 'Hide Settled' : `Show Settled (${settledDebts.length})`}
 			</button>
 		</div>
 
-		<div class="debt-cards-stack">
+		<div class="debts-list">
 			{#each unsettledDebts as debt (debt.id)}
-				<div class="debt-card-item" class:is-receivable={debt.direction === 'receive'}>
-					<div class="debt-card-top">
-						<div class="debt-person-info">
-							<div class="debt-avatar" class:recv={debt.direction === 'receive'}>
-								{debt.person.charAt(0).toUpperCase()}
+				<div class="debt-row-card" class:receive-border={debt.direction === 'receive'} class:give-border={debt.direction === 'give'}>
+					<div class="debt-info-left">
+						<div class="friend-avatar" class:receive-av={debt.direction === 'receive'} class:give-av={debt.direction === 'give'}>
+							{debt.person.slice(0, 2).toUpperCase()}
+						</div>
+						<div class="debt-text-col">
+							<div class="debt-person-line">
+								<strong class="person-name">{debt.person}</strong>
+								<span class="direction-tag" class:tag-receive={debt.direction === 'receive'} class:tag-give={debt.direction === 'give'}>
+									{debt.direction === 'receive' ? 'Owes you' : 'You owe'}
+								</span>
 							</div>
-							<div>
-								<div class="debt-person-name">{debt.person}</div>
-								<div class="debt-meta-date">
-									{debt.direction === 'receive' ? 'Owes you' : 'You owe'} • {formatDate(debt.date)}
-								</div>
-								{#if debt.note}
-									<div class="debt-note-text">"{debt.note}"</div>
+							<div class="debt-meta-line">
+								<span>{debt.note || 'Campus Tab'}</span>
+								<span>•</span>
+								<span>{formatDate(debt.date)}</span>
+								{#if debt.upiId}
+									<span>•</span>
+									<span class="upi-chip">{debt.upiId}</span>
 								{/if}
 							</div>
 						</div>
-
-						<div class="debt-amount-col">
-							<div class="debt-amount-val" class:text-success={debt.direction === 'receive'} class:text-danger={debt.direction === 'give'}>
-								{debt.direction === 'receive' ? '+' : '-'}{formatCurrency(debt.amount)}
-							</div>
-						</div>
 					</div>
 
-					<div class="debt-actions-row">
-						{#if debt.direction === 'receive'}
-							<button class="action-btn remind" onclick={() => shareReminder(debt)}>
-								<Share2 size={13} />
-								<span>Remind</span>
-							</button>
-						{:else if debt.upiId}
-							<a href={generateUPILink(debt)} class="action-btn upi-pay">
-								<Send size={13} />
-								<span>Pay via UPI</span>
-							</a>
-						{/if}
+					<div class="debt-action-right">
+						<div class="debt-amount-figure tabular" class:text-success={debt.direction === 'receive'} class:text-danger={debt.direction === 'give'}>
+							{debt.direction === 'receive' ? '+' : '-'}{formatCurrency(debt.amount)}
+						</div>
 
-						<button class="action-btn settle" onclick={() => openSettlementModal(debt)}>
-							<Check size={13} />
-							<span>Settle Tab</span>
-						</button>
+						<div class="debt-btns-row">
+							{#if debt.direction === 'receive'}
+								<button class="icon-action-btn" title="Send WhatsApp/Share Reminder" onclick={() => shareReminder(debt)} aria-label="Share Reminder">
+									<Send size={13} />
+								</button>
+							{/if}
+							{#if debt.direction === 'give' && debt.upiId}
+								<a href={generateUPILink(debt)} class="icon-action-btn upi-pay-btn" title="Pay with UPI App" aria-label="Pay with UPI">
+									<QrCode size={13} />
+								</a>
+							{/if}
+							<button class="settle-pill-btn" onclick={() => openSettlementModal(debt)}>
+								<Check size={12} />
+								<span>Settle</span>
+							</button>
+						</div>
 					</div>
 				</div>
 			{:else}
-				<div class="empty-debts-card">
-					<Handshake size={32} class="empty-icon" />
-					<p>All clean! Zero unsettled tabs with friends.</p>
+				<div class="empty-debts-box">
+					<Handshake size={32} color="var(--text-muted)" />
+					<p>All clean! Zero unsettled tabs with campus friends.</p>
 				</div>
 			{/each}
 
 			{#if showSettled && settledDebts.length > 0}
-				<div class="settled-divider">
-					<span>Settled History</span>
+				<div class="settled-archive-divider">
+					<span>Settled Archive</span>
 				</div>
 				{#each settledDebts as debt (debt.id)}
-					<div class="debt-card-item settled">
-						<div class="debt-card-top">
-							<div class="debt-person-info">
-								<div class="debt-avatar settled-av">✓</div>
-								<div>
-									<div class="debt-person-name settled-txt">{debt.person}</div>
-									<div class="debt-meta-date">Settled on {debt.settledDate ? formatDate(debt.settledDate) : 'Done'}</div>
-								</div>
+					<div class="debt-row-card settled-card">
+						<div class="debt-info-left">
+							<div class="friend-avatar settled-av">✓</div>
+							<div class="debt-text-col">
+								<strong class="person-name settled-txt">{debt.person}</strong>
+								<span class="debt-meta-line settled-txt">Settled on {debt.settledDate ? formatDate(debt.settledDate) : 'Completed'}</span>
 							</div>
-							<div class="debt-amount-val settled-txt">{formatCurrency(debt.amount)}</div>
+						</div>
+						<div class="debt-amount-figure tabular settled-txt">
+							{formatCurrency(debt.amount)}
 						</div>
 					</div>
 				{/each}
@@ -386,7 +380,7 @@
 	</div>
 </div>
 
-<!-- Settlement Modal -->
+<!-- Settlement Modal Sheet -->
 {#if settlementModal.open && settlementModal.debt}
 	<div
 		class="modal-backdrop"
@@ -403,41 +397,35 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
-				<h3 class="modal-title">Settle Tab with {settlementModal.debt.person}</h3>
+			<div class="sheet-top-row">
+				<h3>Settle Tab with {settlementModal.debt.person}</h3>
 				<button class="close-btn" onclick={() => (settlementModal.open = false)}>✕</button>
 			</div>
 
-			<p class="modal-sub">
-				Total Tab Amount: <strong>{formatCurrency(settlementModal.debt.amount)}</strong>
+			<p class="sheet-sub">
+				Total Tab Amount: <strong class="tabular">{formatCurrency(settlementModal.debt.amount)}</strong>
 			</p>
 
-			<div class="settle-options-stack">
-				<div class="option-card">
-					<h4>Option 1: Settle & Adjust Wallet Balance</h4>
-					<p class="opt-desc">Automatically update your UPI or Cash balance with this settlement.</p>
-					
-					<div class="wallet-picker-row">
-						<select bind:value={settlementModal.walletId}>
-							<option value={null}>Select Wallet...</option>
+			<div class="settlement-options-stack">
+				<div class="settle-choice-card">
+					<h4>Option 1: Settle & Sync Wallet Balance</h4>
+					<p class="choice-desc">Automatically update your real UPI or Cash balance with this settlement.</p>
+					<div class="choice-input-row">
+						<select bind:value={settlementModal.walletId} class="wallet-select">
 							{#each $wallets as w}
 								<option value={w.id}>{w.name} ({formatCurrency(w.balance)})</option>
 							{/each}
 						</select>
-						<button
-							class="primary-btn mini"
-							disabled={!settlementModal.walletId}
-							onclick={handleSettleWithWallet}
-						>
-							Confirm & Sync
+						<button class="primary-btn-mini" onclick={handleSettleWithWallet}>
+							Sync & Settle
 						</button>
 					</div>
 				</div>
 
-				<div class="option-card">
-					<h4>Option 2: Mark as Settled Only</h4>
-					<p class="opt-desc">Record debt as paid without changing your wallet balances.</p>
-					<button class="secondary-btn" onclick={handleSettleWithoutWallet}>
+				<div class="settle-choice-card">
+					<h4>Option 2: Mark Settled Directly</h4>
+					<p class="choice-desc">Record tab as settled without changing wallet balances.</p>
+					<button class="secondary-btn-full" onclick={handleSettleWithoutWallet}>
 						Mark Settled Directly
 					</button>
 				</div>
@@ -446,507 +434,516 @@
 	</div>
 {/if}
 
-<!-- Bill Split Modal -->
 <BillSplitModal
 	bind:open={showSplitModal}
-	onSuccess={() => showSuccessToast('Group bill split & receivables recorded!')}
+	onSuccess={() => showSuccessToast('Group bill split & tabs created! 🎉')}
 />
 
 <style>
 	.debts-page {
-		max-width: 620px;
+		max-width: 680px;
 		margin: 0 auto;
-		padding: 0 16px 120px 16px;
-		animation: fadeIn 0.4s ease-out;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
+	}
+
+	.toast-pill {
+		position: fixed;
+		top: 1.25rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #10B981;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.85rem;
+		padding: 0.55rem 1.25rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: var(--shadow-lg);
+		z-index: 10000;
 	}
 
 	.page-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 20px;
-		padding-top: 8px;
 	}
 
-	.eyebrow {
-		font-size: 0.76rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+	.campus-sub {
 		display: block;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-primary);
 		margin-bottom: 2px;
 	}
 
 	.page-title {
-		font-size: 1.75rem;
+		font-size: 1.65rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.5px;
+		letter-spacing: -0.04em;
+		margin: 0;
 	}
 
 	.split-bill-hero-btn {
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 9px 16px;
-		border-radius: 9999px;
-		font-weight: 700;
-		font-size: 0.82rem;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		box-shadow: 0 4px 15px var(--accent-glow);
-		cursor: pointer;
+		background: var(--accent-primary);
+		color: #080C14;
+		padding: 0.55rem 1rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
+		font-weight: 700;
+		box-shadow: 0 4px 14px var(--accent-glow);
+		transition: all 0.2s ease;
 	}
 
-	/* Net Position Hero */
+	.split-bill-hero-btn:hover {
+		filter: brightness(1.1);
+	}
+
+	/* Net Position Card */
 	.net-position-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 26px;
-		padding: 22px;
-		margin-bottom: 20px;
+		border-radius: 24px;
+		padding: 1.35rem;
 		box-shadow: var(--shadow-sm);
+		border: 1px solid var(--border-color);
+		background: var(--bg-card);
 	}
 
-	.net-header {
+	.net-position-card.positive {
+		border-top: 3px solid #10B981;
+	}
+
+	.net-position-card.negative {
+		border-top: 3px solid #F43F5E;
+	}
+
+	.net-top-line {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 6px;
+		margin-bottom: 0.35rem;
 	}
 
-	.net-title {
-		font-size: 0.8rem;
+	.net-title-eyebrow {
+		font-size: 0.72rem;
 		font-weight: 700;
 		text-transform: uppercase;
+		letter-spacing: 0.05em;
 		color: var(--text-muted);
 	}
 
-	.net-badge {
-		font-size: 0.72rem;
-		font-weight: 700;
-		padding: 3px 10px;
-		border-radius: 9999px;
-		background: rgba(124, 58, 237, 0.1);
-		color: var(--accent-primary);
+	.net-status-pill {
+		font-size: 0.68rem;
+		font-weight: 800;
+		padding: 0.2rem 0.55rem;
+		border-radius: var(--border-radius-pill);
+		text-transform: uppercase;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
 	}
 
-	.net-amount {
-		font-size: 2.2rem;
+	.net-amount-hero {
+		font-size: 2.15rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.5px;
-		margin-bottom: 16px;
+		margin-bottom: 1rem;
+		line-height: 1.1;
 	}
 
-	.position-split-row {
-		display: flex;
-		gap: 16px;
-		border-top: 1px solid var(--border-color);
-		padding-top: 14px;
+	.position-stats-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+		border-top: 1px solid var(--border-subtle);
+		padding-top: 0.85rem;
 	}
 
-	.pos-item {
-		flex: 1;
+	.pos-stat-box {
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 
-	.pos-label {
+	.pos-lbl {
 		display: flex;
 		align-items: center;
-		gap: 5px;
-		font-size: 0.76rem;
-		color: var(--text-muted);
-		font-weight: 600;
-	}
-
-	.pos-val {
-		font-size: 1.05rem;
-		font-weight: 800;
-	}
-
-	/* Form */
-	.add-debt-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 24px;
-		padding: 20px;
-		margin-bottom: 24px;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.card-title {
-		font-size: 1rem;
-		font-weight: 800;
-		color: var(--text-primary);
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		margin-bottom: 16px;
-	}
-
-	.form-row {
-		display: flex;
-		gap: 10px;
-		margin-bottom: 12px;
-	}
-
-	.input-group {
-		display: flex;
-		flex-direction: column;
 		gap: 4px;
-	}
-
-	.flex-2 { flex: 2; }
-	.flex-1 { flex: 1; }
-
-	label {
 		font-size: 0.72rem;
 		font-weight: 700;
 		color: var(--text-muted);
 		text-transform: uppercase;
 	}
 
-	input, select {
-		padding: 10px 14px;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		color: var(--text-primary);
-		font-size: 0.88rem;
-		font-weight: 600;
+	.pos-val {
+		font-size: 1.15rem;
+		font-weight: 800;
 	}
 
-	input:focus, select:focus {
-		outline: none;
-		border-color: var(--accent-primary);
+	.text-success { color: #10B981; }
+	.text-danger { color: #F43F5E; }
+
+	/* Quick Tab Card */
+	.quick-tab-card {
+		padding: 1.35rem;
+	}
+
+	.card-heading {
+		font-size: 1rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		margin-bottom: 1rem;
 	}
 
 	.direction-toggle-row {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 8px;
-		margin-bottom: 14px;
+		gap: 6px;
+		margin-bottom: 1rem;
 	}
 
-	.dir-btn {
+	.dir-toggle-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 6px;
-		padding: 10px;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		font-size: 0.8rem;
+		padding: 0.65rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
+		font-size: 0.82rem;
 		font-weight: 700;
-		cursor: pointer;
-		color: var(--text-muted);
-		transition: all 0.2s;
+		transition: all 0.2s ease;
 	}
 
-	.dir-btn.receive.selected {
-		background: rgba(16, 185, 129, 0.12);
-		border-color: #10B981;
-		color: #059669;
-	}
-
-	.dir-btn.give.selected {
-		background: rgba(255, 51, 102, 0.12);
-		border-color: #FF3366;
-		color: #FF3366;
-	}
-
-	.submit-btn {
-		width: 100%;
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 12px;
-		border-radius: 16px;
-		font-weight: 800;
-		font-size: 0.92rem;
-		cursor: pointer;
-		margin-top: 6px;
-	}
-
-	.error-msg {
-		color: var(--danger);
-		font-size: 0.7rem;
-	}
-
-	/* Ledger List */
-	.section-title-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 12px;
-	}
-
-	.section-title {
-		font-size: 1.05rem;
-		font-weight: 800;
+	.dir-toggle-btn.active {
+		background: var(--bg-card);
+		border-color: var(--accent-primary);
 		color: var(--text-primary);
+		box-shadow: var(--shadow-xs);
 	}
 
-	.toggle-settled-btn {
-		background: transparent;
-		border: none;
-		color: var(--accent-primary);
-		font-size: 0.78rem;
-		font-weight: 700;
-		cursor: pointer;
+	.form-inputs-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px;
+		margin-bottom: 0.85rem;
 	}
 
-	.debt-cards-stack {
+	.form-field-col {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
 	}
 
-	.debt-card-item {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 20px;
-		padding: 16px;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.debt-card-top {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		margin-bottom: 12px;
-	}
-
-	.debt-person-info {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-	}
-
-	.debt-avatar {
-		width: 40px;
-		height: 40px;
-		border-radius: 14px;
-		background: rgba(255, 51, 102, 0.12);
-		color: #FF3366;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 800;
-		font-size: 1.05rem;
-	}
-
-	.debt-avatar.recv {
-		background: rgba(16, 185, 129, 0.12);
-		color: #059669;
-	}
-
-	.debt-avatar.settled-av {
-		background: var(--bg-primary);
-		color: var(--text-muted);
-	}
-
-	.debt-person-name {
-		font-weight: 800;
-		font-size: 0.95rem;
-		color: var(--text-primary);
-	}
-
-	.debt-meta-date {
-		font-size: 0.75rem;
-		color: var(--text-muted);
-	}
-
-	.debt-note-text {
-		font-size: 0.75rem;
-		color: var(--text-secondary);
-		font-style: italic;
+	.err-txt {
+		font-size: 0.72rem;
+		color: var(--danger);
+		font-weight: 600;
 		margin-top: 2px;
 	}
 
-	.debt-amount-val {
-		font-weight: 800;
-		font-size: 1.05rem;
-	}
-
-	.debt-actions-row {
-		display: flex;
-		gap: 8px;
-		border-top: 1px solid var(--border-color);
-		padding-top: 10px;
-		justify-content: flex-end;
-	}
-
-	.action-btn {
-		padding: 6px 12px;
-		border-radius: 10px;
-		font-size: 0.74rem;
-		font-weight: 700;
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		cursor: pointer;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		color: var(--text-primary);
-		text-decoration: none;
-	}
-
-	.action-btn.settle {
-		background: var(--accent-primary);
-		color: white;
-		border-color: var(--accent-primary);
-	}
-
-	.action-btn.upi-pay {
-		background: #2563EB;
-		color: white;
-		border-color: #2563EB;
-	}
-
-	.empty-debts-card {
-		text-align: center;
-		padding: 40px 20px;
-		background: var(--bg-card);
-		border-radius: 20px;
-		border: 1px dashed var(--border-color);
-		color: var(--text-muted);
-	}
-
-	.settled-divider {
-		text-align: center;
-		font-size: 0.75rem;
-		font-weight: 700;
-		color: var(--text-muted);
-		margin: 10px 0;
-	}
-
-	.debt-card-item.settled {
-		opacity: 0.6;
-	}
-
-	/* Modal */
-	.modal-backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.65);
-		backdrop-filter: blur(5px);
-		z-index: 1000;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-	}
-
-	.modal-sheet {
-		background: var(--bg-card);
-		border-radius: 28px 28px 0 0;
-		padding: 24px;
+	.primary-btn-full {
 		width: 100%;
-		max-width: 600px;
-		border: 1px solid var(--border-color);
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.95rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
+		min-height: 46px;
 	}
 
-	.modal-header {
+	/* Active Tabs Ledger */
+	.debts-ledger-card {
+		padding: 1.35rem;
+	}
+
+	.ledger-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 6px;
+		margin-bottom: 1rem;
 	}
 
-	.modal-title {
-		font-size: 1.15rem;
+	.toggle-settled-link {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--accent-primary);
+	}
+
+	.debts-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.debt-row-card {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.85rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	.receive-border { border-left: 3px solid #10B981; }
+	.give-border { border-left: 3px solid #F43F5E; }
+
+	.debt-info-left {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-width: 0;
+	}
+
+	.friend-avatar {
+		width: 38px;
+		height: 38px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.76rem;
+		font-weight: 800;
+		flex-shrink: 0;
+	}
+
+	.receive-av { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+	.give-av { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+	.settled-av { background: var(--surface-3); color: var(--text-muted); }
+
+	.debt-text-col {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.debt-person-line {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.person-name {
+		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.close-btn {
-		background: transparent;
-		border: none;
+	.direction-tag {
+		font-size: 0.65rem;
+		font-weight: 700;
+		padding: 1px 5px;
+		border-radius: var(--border-radius-pill);
+	}
+
+	.tag-receive { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+	.tag-give { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+
+	.debt-meta-line {
+		font-size: 0.72rem;
 		color: var(--text-muted);
-		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		margin-top: 2px;
+		flex-wrap: wrap;
 	}
 
-	.modal-sub {
-		font-size: 0.85rem;
+	.upi-chip {
+		background: var(--bg-card);
+		border: 1px solid var(--border-subtle);
+		padding: 1px 5px;
+		border-radius: var(--border-radius-xs);
+		font-size: 0.65rem;
 		color: var(--text-secondary);
-		margin-bottom: 18px;
 	}
 
-	.settle-options-stack {
+	.debt-action-right {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.debt-amount-figure {
+		font-size: 1.05rem;
+		font-weight: 800;
+	}
+
+	.debt-btns-row {
+		display: flex;
+		align-items: center;
+		gap: 5px;
+	}
+
+	.icon-action-btn {
+		width: 30px;
+		height: 30px;
+		border-radius: 50%;
+		background: var(--bg-card);
+		border: 1px solid var(--border-subtle);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--text-secondary);
+	}
+
+	.icon-action-btn:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+
+	.upi-pay-btn {
+		color: var(--accent-primary);
+		text-decoration: none;
+	}
+
+	.settle-pill-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-size: 0.72rem;
+		font-weight: 800;
+		padding: 0.35rem 0.65rem;
+		border-radius: var(--border-radius-pill);
+	}
+
+	.settled-card {
+		opacity: 0.65;
+		border-left: 3px solid var(--border-strong);
+	}
+
+	.settled-txt {
+		color: var(--text-muted) !important;
+	}
+
+	.settled-archive-divider {
+		font-size: 0.72rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
+		text-align: center;
+		margin: 0.5rem 0;
+	}
+
+	.empty-debts-box {
+		text-align: center;
+		padding: 2.5rem 1rem;
 		display: flex;
 		flex-direction: column;
-		gap: 12px;
+		align-items: center;
+		gap: 0.75rem;
+		color: var(--text-muted);
+		font-size: 0.84rem;
 	}
 
-	.option-card {
-		background: var(--bg-primary);
-		padding: 16px;
-		border-radius: 18px;
-		border: 1px solid var(--border-color);
+	/* Settlement Modal */
+	.sheet-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.5rem;
 	}
 
-	.option-card h4 {
-		font-size: 0.92rem;
-		font-weight: 700;
+	.sheet-top-row h3 {
+		font-size: 1.15rem;
+		font-weight: 800;
+	}
+
+	.sheet-sub {
+		font-size: 0.84rem;
+		color: var(--text-secondary);
+		margin-bottom: 1.25rem;
+	}
+
+	.settlement-options-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+	}
+
+	.settle-choice-card {
+		background: var(--surface-2);
+		border-radius: var(--border-radius);
+		padding: 1rem;
+		border: 1px solid var(--border-subtle);
+	}
+
+	.settle-choice-card h4 {
+		font-size: 0.88rem;
+		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 4px;
+		margin-bottom: 3px;
 	}
 
-	.opt-desc {
+	.choice-desc {
 		font-size: 0.76rem;
 		color: var(--text-muted);
-		margin-bottom: 12px;
+		margin-bottom: 0.75rem;
 	}
 
-	.wallet-picker-row {
+	.choice-input-row {
 		display: flex;
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.wallet-picker-row select {
+	.wallet-select {
 		flex: 1;
+		min-height: 40px;
+		padding: 0.4rem 0.75rem;
+		font-size: 0.82rem;
 	}
 
-	.primary-btn.mini {
-		padding: 8px 14px;
-		font-size: 0.8rem;
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		border-radius: 12px;
-		font-weight: 700;
-		cursor: pointer;
+	.primary-btn-mini {
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		padding: 0.4rem 0.85rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.78rem;
+		white-space: nowrap;
 	}
 
-	.secondary-btn {
+	.secondary-btn-full {
 		width: 100%;
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
-		padding: 10px;
-		border-radius: 12px;
+		font-size: 0.82rem;
 		font-weight: 700;
-		cursor: pointer;
+		padding: 0.65rem;
+		border-radius: var(--border-radius-pill);
 	}
 
-	.toast {
-		position: fixed;
-		top: 24px;
-		left: 50%;
-		transform: translateX(-50%);
-		background: var(--accent-primary);
-		color: white;
-		padding: 10px 20px;
-		border-radius: 9999px;
-		font-size: 0.85rem;
-		font-weight: 700;
-		box-shadow: var(--shadow-md);
-		z-index: 1001;
+	@media (max-width: 520px) {
+		.form-inputs-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.debt-row-card {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.debt-action-right {
+			width: 100%;
+			justify-content: space-between;
+			border-top: 1px solid var(--border-subtle);
+			padding-top: 0.5rem;
+			margin-top: 0.25rem;
+		}
 	}
 </style>

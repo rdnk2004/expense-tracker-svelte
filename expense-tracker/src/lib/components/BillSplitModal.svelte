@@ -7,7 +7,6 @@
 		Trash2,
 		X,
 		Check,
-		Share2,
 		Receipt,
 		CreditCard,
 		Sparkles
@@ -18,7 +17,7 @@
 		onSuccess?: () => void;
 	}>();
 
-	let title = $state('Campus Group Split');
+	let title = $state('Campus Outing / Feast');
 	let totalAmountStr = $state('');
 	let selectedWalletId = $state($wallets[0]?.id || '');
 	let splitMethod = $state<'equal' | 'custom'>('equal');
@@ -62,7 +61,6 @@
 		}
 
 		try {
-			// 1. Calculate each friend's share
 			const participants = validFriends.map((f) => {
 				const share =
 					splitMethod === 'equal'
@@ -80,12 +78,10 @@
 				? totalAmountPaise - participants.reduce((sum, p) => sum + p.shareAmount, 0)
 				: 0;
 
-			// 2. Log full expense or your share to wallet
 			const foodCategory = (await db.getCategories()).find((c) =>
 				c.name.toLowerCase().includes('food')
 			);
 
-			// Log your personal share as an Expense
 			if (youIncluded && yourSharePaise > 0) {
 				await addExpense({
 					walletId: selectedWalletId || $wallets[0]?.id,
@@ -98,7 +94,6 @@
 				});
 			}
 
-			// 3. Create 'receive' Debts for all friends
 			for (const p of participants) {
 				await addDebt({
 					person: p.name,
@@ -110,7 +105,6 @@
 				});
 			}
 
-			// 4. Save to BillSplits collection
 			await db.addBillSplit({
 				title,
 				totalAmount: totalAmountPaise,
@@ -144,43 +138,43 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
+			<div class="sheet-top-row">
 				<div class="title-wrap">
-					<Users size={22} class="text-accent" />
+					<Users size={20} color="var(--accent-primary)" />
 					<h3 class="modal-title">Campus Bill Splitter</h3>
 				</div>
 				<button class="close-btn" onclick={() => (open = false)}>✕</button>
 			</div>
 
-			<div class="modal-body">
+			<div class="modal-body-scroll">
 				<!-- Title & Total Amount -->
-				<div class="form-row">
-					<div class="field-col flex-2">
-						<label for="split-title">Bill / Event Name</label>
-						<input id="split-title" type="text" bind:value={title} placeholder="e.g. Swiggy treat, Canteen bill" />
+				<div class="form-grid-two">
+					<div class="field-col">
+						<label for="s-title">Event / Bill Note</label>
+						<input id="s-title" type="text" bind:value={title} placeholder="e.g. Canteen Feast, Swiggy" />
 					</div>
-					<div class="field-col flex-1">
-						<label for="split-amount">Total Bill (₹)</label>
-						<input id="split-amount" type="number" bind:value={totalAmountStr} placeholder="900" step="1" min="0" />
+					<div class="field-col">
+						<label for="s-amount">Total Bill (₹)</label>
+						<input id="s-amount" type="number" bind:value={totalAmountStr} placeholder="900" step="1" min="0" class="tabular" />
 					</div>
 				</div>
 
 				<!-- Wallet Selection -->
-				<div class="wallet-select-row">
-					<label for="split-wallet">Paid From Wallet:</label>
-					<select id="split-wallet" bind:value={selectedWalletId}>
+				<div class="form-field-row">
+					<label for="s-wallet">Paid From Wallet:</label>
+					<select id="s-wallet" bind:value={selectedWalletId}>
 						{#each $wallets as w}
 							<option value={w.id}>{w.name} ({formatCurrency(w.balance)})</option>
 						{/each}
 					</select>
 				</div>
 
-				<!-- Split Method Controls -->
-				<div class="method-toggle-row">
-					<div class="toggle-group">
+				<!-- Split Controls -->
+				<div class="method-toggle-container">
+					<div class="toggle-pills">
 						<button
 							type="button"
-							class="toggle-btn"
+							class="pill-btn"
 							class:active={splitMethod === 'equal'}
 							onclick={() => (splitMethod = 'equal')}
 						>
@@ -188,7 +182,7 @@
 						</button>
 						<button
 							type="button"
-							class="toggle-btn"
+							class="pill-btn"
 							class:active={splitMethod === 'custom'}
 							onclick={() => (splitMethod = 'custom')}
 						>
@@ -196,30 +190,30 @@
 						</button>
 					</div>
 
-					<label class="checkbox-label">
+					<label class="include-me-toggle">
 						<input type="checkbox" bind:checked={youIncluded} />
-						<span>Include Me in Split</span>
+						<span>Include Me ({youIncluded ? 'Yes' : 'No'})</span>
 					</label>
 				</div>
 
 				{#if splitMethod === 'equal' && totalAmountPaise > 0}
-					<div class="split-preview-banner">
-						<span>Each person pays: <strong>{formatCurrency(equalSharePaise)}</strong> ({totalPeopleCount} people)</span>
+					<div class="equal-preview-pill">
+						<span>Each share: <strong class="tabular">{formatCurrency(equalSharePaise)}</strong> ({totalPeopleCount} people)</span>
 					</div>
 				{/if}
 
 				<!-- Friends List -->
-				<div class="friends-section">
-					<div class="friends-header">
-						<span>Friends Sharing This Bill</span>
-						<button type="button" class="add-friend-btn" onclick={addFriendRow}>
-							<Plus size={14} /> Add Friend
+				<div class="friends-box">
+					<div class="friends-box-header">
+						<span>Friends in this Tab</span>
+						<button type="button" class="mini-add-friend" onclick={addFriendRow}>
+							<Plus size={13} /> Add Person
 						</button>
 					</div>
 
-					<div class="friends-list-stack">
+					<div class="friends-list-cards">
 						{#each friends as friend, index}
-							<div class="friend-row-card">
+							<div class="friend-card-row">
 								<input
 									type="text"
 									placeholder="Friend's Name"
@@ -231,11 +225,11 @@
 										type="number"
 										placeholder="₹ Amount"
 										bind:value={friend.amountStr}
-										class="friend-amount-input"
+										class="friend-amount-input tabular"
 										step="1"
 									/>
 								{:else}
-									<div class="equal-badge">{formatCurrency(equalSharePaise)}</div>
+									<div class="equal-chip tabular">{formatCurrency(equalSharePaise)}</div>
 								{/if}
 								<input
 									type="text"
@@ -245,9 +239,10 @@
 								/>
 								<button
 									type="button"
-									class="remove-btn"
+									class="delete-friend-btn"
 									onclick={() => removeFriendRow(index)}
 									disabled={friends.length <= 1}
+									aria-label="Remove Friend"
 								>
 									<Trash2 size={15} />
 								</button>
@@ -257,10 +252,9 @@
 				</div>
 			</div>
 
-			<div class="modal-footer">
-				<button class="secondary-btn" onclick={() => (open = false)}>Cancel</button>
-				<button class="primary-btn" onclick={handleSaveSplit}>
-					Split & Create Receivables
+			<div class="sheet-action-footer">
+				<button class="primary-btn-full" onclick={handleSaveSplit}>
+					Split & Auto-Create Tabs
 				</button>
 			</div>
 		</div>
@@ -268,261 +262,204 @@
 {/if}
 
 <style>
-	.modal-backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.65);
-		backdrop-filter: blur(5px);
-		z-index: 1000;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-	}
-
-	.modal-sheet {
-		background: var(--bg-card);
-		border-radius: 28px 28px 0 0;
-		padding: 24px;
-		width: 100%;
-		max-width: 600px;
-		max-height: 85vh;
-		overflow-y: auto;
-		border: 1px solid var(--border-color);
-		box-shadow: var(--shadow-lg);
-	}
-
-	.modal-header {
+	.sheet-top-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16px;
+		margin-bottom: 1.15rem;
 	}
 
 	.title-wrap {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 6px;
 	}
 
 	.modal-title {
-		font-size: 1.2rem;
+		font-size: 1.15rem;
 		font-weight: 800;
-		color: var(--text-primary);
+		margin: 0;
 	}
 
-	.close-btn {
-		background: transparent;
-		border: none;
-		font-size: 1.2rem;
-		color: var(--text-muted);
-		cursor: pointer;
-	}
-
-	.form-row {
+	.modal-body-scroll {
 		display: flex;
-		gap: 10px;
-		margin-bottom: 14px;
+		flex-direction: column;
+		gap: 0.85rem;
+		max-height: 60vh;
+		max-height: 60dvh;
+		overflow-y: auto;
+		padding-right: 2px;
+	}
+
+	.form-grid-two {
+		display: grid;
+		grid-template-columns: 2fr 1fr;
+		gap: 8px;
 	}
 
 	.field-col {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
 	}
 
-	.flex-2 { flex: 2; }
-	.flex-1 { flex: 1; }
-
-	label {
-		font-size: 0.75rem;
-		font-weight: 700;
-		color: var(--text-muted);
-		text-transform: uppercase;
-	}
-
-	input, select {
-		padding: 10px 14px;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		color: var(--text-primary);
-		font-size: 0.9rem;
-		font-weight: 600;
-	}
-
-	input:focus, select:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-	}
-
-	.wallet-select-row {
+	.form-field-row {
 		display: flex;
-		align-items: center;
-		gap: 10px;
-		margin-bottom: 14px;
+		flex-direction: column;
 	}
 
-	.wallet-select-row select {
-		flex: 1;
-	}
-
-	.method-toggle-row {
+	.method-toggle-container {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 12px;
 		flex-wrap: wrap;
 		gap: 8px;
+		background: var(--surface-2);
+		padding: 6px 10px;
+		border-radius: var(--border-radius);
+		border: 1px solid var(--border-subtle);
 	}
 
-	.toggle-group {
+	.toggle-pills {
 		display: flex;
-		background: var(--bg-primary);
-		padding: 3px;
-		border-radius: 12px;
-		border: 1px solid var(--border-color);
+		background: var(--bg-card);
+		border-radius: var(--border-radius-pill);
+		padding: 2px;
+		border: 1px solid var(--border-subtle);
 	}
 
-	.toggle-btn {
-		padding: 6px 12px;
-		border-radius: 9px;
-		border: none;
-		background: transparent;
+	.pill-btn {
+		padding: 0.35rem 0.65rem;
 		font-size: 0.76rem;
 		font-weight: 700;
-		color: var(--text-muted);
-		cursor: pointer;
+		color: var(--text-secondary);
+		border-radius: var(--border-radius-pill);
 	}
 
-	.toggle-btn.active {
+	.pill-btn.active {
 		background: var(--accent-primary);
-		color: white;
+		color: #080C14;
 	}
 
-	.checkbox-label {
+	.include-me-toggle {
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.8rem;
-		color: var(--text-secondary);
-		cursor: pointer;
+		font-size: 0.76rem;
 		font-weight: 600;
+		color: var(--text-primary);
+		cursor: pointer;
+		margin: 0;
+		text-transform: none;
+		letter-spacing: normal;
 	}
 
-	.split-preview-banner {
-		background: rgba(124, 58, 237, 0.08);
-		border: 1px solid rgba(124, 58, 237, 0.2);
-		color: var(--accent-primary);
-		padding: 8px 14px;
-		border-radius: 12px;
-		font-size: 0.82rem;
-		margin-bottom: 14px;
+	.include-me-toggle input {
+		width: 16px;
+		height: 16px;
+		min-height: auto;
+	}
+
+	.equal-preview-pill {
+		background: var(--success-bg);
+		border: 1px solid var(--success-border);
+		color: var(--success);
+		padding: 0.45rem 0.85rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.78rem;
 		text-align: center;
 	}
 
-	.friends-section {
-		margin-bottom: 18px;
+	.friends-box {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius);
+		padding: 0.85rem;
 	}
 
-	.friends-header {
+	.friends-box-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 8px;
-		font-size: 0.82rem;
-		font-weight: 700;
-		color: var(--text-primary);
+		font-size: 0.76rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-muted);
+		margin-bottom: 0.65rem;
 	}
 
-	.add-friend-btn {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		color: var(--accent-primary);
-		padding: 4px 10px;
-		border-radius: 8px;
-		font-size: 0.74rem;
-		font-weight: 700;
-		cursor: pointer;
-		display: flex;
+	.mini-add-friend {
+		display: inline-flex;
 		align-items: center;
-		gap: 4px;
+		gap: 3px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--accent-primary);
 	}
 
-	.friends-list-stack {
+	.friends-list-cards {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.friend-row-card {
-		display: flex;
+	.friend-card-row {
+		display: grid;
+		grid-template-columns: 1fr 90px 1fr 32px;
+		gap: 6px;
 		align-items: center;
-		gap: 8px;
-		background: var(--bg-primary);
-		padding: 8px 12px;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
 	}
 
-	.friend-name-input {
-		flex: 2;
-		padding: 8px 10px;
-		font-size: 0.85rem;
-	}
-
-	.friend-amount-input {
-		flex: 1;
-		padding: 8px 10px;
-		font-size: 0.85rem;
-	}
-
-	.equal-badge {
-		font-size: 0.85rem;
-		font-weight: 700;
-		color: var(--text-primary);
-		padding: 0 8px;
-	}
-
-	.friend-upi-input {
-		flex: 2;
-		padding: 8px 10px;
+	.friend-card-row input {
+		min-height: 36px;
+		padding: 0.4rem 0.65rem;
 		font-size: 0.8rem;
 	}
 
-	.remove-btn {
-		background: transparent;
-		border: none;
-		color: var(--danger, #FF3366);
-		cursor: pointer;
-		padding: 4px;
-	}
-
-	.modal-footer {
-		display: flex;
-		gap: 10px;
-		margin-top: 14px;
-	}
-
-	.secondary-btn {
-		flex: 1;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 12px;
-		border-radius: 14px;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.primary-btn {
-		flex: 2;
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 12px;
-		border-radius: 14px;
+	.equal-chip {
+		background: var(--bg-card);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-pill);
+		padding: 0.4rem 0.5rem;
+		font-size: 0.78rem;
 		font-weight: 800;
-		cursor: pointer;
-		box-shadow: 0 4px 15px var(--accent-glow);
+		text-align: center;
+		color: var(--text-primary);
+	}
+
+	.delete-friend-btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--danger);
+		background: var(--danger-bg);
+	}
+
+	.sheet-action-footer {
+		margin-top: 1.15rem;
+	}
+
+	.primary-btn-full {
+		width: 100%;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.95rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
+	}
+
+	@media (max-width: 520px) {
+		.friend-card-row {
+			grid-template-columns: 1fr 1fr 32px;
+		}
+
+		.friend-upi-input {
+			grid-column: span 3;
+		}
 	}
 </style>
