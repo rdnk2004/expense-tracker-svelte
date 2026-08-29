@@ -23,9 +23,6 @@
 		GraduationCap,
 		Clock,
 		Flame,
-		Smile,
-		Meh,
-		Frown,
 		Trash2,
 		X
 	} from 'lucide-svelte';
@@ -35,11 +32,9 @@
 	let activeValueFilter = $state<'all' | 'need' | 'want' | 'growth' | 'regretted'>('all');
 	let searchQuery = $state('');
 
-	// Selected transaction for satisfaction rating modal
 	let selectedExpense = $state<Expense | null>(null);
 	let showSatisfactionModal = $state(false);
 
-	// Merge and process transactions
 	let allTransactions = $derived.by(() => {
 		const expenseItems = $expenses.map((e) => ({
 			...e,
@@ -53,10 +48,10 @@
 			type: 'transfer',
 			categoryId: 'transfer',
 			displayName: t.note || 'Transfer',
-			walletName: `${$wallets.find((w) => w.id === t.fromWalletId)?.name} -> ${$wallets.find((w) => w.id === t.toWalletId)?.name}`
+			walletName: `${$wallets.find((w) => w.id === t.fromWalletId)?.name} ➔ ${$wallets.find((w) => w.id === t.toWalletId)?.name}`
 		}));
 
-		// @ts-ignore - Merging types loosely for display
+		// @ts-ignore
 		return [...expenseItems, ...transferItems].sort(
 			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
 		);
@@ -106,18 +101,18 @@
 	}
 </script>
 
-<div class="page-container">
+<div class="transactions-page">
 	<div class="header-section">
 		<h1 class="page-title">Transactions & Audit</h1>
 
-		<!-- Search Bar -->
-		<div class="search-bar">
-			<Search size={18} class="search-input-icon" />
+		<!-- Search Input Bar -->
+		<div class="search-wrap">
+			<Search size={16} class="search-icon" />
 			<input type="text" placeholder="Search transactions, notes, items..." bind:value={searchQuery} />
 		</div>
 
-		<!-- Segment Control -->
-		<div class="segment-control">
+		<!-- Segment Switcher Tabs -->
+		<div class="segment-tabs">
 			<button
 				class="segment-btn"
 				class:active={activeSegment === 'all'}
@@ -130,57 +125,57 @@
 				class:active={activeSegment === 'expense'}
 				onclick={() => (activeSegment = 'expense')}
 			>
-				Expense
+				Outflows
 			</button>
 			<button
 				class="segment-btn"
 				class:active={activeSegment === 'income'}
 				onclick={() => (activeSegment = 'income')}
 			>
-				Income
+				Inflows
 			</button>
 			<button
 				class="segment-btn"
 				class:active={activeSegment === 'transfer'}
 				onclick={() => (activeSegment = 'transfer')}
 			>
-				Transfer
+				Transfers
 			</button>
 		</div>
 
-		<!-- Value Tag Filter Pills (for Mindful Spending Review) -->
+		<!-- Value Tag Filter Pills -->
 		{#if activeSegment === 'all' || activeSegment === 'expense'}
-			<div class="value-filter-chips">
+			<div class="filter-chips-row">
 				<button
-					class="v-chip"
+					class="filter-chip"
 					class:active={activeValueFilter === 'all'}
 					onclick={() => (activeValueFilter = 'all')}
 				>
 					All Tags
 				</button>
 				<button
-					class="v-chip chip-need"
+					class="filter-chip chip-need"
 					class:active={activeValueFilter === 'need'}
 					onclick={() => (activeValueFilter = 'need')}
 				>
 					⚡ Needs
 				</button>
 				<button
-					class="v-chip chip-want"
+					class="filter-chip chip-want"
 					class:active={activeValueFilter === 'want'}
 					onclick={() => (activeValueFilter = 'want')}
 				>
 					✨ Wants
 				</button>
 				<button
-					class="v-chip chip-growth"
+					class="filter-chip chip-growth"
 					class:active={activeValueFilter === 'growth'}
 					onclick={() => (activeValueFilter = 'growth')}
 				>
 					📚 Growth
 				</button>
 				<button
-					class="v-chip chip-regret"
+					class="filter-chip chip-regret"
 					class:active={activeValueFilter === 'regretted'}
 					onclick={() => (activeValueFilter = 'regretted')}
 				>
@@ -190,7 +185,8 @@
 		{/if}
 	</div>
 
-	<div class="transactions-list">
+	<!-- Transaction List Feed -->
+	<div class="feed-container">
 		{#each filteredTransactions as transaction (transaction.id)}
 			{@const isExpense = transaction.type === 'expense'}
 			{@const isIncome = transaction.type === 'income'}
@@ -198,30 +194,36 @@
 			{@const category = getCategoryById(transaction.categoryId)}
 			{@const exp = isExpense ? (transaction as unknown as Expense) : null}
 
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
-				class="transaction-card"
+				class="transaction-row card"
+				role="button"
+				tabindex="0"
 				onclick={() => {
 					if (isExpense && exp) {
 						selectedExpense = exp;
 						showSatisfactionModal = true;
 					}
 				}}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' && isExpense && exp) {
+						selectedExpense = exp;
+						showSatisfactionModal = true;
+					}
+				}}
 			>
-				<div class="icon-wrapper" class:income={isIncome} class:transfer={isTransfer}>
+				<div class="icon-wrap" class:income={isIncome} class:transfer={isTransfer}>
 					{#if isTransfer}
-						<ArrowRightLeft size={20} />
+						<ArrowRightLeft size={18} color="var(--accent-primary)" />
 					{:else if isIncome}
-						<ArrowDownLeft size={20} />
+						<ArrowDownLeft size={18} color="#10B981" />
 					{:else}
-						<CategoryIcon icon={category?.icon || 'Receipt'} size={20} />
+						<CategoryIcon icon={category?.icon || 'Receipt'} color={category?.color || '#10B981'} size={18} />
 					{/if}
 				</div>
 
-				<div class="details">
-					<div class="title-row">
-						<span class="title">
+				<div class="details-col">
+					<div class="title-line">
+						<span class="tx-title">
 							{#if isTransfer}
 								Transfer
 							{:else}
@@ -229,7 +231,7 @@
 							{/if}
 						</span>
 						{#if isExpense && exp}
-							<div class="tag-badges-row">
+							<div class="badges-wrap">
 								{#if exp.valueTag}
 									<span class="tag-pill tag-{exp.valueTag}">
 										{exp.valueTag === 'need' ? '⚡ Need' : exp.valueTag === 'want' ? '✨ Want' : '📚 Growth'}
@@ -244,31 +246,31 @@
 						{/if}
 					</div>
 
-					<div class="subtitle">
-						{transaction.displayName} • {formatDate(transaction.date)}
+					<div class="meta-line">
+						<span>{transaction.displayName}</span>
+						<span class="bullet">•</span>
+						<span>{formatDate(transaction.date)}</span>
+						{#if transaction.walletName}
+							<span class="bullet">•</span>
+							<span class="wallet-tag">{transaction.walletName}</span>
+						{/if}
 					</div>
-
-					{#if isExpense}
-						<div class="time-cost-sub">
-							<Clock size={11} />
-							<span>{calculateHoursOfWork(transaction.amount, $studentProfile.hourlyWageRate)} of work</span>
-						</div>
-					{/if}
 				</div>
 
-				<div class="amount" class:positive={isIncome} class:neutral={isTransfer}>
-					{isExpense ? '-' : isIncome ? '+' : ''}{formatCurrency(transaction.amount)}
+				<div class="amount-col tabular" class:income-amount={isIncome}>
+					{isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}
 				</div>
 			</div>
 		{:else}
-			<div class="empty-state">
-				<p>No transactions found matching criteria.</p>
+			<div class="empty-feed card">
+				<Receipt size={32} color="var(--text-muted)" />
+				<p>No matching transactions found.</p>
 			</div>
 		{/each}
 	</div>
 </div>
 
-<!-- Satisfaction Audit Modal -->
+<!-- Mindful Satisfaction Rating & Audit Sheet -->
 {#if showSatisfactionModal && selectedExpense}
 	<div
 		class="modal-backdrop"
@@ -285,17 +287,14 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
-				<h3 class="modal-title">Spend Satisfaction Check</h3>
+			<div class="sheet-top-row">
+				<h3>Mindful Spending Audit</h3>
 				<button class="close-btn" onclick={() => (showSatisfactionModal = false)}>✕</button>
 			</div>
 
-			<div class="audit-item-info">
-				<div class="audit-item-note">{selectedExpense.note || 'Expense'}</div>
-				<div class="audit-item-amount">{formatCurrency(selectedExpense.amount)}</div>
-				<div class="audit-item-meta">
-					Logged on {formatDate(selectedExpense.date)} • Cost: {calculateHoursOfWork(selectedExpense.amount, $studentProfile.hourlyWageRate)} of work
-				</div>
+			<div class="audit-summary-box">
+				<div class="audit-amount tabular">{formatCurrency(selectedExpense.amount)}</div>
+				<div class="audit-note">{selectedExpense.note || 'Expense Outlay'} • {formatDate(selectedExpense.date)}</div>
 			</div>
 
 			<p class="audit-question">Looking back, was this purchase genuinely worth it?</p>
@@ -308,7 +307,7 @@
 				>
 					<span class="emoji">🔥</span>
 					<strong>Worth It</strong>
-					<span class="sub">No regrets, loved it</span>
+					<span class="sub">Loved it / high utility</span>
 				</button>
 
 				<button
@@ -332,7 +331,7 @@
 				</button>
 			</div>
 
-			<div class="modal-actions-row">
+			<div class="sheet-delete-row">
 				<button class="delete-btn" onclick={() => handleDeleteExpense(selectedExpense!.id)}>
 					<Trash2 size={16} />
 					<span>Delete Transaction</span>
@@ -343,371 +342,293 @@
 {/if}
 
 <style>
-	.page-container {
-		max-width: 620px;
+	.transactions-page {
+		max-width: 680px;
 		margin: 0 auto;
-		padding: 0 16px 120px 16px;
-		animation: fadeIn 0.4s ease-out;
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
 	}
 
 	.header-section {
-		margin-bottom: 20px;
-		padding-top: 8px;
+		margin-bottom: 1.25rem;
 	}
 
 	.page-title {
-		font-size: 1.75rem;
+		font-size: 1.65rem;
 		font-weight: 800;
-		margin-bottom: 16px;
+		color: var(--text-primary);
+		letter-spacing: -0.04em;
+		margin-bottom: 1rem;
+	}
+
+	.search-wrap {
+		position: relative;
+		margin-bottom: 0.75rem;
+	}
+
+	.search-wrap input {
+		width: 100%;
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
+		padding: 0.75rem 1rem 0.75rem 2.4rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.88rem;
 		color: var(--text-primary);
 	}
 
-	.search-bar {
-		position: relative;
-		margin-bottom: 14px;
-	}
-
-	.search-input-icon {
+	.search-icon {
 		position: absolute;
 		left: 14px;
 		top: 50%;
 		transform: translateY(-50%);
 		color: var(--text-muted);
+		pointer-events: none;
 	}
 
-	.search-bar input {
-		width: 100%;
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		padding: 12px 14px 12px 42px;
-		border-radius: 16px;
-		font-size: 0.92rem;
-		color: var(--text-primary);
-		transition: all 0.2s;
-	}
-
-	.search-bar input:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-		box-shadow: 0 0 0 3px var(--accent-glow);
-	}
-
-	.segment-control {
+	.segment-tabs {
 		display: flex;
-		background: var(--bg-card);
-		padding: 4px;
-		border-radius: 16px;
-		border: 1px solid var(--border-color);
-		margin-bottom: 12px;
+		background: var(--surface-2);
+		padding: 3px;
+		border-radius: var(--border-radius-pill);
+		border: 1px solid var(--border-subtle);
+		margin-bottom: 0.75rem;
 	}
 
 	.segment-btn {
 		flex: 1;
-		padding: 8px;
-		text-align: center;
-		border-radius: 12px;
-		font-size: 0.82rem;
-		font-weight: 600;
-		color: var(--text-muted);
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		transition: all 0.2s;
+		padding: 0.45rem 0.6rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.78rem;
+		font-weight: 700;
+		color: var(--text-secondary);
+		transition: all 0.2s ease;
 	}
 
 	.segment-btn.active {
-		background: var(--accent-primary);
-		color: white;
-		box-shadow: 0 4px 12px var(--accent-glow);
-		font-weight: 700;
+		background: var(--bg-card);
+		color: var(--text-primary);
+		box-shadow: var(--shadow-xs);
 	}
 
-	.value-filter-chips {
+	.filter-chips-row {
 		display: flex;
 		gap: 6px;
 		overflow-x: auto;
-		padding-bottom: 4px;
+		padding-bottom: 2px;
 	}
 
-	.v-chip {
-		padding: 5px 12px;
-		border-radius: 9999px;
-		font-size: 0.75rem;
+	.filter-chip {
+		padding: 0.35rem 0.75rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.72rem;
 		font-weight: 700;
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		color: var(--text-muted);
-		cursor: pointer;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
 		white-space: nowrap;
-		transition: all 0.2s;
+		transition: all 0.2s ease;
 	}
 
-	.v-chip.active {
-		background: var(--text-primary);
-		color: var(--bg-primary);
-		border-color: var(--text-primary);
+	.filter-chip.active {
+		background: var(--accent-primary);
+		color: #080C14;
+		border-color: var(--accent-primary);
 	}
 
-	.transactions-list {
+	.feed-container {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 0.65rem;
 	}
 
-	.transaction-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 20px;
-		padding: 14px 16px;
+	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 14px;
+		gap: 0.85rem;
+		padding: 1rem 1.15rem;
 		cursor: pointer;
-		transition: transform 0.2s;
 	}
 
-	.transaction-card:active {
-		transform: scale(0.98);
-	}
-
-	.icon-wrapper {
-		width: 44px;
-		height: 44px;
-		border-radius: 14px;
-		background: var(--bg-primary);
+	.icon-wrap {
+		width: 40px;
+		height: 40px;
+		border-radius: var(--border-radius-sm);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--accent-primary);
+		flex-shrink: 0;
 	}
 
-	.icon-wrapper.income {
-		background: rgba(16, 185, 129, 0.12);
-		color: #10B981;
-	}
-
-	.icon-wrapper.transfer {
-		background: rgba(124, 58, 237, 0.12);
-		color: #7C3AED;
-	}
-
-	.details {
+	.details-col {
 		flex: 1;
+		min-width: 0;
 	}
 
-	.title-row {
+	.title-line {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 6px;
 		margin-bottom: 2px;
-		flex-wrap: wrap;
 	}
 
-	.title {
+	.tx-title {
+		font-size: 0.92rem;
 		font-weight: 700;
-		font-size: 0.95rem;
 		color: var(--text-primary);
 	}
 
-	.tag-badges-row {
+	.badges-wrap {
 		display: flex;
 		gap: 4px;
+	}
+
+	.meta-line {
+		font-size: 0.72rem;
+		color: var(--text-muted);
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.bullet {
+		color: var(--border-strong);
+	}
+
+	.wallet-tag {
+		color: var(--text-secondary);
+		font-weight: 600;
 	}
 
 	.tag-pill {
-		padding: 2px 7px;
-		border-radius: 9999px;
 		font-size: 0.65rem;
 		font-weight: 700;
+		padding: 1px 6px;
+		border-radius: var(--border-radius-pill);
 	}
 
-	.tag-need { background: rgba(37, 99, 235, 0.12); color: #2563EB; }
-	.tag-want { background: rgba(219, 39, 119, 0.12); color: #DB2777; }
-	.tag-growth { background: rgba(5, 150, 105, 0.12); color: #059669; }
-	.tag-worth { background: rgba(245, 158, 11, 0.15); color: #D97706; }
-	.tag-regret { background: rgba(255, 51, 102, 0.15); color: #FF3366; }
+	.tag-need { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+	.tag-want { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
+	.tag-growth { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
+	.tag-worth { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+	.tag-regret { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
 
-	.subtitle {
-		font-size: 0.78rem;
-		color: var(--text-muted);
-	}
-
-	.time-cost-sub {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		font-size: 0.72rem;
-		color: var(--accent-primary);
-		font-weight: 600;
-		margin-top: 2px;
-	}
-
-	.amount {
-		font-weight: 800;
+	.amount-col {
 		font-size: 1rem;
+		font-weight: 800;
 		color: var(--text-primary);
+		flex-shrink: 0;
 	}
 
-	.amount.positive {
-		color: var(--success, #10B981);
+	.income-amount {
+		color: #10B981;
 	}
 
-	.empty-state {
+	.empty-feed {
 		text-align: center;
-		padding: 40px 20px;
+		padding: 3rem 1.5rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
 		color: var(--text-muted);
 	}
 
-	/* Modal */
-	.modal-backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
-		z-index: 999;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-	}
-
-	.modal-sheet {
-		background: var(--bg-card);
-		border-radius: 28px 28px 0 0;
-		padding: 24px;
-		width: 100%;
-		max-width: 600px;
-		border: 1px solid var(--border-color);
-	}
-
-	.modal-header {
+	/* Audit Sheet */
+	.sheet-top-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 14px;
+		margin-bottom: 1.15rem;
 	}
 
-	.modal-title {
-		font-size: 1.15rem;
+	.audit-summary-box {
+		background: var(--surface-2);
+		border-radius: var(--border-radius);
+		padding: 1rem;
+		text-align: center;
+		margin-bottom: 1.15rem;
+		border: 1px solid var(--border-subtle);
+	}
+
+	.audit-amount {
+		font-size: 1.85rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.close-btn {
-		background: transparent;
-		border: none;
-		font-size: 1.2rem;
-		color: var(--text-muted);
-		cursor: pointer;
-	}
-
-	.audit-item-info {
-		background: var(--bg-primary);
-		padding: 14px;
-		border-radius: 18px;
-		border: 1px solid var(--border-color);
-		margin-bottom: 16px;
-	}
-
-	.audit-item-note {
-		font-weight: 700;
-		font-size: 1rem;
-		color: var(--text-primary);
-	}
-
-	.audit-item-amount {
-		font-size: 1.4rem;
-		font-weight: 800;
-		color: var(--accent-primary);
-		margin: 2px 0;
-	}
-
-	.audit-item-meta {
+	.audit-note {
 		font-size: 0.78rem;
 		color: var(--text-muted);
+		margin-top: 2px;
 	}
 
 	.audit-question {
 		font-size: 0.88rem;
-		font-weight: 700;
-		color: var(--text-primary);
-		margin-bottom: 12px;
+		color: var(--text-secondary);
+		text-align: center;
+		margin-bottom: 1rem;
+		font-weight: 600;
 	}
 
 	.satisfaction-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
-		margin-bottom: 20px;
+		gap: 8px;
+		margin-bottom: 1.25rem;
 	}
 
 	.satisfaction-btn {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		padding: 12px 8px;
-		border-radius: 16px;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 4px;
-		cursor: pointer;
-		transition: all 0.2s;
+		padding: 0.85rem 0.45rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		text-align: center;
+		gap: 2px;
+		transition: all 0.2s ease;
 	}
 
 	.satisfaction-btn .emoji {
 		font-size: 1.5rem;
+		margin-bottom: 2px;
 	}
 
 	.satisfaction-btn strong {
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		color: var(--text-primary);
 	}
 
 	.satisfaction-btn .sub {
 		font-size: 0.65rem;
 		color: var(--text-muted);
-		text-align: center;
 	}
 
-	.btn-worth.selected {
-		border-color: #F59E0B;
-		background: rgba(245, 158, 11, 0.12);
-	}
-
-	.btn-neutral.selected {
+	.satisfaction-btn.selected {
 		border-color: var(--accent-primary);
-		background: rgba(124, 58, 237, 0.12);
+		background: var(--bg-hover);
 	}
 
-	.btn-regret.selected {
-		border-color: #FF3366;
-		background: rgba(255, 51, 102, 0.12);
-	}
-
-	.modal-actions-row {
+	.sheet-delete-row {
 		display: flex;
-		justify-content: flex-end;
+		justify-content: center;
+		padding-top: 0.5rem;
 	}
 
 	.delete-btn {
-		background: transparent;
-		border: none;
-		color: var(--danger, #FF3366);
-		font-size: 0.82rem;
-		font-weight: 700;
-		cursor: pointer;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 6px;
+		color: var(--danger);
+		background: var(--danger-bg);
+		border: 1px solid var(--danger-border);
+		padding: 0.55rem 1.15rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
+		font-weight: 700;
 	}
 </style>

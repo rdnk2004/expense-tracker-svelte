@@ -24,7 +24,7 @@
 		Sparkles,
 		GraduationCap,
 		Clock,
-		Flame
+		ArrowRightLeft
 	} from 'lucide-svelte';
 
 	let amountStr = $state('0');
@@ -43,7 +43,6 @@
 	let showCategoryModal = $state(false);
 	let showSubcategoryModal = $state(false);
 
-	// Automatically select defaults when stores load
 	$effect(() => {
 		if ($wallets.length > 0 && !selectedWalletId) {
 			selectedWalletId = $wallets[0].id;
@@ -75,7 +74,6 @@
 		}
 	});
 
-	// Derived values
 	let displayAmount = $derived(amountStr === '' ? '0' : amountStr);
 	let amountNumber = $derived(parseFloat(amountStr) || 0);
 	let amountInPaise = $derived(Math.round(amountNumber * 100));
@@ -83,7 +81,6 @@
 	let selectedToWallet = $derived($wallets.find((w) => w.id === selectedToWalletId));
 	let selectedCategory = $derived($categories.find((c) => c.id === selectedCategoryId));
 
-	// Work-time equivalence calculation
 	let workTimeEquiv = $derived(
 		calculateHoursOfWork(amountInPaise, $studentProfile.hourlyWageRate || 20000)
 	);
@@ -104,7 +101,6 @@
 			if (amountStr === '0') {
 				amountStr = key;
 			} else {
-				// Prevent too many decimals
 				if (amountStr.includes('.') && amountStr.split('.')[1].length >= 2) return;
 				amountStr += key;
 			}
@@ -154,199 +150,178 @@
 	}
 </script>
 
-<div class="page-container">
-	<!-- Header -->
-	<div class="header">
-		<button class="icon-btn" onclick={() => goto('/')} aria-label="Go back">
-			<ArrowLeft size={24} />
+<div class="transaction-creator-page">
+	<!-- Top Navigation Bar -->
+	<header class="top-nav-bar">
+		<button class="back-btn" onclick={() => goto('/')} aria-label="Go back to Dashboard">
+			<ArrowLeft size={20} />
 		</button>
-		<div class="tabs">
-			<button class="tab" class:active={type === 'income'} onclick={() => (type = 'income')}
-				>Income</button
-			>
-			<button class="tab" class:active={type === 'expense'} onclick={() => (type = 'expense')}
-				>Expense</button
-			>
-			<button class="tab" class:active={type === 'transfer'} onclick={() => (type = 'transfer')}
-				>Transfer</button
-			>
-		</div>
-		<div style="width: 40px;"></div>
-	</div>
 
-	<!-- Amount Display with Live Student Work-Time Badge -->
-	<div class="amount-hero-section">
-		<div class="amount-display">
-			<span class="currency">₹</span>
-			<span class="value">{displayAmount}</span>
+		<div class="type-segment-tabs">
+			<button class="segment-tab" class:active={type === 'expense'} onclick={() => (type = 'expense')}>
+				Expense
+			</button>
+			<button class="segment-tab" class:active={type === 'income'} onclick={() => (type = 'income')}>
+				Income
+			</button>
+			<button class="segment-tab" class:active={type === 'transfer'} onclick={() => (type = 'transfer')}>
+				Transfer
+			</button>
 		</div>
 
+		<div class="header-placeholder"></div>
+	</header>
+
+	<div class="creator-content">
+		<!-- Hero Numeric Display -->
+		<div class="hero-amount-display">
+			<span class="currency-symbol">₹</span>
+			<span class="amount-digits tabular">{displayAmount}</span>
+		</div>
+
+		<!-- Real-time Student Labor-Cost Badge -->
 		{#if type === 'expense' && amountNumber > 0}
-			<div class="work-time-badge">
-				<Clock size={13} />
-				<span>Cost in Labor: <strong>{workTimeEquiv}</strong> of gig work</span>
+			<div class="labor-cost-banner">
+				<Clock size={13} color="var(--accent-primary)" />
+				<span>Cost in Labor: <strong class="tabular">{workTimeEquiv}</strong> of student work</span>
 			</div>
 		{/if}
-	</div>
 
-	<!-- Mindful Value Tagging Bar (Expense only) -->
-	{#if type === 'expense'}
-		<div class="value-tag-selector">
-			<button
-				type="button"
-				class="value-tag-btn tag-need"
-				class:selected={selectedValueTag === 'need'}
-				onclick={() => (selectedValueTag = 'need')}
-			>
-				<Zap size={14} />
-				<span>Need</span>
-			</button>
-			<button
-				type="button"
-				class="value-tag-btn tag-want"
-				class:selected={selectedValueTag === 'want'}
-				onclick={() => (selectedValueTag = 'want')}
-			>
-				<Sparkles size={14} />
-				<span>Want</span>
-			</button>
-			<button
-				type="button"
-				class="value-tag-btn tag-growth"
-				class:selected={selectedValueTag === 'growth'}
-				onclick={() => (selectedValueTag = 'growth')}
-			>
-				<GraduationCap size={14} />
-				<span>Growth</span>
-			</button>
-		</div>
-	{/if}
-
-	<!-- Controls / Inputs -->
-	{#if type === 'transfer'}
-		<div class="input-row">
-			<button class="input-pill" onclick={() => (showWalletModal = true)}>
-				<CreditCard size={16} />
-				<span>From: {selectedWallet?.name || 'Select'}</span>
-				<ChevronDown size={14} />
-			</button>
-			<button class="input-pill" onclick={() => (showToWalletModal = true)}>
-				<CreditCard size={16} />
-				<span>To: {selectedToWallet?.name || 'Select'}</span>
-				<ChevronDown size={14} />
-			</button>
-		</div>
-		<div class="input-row">
-			<button class="input-pill full" style="position: relative;">
-				<Calendar size={16} />
-				<span>Date: {new Date(date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-				<ChevronDown size={14} />
-				<input
-					type="date"
-					bind:value={date}
-					style="position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;"
-				/>
-			</button>
-		</div>
-	{:else}
-		<div class="input-row">
-			<button class="input-pill" onclick={() => (showWalletModal = true)}>
-				<CreditCard size={16} />
-				<span>{selectedWallet?.name || 'Wallet'}</span>
-				<ChevronDown size={14} />
-			</button>
-			<button class="input-pill" style="position: relative;">
-				<Calendar size={16} />
-				<span>{new Date(date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</span>
-				<ChevronDown size={14} />
-				<input
-					type="date"
-					bind:value={date}
-					style="position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;"
-				/>
-			</button>
-		</div>
-
+		<!-- Mindful Value Tagging Selector (Expense only) -->
 		{#if type === 'expense'}
-			<div class="input-row">
-				{#if selectedCategory && selectedCategory.subcategories.length > 0}
-					<button class="input-pill" onclick={() => (showCategoryModal = true)}>
-						<span>{selectedCategory.name}</span>
-						<ChevronDown size={14} />
-					</button>
-					<button class="input-pill" onclick={() => (showSubcategoryModal = true)}>
-						<span>{selectedSubcategory || 'Subcategory'}</span>
-						<ChevronDown size={14} />
-					</button>
-				{:else}
-					<button class="input-pill full" onclick={() => (showCategoryModal = true)}>
-						<span>{selectedCategory?.name || 'Select Category'}</span>
-						<ChevronDown size={14} />
+			<div class="value-tag-selector">
+				<button
+					type="button"
+					class="tag-btn tag-need"
+					class:selected={selectedValueTag === 'need'}
+					onclick={() => (selectedValueTag = 'need')}
+				>
+					<Zap size={14} />
+					<span>Need (Essential)</span>
+				</button>
+				<button
+					type="button"
+					class="tag-btn tag-want"
+					class:selected={selectedValueTag === 'want'}
+					onclick={() => (selectedValueTag = 'want')}
+				>
+					<Sparkles size={14} />
+					<span>Want (Fun)</span>
+				</button>
+				<button
+					type="button"
+					class="tag-btn tag-growth"
+					class:selected={selectedValueTag === 'growth'}
+					onclick={() => (selectedValueTag = 'growth')}
+				>
+					<GraduationCap size={14} />
+					<span>Growth</span>
+				</button>
+			</div>
+		{/if}
+
+		<!-- Selector Pills Row -->
+		{#if type === 'transfer'}
+			<div class="pill-selectors-row">
+				<button class="selector-pill" onclick={() => (showWalletModal = true)}>
+					<CreditCard size={15} color="var(--accent-primary)" />
+					<span class="pill-text">From: <strong>{selectedWallet?.name || 'Wallet'}</strong></span>
+					<ChevronDown size={13} />
+				</button>
+				<button class="selector-pill" onclick={() => (showToWalletModal = true)}>
+					<ArrowRightLeft size={15} color="var(--accent-primary)" />
+					<span class="pill-text">To: <strong>{selectedToWallet?.name || 'Wallet'}</strong></span>
+					<ChevronDown size={13} />
+				</button>
+			</div>
+		{:else}
+			<div class="pill-selectors-row">
+				<button class="selector-pill" onclick={() => (showWalletModal = true)}>
+					<CreditCard size={15} color="var(--accent-primary)" />
+					<span class="pill-text">{selectedWallet?.name || 'Select Wallet'}</span>
+					<ChevronDown size={13} />
+				</button>
+
+				{#if type === 'expense'}
+					<button class="selector-pill" onclick={() => (showCategoryModal = true)}>
+						<span class="pill-text">
+							<strong>{selectedCategory?.name || 'Category'}</strong>
+							{#if selectedSubcategory}
+								<small>• {selectedSubcategory}</small>
+							{/if}
+						</span>
+						<ChevronDown size={13} />
 					</button>
 				{/if}
+
+				<button class="selector-pill date-pill" style="position: relative;">
+					<Calendar size={15} />
+					<span class="pill-text">{new Date(date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</span>
+					<ChevronDown size={13} />
+					<input
+						type="date"
+						bind:value={date}
+						style="position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;"
+					/>
+				</button>
 			</div>
 		{/if}
-	{/if}
 
-	<!-- Description / Note Input -->
-	<div class="input-row note-row">
-		<input
-			type="text"
-			placeholder={type === 'income' ? 'Income source (e.g., Allowance, Freelance, Tutoring)...' : 'Add note (e.g. Swiggy treat, Notes printing)...'}
-			bind:value={description}
-			class="note-input"
-		/>
-	</div>
+		<!-- Note / Description Input -->
+		<div class="note-input-row">
+			<input
+				type="text"
+				placeholder={type === 'income' ? 'Income source (e.g. Allowance, Stipend, Tutoring)...' : 'Note (e.g. Canteen chai, Book photocopy)...'}
+				bind:value={description}
+				class="note-field"
+			/>
+		</div>
 
-	<!-- Spacer -->
-	<div class="spacer"></div>
-
-	<!-- Keypad -->
-	<div class="keypad-section">
-		<Keypad on:press={handleKeyPress} />
-		<button class="submit-btn" onclick={handleSubmit}>
-			Add {type === 'expense' ? 'Expense' : type === 'income' ? 'Income' : 'Transfer'}
-		</button>
+		<!-- Tactile Numeric Keypad & Submit Action -->
+		<div class="keypad-container">
+			<Keypad on:press={handleKeyPress} />
+			<button class="confirm-submit-btn" onclick={handleSubmit}>
+				Confirm {type === 'expense' ? 'Expense' : type === 'income' ? 'Inflow' : 'Transfer'}
+			</button>
+		</div>
 	</div>
 </div>
 
-<!-- Wallet Selection Modal -->
+<!-- Wallet Selection Bottom Sheet -->
 {#if showWalletModal}
 	<div
-		class="modal-overlay"
+		class="modal-backdrop"
 		onclick={() => (showWalletModal = false)}
 		role="button"
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showWalletModal = false)}
 	>
 		<div
-			class="modal"
+			class="modal-sheet"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
+			<div class="sheet-top-row">
 				<h3>Select Wallet</h3>
-				<button class="close-btn" onclick={() => (showWalletModal = false)} aria-label="Close"
-					><X size={20} /></button
-				>
+				<button class="close-btn" onclick={() => (showWalletModal = false)}>✕</button>
 			</div>
-			<div class="modal-list">
+			<div class="sheet-options-list">
 				{#each $wallets as wallet}
 					<button
-						class="modal-item"
+						class="sheet-option-item"
 						class:selected={selectedWalletId === wallet.id}
 						onclick={() => {
 							selectedWalletId = wallet.id;
 							showWalletModal = false;
 						}}
 					>
-						<span class="item-name">{wallet.name}</span>
-						<span class="item-balance">{formatCurrency(wallet.balance)}</span>
+						<span class="wallet-name">{wallet.name}</span>
+						<span class="wallet-bal tabular">{formatCurrency(wallet.balance)}</span>
 						{#if selectedWalletId === wallet.id}
-							<span class="check-icon"><Check size={18} /></span>
+							<Check size={18} color="var(--accent-primary)" />
 						{/if}
 					</button>
 				{/each}
@@ -355,43 +330,41 @@
 	</div>
 {/if}
 
-<!-- Target Wallet Selection Modal -->
+<!-- To Wallet Selection Bottom Sheet -->
 {#if showToWalletModal}
 	<div
-		class="modal-overlay"
+		class="modal-backdrop"
 		onclick={() => (showToWalletModal = false)}
 		role="button"
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showToWalletModal = false)}
 	>
 		<div
-			class="modal"
+			class="modal-sheet"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
+			<div class="sheet-top-row">
 				<h3>Select Destination Wallet</h3>
-				<button class="close-btn" onclick={() => (showToWalletModal = false)} aria-label="Close"
-					><X size={20} /></button
-				>
+				<button class="close-btn" onclick={() => (showToWalletModal = false)}>✕</button>
 			</div>
-			<div class="modal-list">
+			<div class="sheet-options-list">
 				{#each $wallets.filter((w) => w.id !== selectedWalletId) as wallet}
 					<button
-						class="modal-item"
+						class="sheet-option-item"
 						class:selected={selectedToWalletId === wallet.id}
 						onclick={() => {
 							selectedToWalletId = wallet.id;
 							showToWalletModal = false;
 						}}
 					>
-						<span class="item-name">{wallet.name}</span>
-						<span class="item-balance">{formatCurrency(wallet.balance)}</span>
+						<span class="wallet-name">{wallet.name}</span>
+						<span class="wallet-bal tabular">{formatCurrency(wallet.balance)}</span>
 						{#if selectedToWalletId === wallet.id}
-							<span class="check-icon"><Check size={18} /></span>
+							<Check size={18} color="var(--accent-primary)" />
 						{/if}
 					</button>
 				{/each}
@@ -400,43 +373,44 @@
 	</div>
 {/if}
 
-<!-- Category Selection Modal -->
+<!-- Category Selection Bottom Sheet -->
 {#if showCategoryModal}
 	<div
-		class="modal-overlay"
+		class="modal-backdrop"
 		onclick={() => (showCategoryModal = false)}
 		role="button"
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showCategoryModal = false)}
 	>
 		<div
-			class="modal"
+			class="modal-sheet category-sheet"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
+			<div class="sheet-top-row">
 				<h3>Select Category</h3>
-				<button class="close-btn" onclick={() => (showCategoryModal = false)} aria-label="Close"
-					><X size={20} /></button
-				>
+				<button class="close-btn" onclick={() => (showCategoryModal = false)}>✕</button>
 			</div>
-			<div class="modal-list category-grid">
+			<div class="categories-grid">
 				{#each $categories as category}
 					<button
-						class="modal-category-item"
+						class="cat-tile"
 						class:selected={selectedCategoryId === category.id}
 						onclick={() => {
 							selectedCategoryId = category.id;
 							showCategoryModal = false;
+							if (category.subcategories && category.subcategories.length > 0) {
+								showSubcategoryModal = true;
+							}
 						}}
 					>
-						<div class="cat-icon-badge" style="background: {category.color}20; color: {category.color};">
+						<div class="cat-icon-wrap" style="background: {category.color}20; color: {category.color};">
 							<CategoryIcon icon={category.icon} size={22} />
 						</div>
-						<span class="cat-label">{category.name}</span>
+						<span class="cat-name">{category.name}</span>
 					</button>
 				{/each}
 			</div>
@@ -444,55 +418,53 @@
 	</div>
 {/if}
 
-<!-- Subcategory Selection Modal -->
+<!-- Subcategory Selection Bottom Sheet -->
 {#if showSubcategoryModal && selectedCategory}
 	<div
-		class="modal-overlay"
+		class="modal-backdrop"
 		onclick={() => (showSubcategoryModal = false)}
 		role="button"
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showSubcategoryModal = false)}
 	>
 		<div
-			class="modal"
+			class="modal-sheet"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
 			tabindex="-1"
 		>
-			<div class="modal-header">
-				<h3>Select Subcategory</h3>
-				<button class="close-btn" onclick={() => (showSubcategoryModal = false)} aria-label="Close"
-					><X size={20} /></button
-				>
+			<div class="sheet-top-row">
+				<h3>{selectedCategory.name} Subcategories</h3>
+				<button class="close-btn" onclick={() => (showSubcategoryModal = false)}>✕</button>
 			</div>
-			<div class="modal-list">
+			<div class="sheet-options-list">
 				<button
-					class="modal-item"
+					class="sheet-option-item"
 					class:selected={selectedSubcategory === ''}
 					onclick={() => {
 						selectedSubcategory = '';
 						showSubcategoryModal = false;
 					}}
 				>
-					<span class="item-name">None</span>
+					<span>None (General)</span>
 					{#if selectedSubcategory === ''}
-						<span class="check-icon"><Check size={18} /></span>
+						<Check size={18} color="var(--accent-primary)" />
 					{/if}
 				</button>
 				{#each selectedCategory.subcategories as sub}
 					<button
-						class="modal-item"
+						class="sheet-option-item"
 						class:selected={selectedSubcategory === sub}
 						onclick={() => {
 							selectedSubcategory = sub;
 							showSubcategoryModal = false;
 						}}
 					>
-						<span class="item-name">{sub}</span>
+						<span>{sub}</span>
 						{#if selectedSubcategory === sub}
-							<span class="check-icon"><Check size={18} /></span>
+							<Check size={18} color="var(--accent-primary)" />
 						{/if}
 					</button>
 				{/each}
@@ -502,314 +474,294 @@
 {/if}
 
 <style>
-	.page-container {
+	.transaction-creator-page {
+		max-width: 520px;
+		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		min-height: 100vh;
-		max-width: 500px;
-		margin: 0 auto;
-		padding: 16px 20px 24px 20px;
+		min-height: calc(100vh - 100px);
+		min-height: calc(100dvh - 100px);
 	}
 
-	.header {
+	.top-nav-bar {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 12px;
+		margin-bottom: 1rem;
 	}
 
-	.icon-btn {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 8px;
+	.back-btn {
+		width: 40px;
+		height: 40px;
 		border-radius: 50%;
-		cursor: pointer;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: var(--text-primary);
+		transition: all 0.2s ease;
 	}
 
-	.tabs {
+	.back-btn:hover {
+		background: var(--bg-hover);
+	}
+
+	.type-segment-tabs {
 		display: flex;
-		background: var(--bg-card);
-		padding: 4px;
-		border-radius: 9999px;
-		border: 1px solid var(--border-color);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 3px;
+		border-radius: var(--border-radius-pill);
 	}
 
-	.tab {
-		padding: 6px 14px;
-		border-radius: 9999px;
-		border: none;
-		background: transparent;
-		font-size: 0.85rem;
+	.segment-tab {
+		padding: 0.35rem 0.85rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
 		font-weight: 700;
-		color: var(--text-muted);
-		cursor: pointer;
-		transition: all 0.2s;
+		color: var(--text-secondary);
+		transition: all 0.2s ease;
 	}
 
-	.tab.active {
-		background: var(--accent-primary);
-		color: white;
-		box-shadow: 0 4px 12px var(--accent-glow);
+	.segment-tab.active {
+		background: var(--bg-card);
+		color: var(--text-primary);
+		box-shadow: var(--shadow-xs);
 	}
 
-	.amount-hero-section {
-		text-align: center;
-		margin: 12px 0 16px 0;
+	.header-placeholder {
+		width: 40px;
 	}
 
-	.amount-display {
+	.creator-content {
 		display: flex;
-		justify-content: center;
+		flex-direction: column;
+		gap: 0.85rem;
+		flex: 1;
+	}
+
+	/* Hero Amount */
+	.hero-amount-display {
+		text-align: center;
+		padding: 1.25rem 0 0.5rem;
+		display: flex;
 		align-items: baseline;
+		justify-content: center;
 		gap: 4px;
 	}
 
-	.currency {
+	.currency-symbol {
 		font-size: 2rem;
-		font-weight: 700;
-		color: var(--text-muted);
+		font-weight: 800;
+		color: var(--accent-primary);
 	}
 
-	.value {
-		font-size: 3.2rem;
+	.amount-digits {
+		font-size: 3.25rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -1px;
+		line-height: 1;
+		letter-spacing: -0.04em;
 	}
 
-	.work-time-badge {
+	/* Labor Cost Badge */
+	.labor-cost-banner {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		gap: 6px;
-		background: rgba(124, 58, 237, 0.08);
-		border: 1px solid rgba(124, 58, 237, 0.2);
-		color: var(--accent-primary);
-		padding: 4px 12px;
-		border-radius: 9999px;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 0.35rem 0.85rem;
+		border-radius: var(--border-radius-pill);
 		font-size: 0.76rem;
-		font-weight: 600;
-		margin-top: 6px;
+		color: var(--text-secondary);
+		margin: 0 auto;
 	}
 
-	/* Value Tag Selector */
+	.labor-cost-banner strong {
+		color: var(--text-primary);
+	}
+
+	/* Value Tagging Selector */
 	.value-tag-selector {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
-		margin-bottom: 14px;
-	}
-
-	.value-tag-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		gap: 6px;
-		padding: 9px;
-		border-radius: 14px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-card);
-		font-size: 0.8rem;
-		font-weight: 700;
-		color: var(--text-secondary);
-		cursor: pointer;
-		transition: all 0.2s;
 	}
 
-	.value-tag-btn.tag-need.selected {
-		background: #2563EB;
-		color: white;
-		border-color: #2563EB;
-		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-	}
-
-	.value-tag-btn.tag-want.selected {
-		background: #DB2777;
-		color: white;
-		border-color: #DB2777;
-		box-shadow: 0 4px 12px rgba(219, 39, 119, 0.3);
-	}
-
-	.value-tag-btn.tag-growth.selected {
-		background: #059669;
-		color: white;
-		border-color: #059669;
-		box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-	}
-
-	.input-row {
+	.tag-btn {
 		display: flex;
-		gap: 8px;
-		margin-bottom: 10px;
+		align-items: center;
+		justify-content: center;
+		gap: 5px;
+		padding: 0.55rem 0.35rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
+		font-size: 0.76rem;
+		font-weight: 700;
+		transition: all 0.2s ease;
 	}
 
-	.input-pill {
+	.tag-btn.selected {
+		border-width: 2px;
+	}
+
+	.tag-need.selected { background: rgba(16, 185, 129, 0.15); color: #10B981; border-color: #10B981; }
+	.tag-want.selected { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border-color: #38BDF8; }
+	.tag-growth.selected { background: rgba(99, 102, 241, 0.15); color: #818CF8; border-color: #818CF8; }
+
+	/* Selector Pills Row */
+	.pill-selectors-row {
+		display: flex;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	.selector-pill {
 		flex: 1;
-		background: var(--bg-card);
+		min-width: 120px;
+		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 10px 14px;
-		border-radius: 14px;
-		font-size: 0.85rem;
-		font-weight: 600;
-		color: var(--text-primary);
+		border-radius: var(--border-radius-pill);
+		padding: 0.55rem 0.85rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		cursor: pointer;
-	}
-
-	.input-pill.full {
-		width: 100%;
-	}
-
-	.note-input {
-		width: 100%;
-		padding: 12px 16px;
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 14px;
-		font-size: 0.9rem;
+		gap: 6px;
+		font-size: 0.82rem;
 		color: var(--text-primary);
+		min-height: 42px;
 	}
 
-	.note-input:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-	}
-
-	.spacer {
+	.pill-text {
 		flex: 1;
+		text-align: left;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
-	.keypad-section {
-		margin-top: 10px;
-	}
-
-	.submit-btn {
+	/* Note input */
+	.note-input-row {
 		width: 100%;
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 15px;
-		border-radius: 18px;
-		font-size: 1rem;
-		font-weight: 800;
-		cursor: pointer;
-		margin-top: 12px;
-		box-shadow: 0 10px 25px var(--accent-glow);
-		transition: transform 0.2s;
 	}
 
-	.submit-btn:active {
-		transform: scale(0.98);
+	.note-field {
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		padding: 0.75rem 1rem;
+		font-size: 0.88rem;
+		min-height: 44px;
 	}
 
-	/* Modals */
-	.modal-overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
-		z-index: 999;
+	/* Keypad & Confirm */
+	.keypad-container {
+		margin-top: auto;
 		display: flex;
-		align-items: flex-end;
+		flex-direction: column;
+		gap: 10px;
+		padding-top: 0.5rem;
+	}
+
+	.confirm-submit-btn {
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 1rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
+		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		min-height: 50px;
+		display: flex;
+		align-items: center;
 		justify-content: center;
 	}
 
-	.modal {
-		background: var(--bg-card);
-		border-radius: 28px 28px 0 0;
-		padding: 24px;
-		width: 100%;
-		max-width: 500px;
-		max-height: 70vh;
-		overflow-y: auto;
-		border: 1px solid var(--border-color);
+	.confirm-submit-btn:hover {
+		filter: brightness(1.1);
 	}
 
-	.modal-header {
+	.confirm-submit-btn:active {
+		transform: scale(0.97);
+	}
+
+	/* Bottom Sheets */
+	.sheet-top-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16px;
+		margin-bottom: 1.15rem;
 	}
 
-	.modal-header h3 {
+	.sheet-top-row h3 {
 		font-size: 1.1rem;
 		font-weight: 800;
-		color: var(--text-primary);
 	}
 
-	.close-btn {
-		background: transparent;
-		border: none;
-		color: var(--text-muted);
-		cursor: pointer;
-	}
-
-	.modal-list {
+	.sheet-options-list {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 6px;
 	}
 
-	.modal-item {
+	.sheet-option-item {
 		display: flex;
-		align-items: center;
 		justify-content: space-between;
-		padding: 12px 16px;
-		border-radius: 14px;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		cursor: pointer;
+		align-items: center;
+		padding: 0.85rem 1rem;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius);
+		font-size: 0.92rem;
 		font-weight: 600;
+		color: var(--text-primary);
 	}
 
-	.modal-item.selected {
+	.sheet-option-item.selected {
 		border-color: var(--accent-primary);
-		background: rgba(124, 58, 237, 0.08);
+		background: var(--bg-hover);
 	}
 
-	.category-grid {
+	.categories-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
+		gap: 8px;
 	}
 
-	.modal-category-item {
+	.cat-tile {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 8px;
-		padding: 14px 10px;
-		border-radius: 16px;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		cursor: pointer;
+		gap: 6px;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius);
+		padding: 0.85rem 0.5rem;
+		text-align: center;
 	}
 
-	.modal-category-item.selected {
+	.cat-tile.selected {
 		border-color: var(--accent-primary);
-		background: rgba(124, 58, 237, 0.08);
 	}
 
-	.cat-icon-badge {
+	.cat-icon-wrap {
 		width: 44px;
 		height: 44px;
-		border-radius: 14px;
+		border-radius: var(--border-radius-sm);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	.cat-label {
-		font-size: 0.75rem;
+	.cat-name {
+		font-size: 0.76rem;
 		font-weight: 700;
 		color: var(--text-primary);
-		text-align: center;
 	}
 </style>
