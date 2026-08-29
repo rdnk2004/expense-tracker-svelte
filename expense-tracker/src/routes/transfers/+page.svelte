@@ -8,9 +8,17 @@
 		formatDate,
 		formatDateInput
 	} from '$lib/stores';
-	import { ArrowLeftRight, ArrowRight, Loader2 } from 'lucide-svelte';
+	import {
+		ArrowLeftRight,
+		ArrowRight,
+		CreditCard,
+		Banknote,
+		Calendar,
+		Search,
+		TrendingUp,
+		Zap
+	} from 'lucide-svelte';
 
-	// Form state
 	let formData = $state({
 		fromWalletId: '',
 		toWalletId: '',
@@ -23,111 +31,82 @@
 	let showToast = $state(false);
 	let toastMessage = $state('');
 
-	// Filter state
 	let filters = $state({
 		search: '',
 		monthFilter: ''
 	});
 
-	// Computed values
+	$effect(() => {
+		if ($wallets.length > 0 && !formData.fromWalletId) {
+			formData.fromWalletId = $wallets[0].id;
+		}
+		if ($wallets.length > 1 && !formData.toWalletId) {
+			const other = $wallets.find((w) => w.id !== formData.fromWalletId);
+			if (other) formData.toWalletId = other.id;
+		}
+	});
+
 	let fromWallet = $derived($wallets.find((w) => w.id === formData.fromWalletId));
 	let toWallet = $derived($wallets.find((w) => w.id === formData.toWalletId));
 	let amountInPaise = $derived(formData.amount ? Math.round(parseFloat(formData.amount) * 100) : 0);
 	let hasInsufficientBalance = $derived(fromWallet ? amountInPaise > fromWallet.balance : false);
 
-	// Balance preview
 	let balancePreview = $derived(
 		fromWallet && toWallet && amountInPaise > 0
 			? {
 					fromBefore: fromWallet.balance,
 					fromAfter: fromWallet.balance - amountInPaise,
-					fromChange: -amountInPaise,
 					toBefore: toWallet.balance,
-					toAfter: toWallet.balance + amountInPaise,
-					toChange: amountInPaise
+					toAfter: toWallet.balance + amountInPaise
 				}
 			: null
 	);
 
-	// Filtered transfers
+	let currentMonthTransfers = $derived($transfers.filter((t) => t.date.startsWith($currentMonth)));
+	let totalTransferred = $derived(currentMonthTransfers.reduce((sum, t) => sum + t.amount, 0));
+
 	let filteredTransfers = $derived(
 		$transfers.filter((transfer) => {
-			// Search filter
 			if (filters.search && !transfer.note?.toLowerCase().includes(filters.search.toLowerCase())) {
 				return false;
 			}
-
-			// Month filter
 			if (filters.monthFilter && !transfer.date.startsWith(filters.monthFilter)) {
 				return false;
 			}
-
 			return true;
 		})
 	);
 
-	// Sort by date (newest first)
 	let sortedTransfers = $derived(
 		[...filteredTransfers].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 	);
 
-	// Current month transfers for stats
-	let currentMonthTransfers = $derived($transfers.filter((t) => t.date.startsWith($currentMonth)));
-
-	// Summary stats
-	let totalTransferred = $derived(currentMonthTransfers.reduce((sum, t) => sum + t.amount, 0));
-	let upiToCash = $derived(
-		currentMonthTransfers.filter(
-			(t) =>
-				$wallets.find((w) => w.id === t.fromWalletId)?.name === 'UPI' &&
-				$wallets.find((w) => w.id === t.toWalletId)?.name === 'Cash'
-		)
-	);
-	let cashToUpi = $derived(
-		currentMonthTransfers.filter(
-			(t) =>
-				$wallets.find((w) => w.id === t.fromWalletId)?.name === 'Cash' &&
-				$wallets.find((w) => w.id === t.toWalletId)?.name === 'UPI'
-		)
-	);
+	function setQuickAmount(amt: number) {
+		formData.amount = amt.toString();
+	}
 
 	function validateForm(): boolean {
 		errors = {};
-
 		if (!formData.amount || parseFloat(formData.amount) <= 0) {
-			errors.amount = 'Amount must be greater than 0';
+			errors.amount = 'Enter a valid amount';
 		}
-
 		if (!formData.fromWalletId) {
-			errors.fromWallet = 'Please select source wallet';
+			errors.fromWallet = 'Select source wallet';
 		}
-
 		if (!formData.toWalletId) {
-			errors.toWallet = 'Please select destination wallet';
+			errors.toWallet = 'Select destination wallet';
 		}
-
-		if (
-			formData.fromWalletId &&
-			formData.toWalletId &&
-			formData.fromWalletId === formData.toWalletId
-		) {
-			errors.toWallet = 'Source and destination must be different';
+		if (formData.fromWalletId === formData.toWalletId) {
+			errors.toWallet = 'Source and destination must differ';
 		}
-
 		if (hasInsufficientBalance) {
 			errors.amount = 'Insufficient balance in source wallet';
 		}
-
-		if (!formData.date) {
-			errors.date = 'Please select a date';
-		}
-
 		return Object.keys(errors).length === 0;
 	}
 
 	async function handleSubmit() {
 		if (!validateForm()) return;
-
 		isSubmitting = true;
 
 		try {
@@ -136,668 +115,494 @@
 				formData.toWalletId,
 				amountInPaise,
 				new Date(formData.date).toISOString(),
-				formData.note || undefined
+				formData.note.trim() || undefined
 			);
 
-			// Reset form
-			formData = {
-				fromWalletId: '',
-				toWalletId: '',
-				amount: '',
-				date: formatDateInput(new Date().toISOString()),
-				note: ''
-			};
-
-			showSuccessToast('Transfer completed successfully! 🎉');
-		} catch (error) {
-			console.error('Failed to create transfer:', error);
-			showSuccessToast('Failed to create transfer ❌');
+			formData.amount = '';
+			formData.note = '';
+			showToastMessage('Transfer completed! ⚡');
+		} catch (err) {
+			console.error(err);
+			showToastMessage('Transfer failed.');
 		} finally {
 			isSubmitting = false;
 		}
 	}
 
-	function showSuccessToast(message: string) {
-		toastMessage = message;
+	function showToastMessage(msg: string) {
+		toastMessage = msg;
 		showToast = true;
-		setTimeout(() => {
-			showToast = false;
-		}, 3000);
+		setTimeout(() => (showToast = false), 3000);
 	}
 
-	function getWalletById(id: string) {
-		return $wallets.find((w) => w.id === id);
-	}
-
-	function resetFilters() {
-		filters = {
-			search: '',
-			monthFilter: ''
-		};
+	function getWalletName(id: string) {
+		return $wallets.find((w) => w.id === id)?.name || 'Wallet';
 	}
 </script>
 
 <div class="transfers-page">
-	<!-- Toast Notification -->
 	{#if showToast}
-		<div class="toast">{toastMessage}</div>
+		<div class="toast-pill">{toastMessage}</div>
 	{/if}
 
-	<h1 class="page-title">
-		<ArrowLeftRight class="inline-icon" size={32} /> Transfers
-	</h1>
-
-	<!-- Summary Stats -->
-	<div class="stats-card">
-		<div class="stat">
-			<span class="stat-label">Total This Month</span>
-			<span class="stat-value">{formatCurrency(totalTransferred)}</span>
-		</div>
-		<div class="stat">
-			<span class="stat-label">UPI <ArrowRight size={12} class="inline" /> Cash</span>
-			<span class="stat-value"
-				>{upiToCash.length} ({formatCurrency(
-					upiToCash.reduce((sum, t) => sum + t.amount, 0)
-				)})</span
-			>
-		</div>
-		<div class="stat">
-			<span class="stat-label">Cash <ArrowRight size={12} class="inline" /> UPI</span>
-			<span class="stat-value"
-				>{cashToUpi.length} ({formatCurrency(
-					cashToUpi.reduce((sum, t) => sum + t.amount, 0)
-				)})</span
-			>
+	<div class="page-header">
+		<div>
+			<span class="campus-sub">Liquidity Rebalance</span>
+			<h1 class="page-title">Wallet Transfers & ATM</h1>
 		</div>
 	</div>
 
-	<!-- Create Transfer Form -->
-	<div class="form-card">
-		<h2 class="form-title">Create Transfer</h2>
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				handleSubmit();
-			}}
-		>
-			<div class="form-grid">
-				<div class="form-group">
-					<label for="from-wallet">From Wallet *</label>
-					<select
-						id="from-wallet"
-						bind:value={formData.fromWalletId}
-						class:error={errors.fromWallet}
-					>
-						<option value="">Select wallet</option>
-						{#each $wallets as wallet}
-							<option value={wallet.id}>{wallet.name} ({formatCurrency(wallet.balance)})</option>
+	<!-- Monthly Volume Summary Card -->
+	<div class="card volume-summary-card">
+		<div class="summary-stat-col">
+			<span class="v-label">Monthly Velocity</span>
+			<div class="v-amount tabular">{formatCurrency(totalTransferred)}</div>
+		</div>
+		<div class="summary-pill">
+			<Zap size={14} color="var(--accent-primary)" />
+			<span>{currentMonthTransfers.length} Transfers</span>
+		</div>
+	</div>
+
+	<!-- Transfer Execution Card -->
+	<div class="card transfer-form-card">
+		<h3 class="card-section-title">New Transfer</h3>
+
+		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+			<!-- Source & Destination Visual Row -->
+			<div class="flow-picker-grid">
+				<div class="flow-col">
+					<label for="from-w-select">Debit Source</label>
+					<select id="from-w-select" bind:value={formData.fromWalletId} class="flow-select">
+						{#each $wallets as w}
+							<option value={w.id}>{w.name} ({formatCurrency(w.balance)})</option>
 						{/each}
 					</select>
-					{#if errors.fromWallet}
-						<span class="error-message">{errors.fromWallet}</span>
-					{/if}
 				</div>
 
-				<div class="form-group">
-					<label for="to-wallet">To Wallet *</label>
-					<select id="to-wallet" bind:value={formData.toWalletId} class:error={errors.toWallet}>
-						<option value="">Select wallet</option>
-						{#each $wallets as wallet}
-							<option value={wallet.id}>{wallet.name} ({formatCurrency(wallet.balance)})</option>
+				<div class="flow-arrow-icon">
+					<ArrowRight size={18} color="var(--accent-primary)" />
+				</div>
+
+				<div class="flow-col">
+					<label for="to-w-select">Credit Destination</label>
+					<select id="to-w-select" bind:value={formData.toWalletId} class="flow-select">
+						{#each $wallets.filter(w => w.id !== formData.fromWalletId) as w}
+							<option value={w.id}>{w.name} ({formatCurrency(w.balance)})</option>
 						{/each}
 					</select>
-					{#if errors.toWallet}
-						<span class="error-message">{errors.toWallet}</span>
-					{/if}
-				</div>
-
-				<div class="form-group">
-					<label for="amount">Amount (₹) *</label>
-					<input
-						type="number"
-						id="amount"
-						bind:value={formData.amount}
-						placeholder="0.00"
-						step="0.01"
-						min="0"
-						class:error={errors.amount}
-					/>
-					{#if errors.amount}
-						<span class="error-message">{errors.amount}</span>
-					{/if}
-				</div>
-
-				<div class="form-group">
-					<label for="date">Date *</label>
-					<input type="date" id="date" bind:value={formData.date} class:error={errors.date} />
-					{#if errors.date}
-						<span class="error-message">{errors.date}</span>
-					{/if}
-				</div>
-
-				<div class="form-group full-width">
-					<label for="note">Note (optional)</label>
-					<input
-						type="text"
-						id="note"
-						bind:value={formData.note}
-						placeholder="e.g., Withdraw cash for groceries"
-						maxlength="200"
-					/>
 				</div>
 			</div>
 
-			<!-- Transfer Preview -->
-			{#if fromWallet && toWallet && amountInPaise > 0 && formData.fromWalletId !== formData.toWalletId}
-				<div class="transfer-preview">
-					<div class="preview-title">Preview</div>
-					<div class="preview-summary">
-						Transfer <strong>{formatCurrency(amountInPaise)}</strong> from
-						<strong>{fromWallet.name}</strong> to <strong>{toWallet.name}</strong>
-					</div>
+			<!-- Amount Input & Quick Chips -->
+			<div class="amount-entry-section">
+				<label for="transfer-amt">Transfer Amount (₹)</label>
+				<div class="amount-input-wrap">
+					<span class="currency-glyph">₹</span>
+					<input
+						id="transfer-amt"
+						type="number"
+						step="0.01"
+						placeholder="0.00"
+						bind:value={formData.amount}
+						class="giant-amount-input tabular"
+					/>
+				</div>
+				{#if errors.amount}
+					<span class="error-msg">{errors.amount}</span>
+				{/if}
 
-					{#if balancePreview}
-						<div class="balance-preview">
-							<div class="balance-row">
-								<span class="wallet-name">📱 {fromWallet.name}:</span>
-								<span class="balance-change">
-									{formatCurrency(balancePreview.fromBefore)} →
-									{formatCurrency(balancePreview.fromAfter)}
-									<span class="change negative">({formatCurrency(balancePreview.fromChange)})</span>
-								</span>
-							</div>
-							<div class="balance-row">
-								<span class="wallet-name">💵 {toWallet.name}:</span>
-								<span class="balance-change">
-									{formatCurrency(balancePreview.toBefore)} →
-									{formatCurrency(balancePreview.toAfter)}
-									<span class="change positive">(+{formatCurrency(balancePreview.toChange)})</span>
-								</span>
-							</div>
-						</div>
-					{/if}
+				<!-- Quick Chips -->
+				<div class="quick-preset-chips">
+					<button type="button" class="preset-chip" onclick={() => setQuickAmount(200)}>₹200</button>
+					<button type="button" class="preset-chip" onclick={() => setQuickAmount(500)}>₹500</button>
+					<button type="button" class="preset-chip" onclick={() => setQuickAmount(1000)}>₹1,000</button>
+					<button type="button" class="preset-chip" onclick={() => setQuickAmount(2000)}>₹2,000 (ATM)</button>
+				</div>
+			</div>
+
+			<!-- Live Balance Preview -->
+			{#if balancePreview}
+				<div class="balance-preview-box">
+					<div class="preview-item">
+						<span class="preview-name">{fromWallet?.name}</span>
+						<span class="preview-calc tabular">{formatCurrency(balancePreview.fromBefore)} ➔ <strong>{formatCurrency(balancePreview.fromAfter)}</strong></span>
+					</div>
+					<div class="preview-item">
+						<span class="preview-name">{toWallet?.name}</span>
+						<span class="preview-calc tabular">{formatCurrency(balancePreview.toBefore)} ➔ <strong>{formatCurrency(balancePreview.toAfter)}</strong></span>
+					</div>
 				</div>
 			{/if}
 
-			<button type="submit" class="submit-btn" disabled={isSubmitting || hasInsufficientBalance}>
-				{isSubmitting ? 'Processing...' : 'Create Transfer'}
-				{#if isSubmitting}
-					<Loader2 size={16} class="animate-spin ml-2" />
-				{:else}
-					<ArrowLeftRight size={16} class="ml-2" />
-				{/if}
+			<!-- Note & Date -->
+			<div class="meta-inputs-grid">
+				<div class="meta-input-wrap">
+					<label for="t-note">Note / Purpose</label>
+					<input id="t-note" type="text" placeholder="e.g. ATM Cash pull, GPay reload..." bind:value={formData.note} />
+				</div>
+				<div class="meta-input-wrap">
+					<label for="t-date">Date</label>
+					<input id="t-date" type="date" bind:value={formData.date} />
+				</div>
+			</div>
+
+			<button type="submit" class="submit-transfer-btn" disabled={isSubmitting}>
+				{isSubmitting ? 'Transferring...' : 'Execute Transfer'}
 			</button>
 		</form>
 	</div>
 
-	<!-- Filters -->
-	<div class="filters-card">
-		<div class="filters-grid">
-			<div class="filter-group">
-				<label for="search">Search</label>
-				<input type="text" id="search" bind:value={filters.search} placeholder="Search notes..." />
-			</div>
-
-			<div class="filter-group">
-				<label for="month-filter">Month</label>
-				<input type="month" id="month-filter" bind:value={filters.monthFilter} />
-			</div>
+	<!-- Transfer History -->
+	<div class="card history-section-card">
+		<div class="history-header">
+			<h3 class="card-section-title">Transfer History</h3>
 		</div>
 
-		<button class="reset-btn" onclick={resetFilters}>Reset Filters</button>
-	</div>
-
-	<!-- Transfers History -->
-	<div class="transfers-list">
-		<h2 class="section-title">Transfer History</h2>
-
-		{#if sortedTransfers.length > 0}
-			{#each sortedTransfers as transfer (transfer.id)}
-				{@const fromWallet = getWalletById(transfer.fromWalletId)}
-				{@const toWallet = getWalletById(transfer.toWalletId)}
-				<div class="transfer-item">
-					<div class="transfer-icon">
-						<ArrowLeftRight size={24} />
+		<div class="history-list">
+			{#each sortedTransfers as t}
+				<div class="history-row">
+					<div class="history-icon-box">
+						<ArrowLeftRight size={18} color="var(--accent-primary)" />
 					</div>
-					<div class="transfer-details">
-						<div class="transfer-flow">
-							<span class="wallet-badge from">{fromWallet?.name || 'Unknown'}</span>
-							<span class="arrow"><ArrowRight size={16} /></span>
-							<span class="wallet-badge to">{toWallet?.name || 'Unknown'}</span>
+					<div class="history-details">
+						<div class="history-route">
+							<strong>{getWalletName(t.fromWalletId)}</strong>
+							<span class="route-arrow">➔</span>
+							<strong>{getWalletName(t.toWalletId)}</strong>
 						</div>
-						{#if transfer.note}
-							<div class="transfer-note">{transfer.note}</div>
-						{/if}
-						<div class="transfer-date">{formatDate(transfer.date)}</div>
+						<div class="history-meta">
+							<span>{t.note || 'Internal Transfer'}</span>
+							<span>•</span>
+							<span>{formatDate(t.date)}</span>
+						</div>
 					</div>
-					<div class="transfer-amount">{formatCurrency(transfer.amount)}</div>
+					<div class="history-amount tabular">
+						{formatCurrency(t.amount)}
+					</div>
+				</div>
+			{:else}
+				<div class="empty-history">
+					<p>No transfers recorded yet.</p>
 				</div>
 			{/each}
-		{:else}
-			<div class="empty-state">
-				<div class="empty-icon">
-					<ArrowLeftRight size={48} />
-				</div>
-				<h3>No transfers found</h3>
-				<p>
-					{#if filters.search || filters.monthFilter}
-						Try adjusting your filters
-					{:else}
-						Create your first transfer above
-					{/if}
-				</p>
-			</div>
-		{/if}
+		</div>
 	</div>
 </div>
 
 <style>
 	.transfers-page {
-		animation: fadeIn 0.3s ease-out;
+		max-width: 680px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
 	}
 
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* Toast */
-	.toast {
+	.toast-pill {
 		position: fixed;
-		top: 2rem;
-		right: 2rem;
-		background: var(--success);
-		color: white;
-		padding: 1rem 1.5rem;
-		border-radius: var(--border-radius);
+		top: 1.25rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #10B981;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.85rem;
+		padding: 0.55rem 1.25rem;
+		border-radius: var(--border-radius-pill);
 		box-shadow: var(--shadow-lg);
-		z-index: 1000;
-		animation: slideIn 0.3s ease-out;
+		z-index: 10000;
 	}
 
-	@keyframes slideIn {
-		from {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
+	.page-header {
+		margin-bottom: 0.25rem;
 	}
 
-	/* Page Title */
-	.page-title {
-		font-size: 2rem;
+	.campus-sub {
+		display: block;
+		font-size: 0.72rem;
 		font-weight: 700;
-		margin-bottom: 1.5rem;
-		color: var(--text-primary);
-	}
-
-	/* Stats Card */
-	.stats-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-		box-shadow: var(--shadow-md);
-	}
-
-	.stat {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		text-align: center;
-	}
-
-	.stat-label {
-		font-size: 0.875rem;
-		color: var(--text-secondary);
 		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-
-	.stat-value {
-		font-size: 1.25rem;
-		font-weight: 600;
+		letter-spacing: 0.05em;
 		color: var(--accent-primary);
+		margin-bottom: 2px;
 	}
 
-	/* Form Card */
-	.form-card {
-		background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-hover) 100%);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-		box-shadow: var(--shadow-md);
-	}
-
-	.form-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin-bottom: 1.5rem;
+	.page-title {
+		font-size: 1.65rem;
+		font-weight: 800;
 		color: var(--text-primary);
+		letter-spacing: -0.04em;
+		margin: 0;
 	}
 
-	.form-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.form-group.full-width {
-		grid-column: 1 / -1;
-	}
-
-	label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--text-secondary);
-	}
-
-	input,
-	select {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-		transition: all 0.2s;
-	}
-
-	input:focus,
-	select:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-		box-shadow: 0 0 0 3px rgba(192, 192, 192, 0.1);
-	}
-
-	input.error,
-	select.error {
-		border-color: var(--danger);
-	}
-
-	.error-message {
-		font-size: 0.75rem;
-		color: var(--danger);
-	}
-
-	/* Transfer Preview */
-	.transfer-preview {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1.25rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.preview-title {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--text-secondary);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		margin-bottom: 0.75rem;
-	}
-
-	.preview-summary {
-		font-size: 1rem;
-		color: var(--text-primary);
-		margin-bottom: 1rem;
-		line-height: 1.6;
-	}
-
-	.preview-summary strong {
-		color: var(--accent-primary);
-	}
-
-	.balance-preview {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--border-color);
-	}
-
-	.balance-row {
+	/* Volume Summary Card */
+	.volume-summary-card {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		font-size: 0.9rem;
+		padding: 1.15rem 1.35rem;
+		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
-	.wallet-name {
-		font-weight: 500;
+	.v-label {
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
+	}
+
+	.v-amount {
+		font-size: 1.75rem;
+		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.balance-change {
+	.summary-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 0.35rem 0.75rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.76rem;
+		font-weight: 700;
 		color: var(--text-secondary);
 	}
 
-	.change {
-		font-weight: 600;
-		margin-left: 0.5rem;
+	/* Transfer Form Card */
+	.transfer-form-card {
+		padding: 1.35rem;
 	}
 
-	.change.positive {
-		color: var(--success);
+	.card-section-title {
+		font-size: 1.05rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		margin-bottom: 1.15rem;
 	}
 
-	.change.negative {
-		color: var(--danger);
-	}
-
-	.submit-btn {
-		width: 100%;
-		background: var(--accent-primary);
-		color: var(--bg-primary);
-		border: none;
-		padding: 1rem;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.submit-btn:hover:not(:disabled) {
-		background: var(--accent-hover);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
-	}
-
-	.submit-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	/* Filters Card */
-	.filters-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.filters-grid {
+	.flow-picker-grid {
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 1rem;
-		margin-bottom: 1rem;
+		grid-template-columns: 1fr 30px 1fr;
+		gap: 8px;
+		align-items: center;
+		margin-bottom: 1.15rem;
 	}
 
-	.filter-group {
+	.flow-col {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
 	}
 
-	.reset-btn {
-		background: var(--bg-secondary);
+	.flow-select {
+		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		color: var(--text-secondary);
-		padding: 0.75rem 1.5rem;
 		border-radius: var(--border-radius);
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.reset-btn:hover {
-		background: var(--bg-hover);
+		padding: 0.65rem 0.85rem;
+		font-size: 0.84rem;
 		color: var(--text-primary);
 	}
 
-	/* Transfers List */
-	.transfers-list {
-		margin-top: 2rem;
-	}
-
-	.section-title {
-		font-size: 1.5rem;
-		font-weight: 600;
-		margin-bottom: 1rem;
-		color: var(--text-primary);
-	}
-
-	.transfer-item {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1.25rem;
-		margin-bottom: 0.75rem;
+	.flow-arrow-icon {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		transition: all 0.2s;
+		justify-content: center;
+		margin-top: 18px;
 	}
 
-	.transfer-item:hover {
+	/* Amount entry */
+	.amount-entry-section {
+		margin-bottom: 1.15rem;
+	}
+
+	.amount-input-wrap {
+		position: relative;
+		display: flex;
+		align-items: center;
+	}
+
+	.currency-glyph {
+		position: absolute;
+		left: 14px;
+		font-size: 1.5rem;
+		font-weight: 800;
+		color: var(--accent-primary);
+	}
+
+	.giant-amount-input {
+		padding-left: 36px;
+		font-size: 1.85rem;
+		font-weight: 800;
+		height: 60px;
+	}
+
+	.error-msg {
+		font-size: 0.74rem;
+		color: var(--danger);
+		font-weight: 600;
+		margin-top: 3px;
+		display: block;
+	}
+
+	.quick-preset-chips {
+		display: flex;
+		gap: 6px;
+		margin-top: 8px;
+		flex-wrap: wrap;
+	}
+
+	.preset-chip {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
+		padding: 4px 10px;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.75rem;
+		font-weight: 700;
+		transition: all 0.2s ease;
+	}
+
+	.preset-chip:hover {
 		background: var(--bg-hover);
-		box-shadow: var(--shadow-md);
+		color: var(--text-primary);
+		border-color: var(--border-medium);
 	}
 
-	.transfer-icon {
-		font-size: 2.5rem;
+	/* Balance Preview */
+	.balance-preview-box {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius);
+		padding: 0.85rem 1rem;
+		margin-bottom: 1.15rem;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.preview-item {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.78rem;
+		color: var(--text-secondary);
+	}
+
+	.preview-item strong {
+		color: var(--text-primary);
+	}
+
+	.meta-inputs-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+		margin-bottom: 1.25rem;
+	}
+
+	.submit-transfer-btn {
+		width: 100%;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.95rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
+		transition: all 0.2s ease;
+		min-height: 48px;
+	}
+
+	.submit-transfer-btn:hover {
+		filter: brightness(1.1);
+	}
+
+	/* History */
+	.history-section-card {
+		padding: 1.35rem;
+	}
+
+	.history-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+	}
+
+	.history-row {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		padding: 0.65rem 0.35rem;
+		border-bottom: 1px solid var(--border-subtle);
+	}
+
+	.history-row:last-child {
+		border-bottom: none;
+	}
+
+	.history-icon-box {
+		width: 36px;
+		height: 36px;
+		border-radius: var(--border-radius-sm);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
 	}
 
-	.transfer-details {
+	.history-details {
 		flex: 1;
+		min-width: 0;
 	}
 
-	.transfer-flow {
+	.history-route {
+		font-size: 0.88rem;
+		color: var(--text-primary);
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		margin-bottom: 0.5rem;
-		font-size: 1rem;
+		gap: 6px;
 	}
 
-	.wallet-badge {
-		padding: 0.375rem 0.75rem;
-		border-radius: 6px;
-		font-weight: 500;
-		font-size: 0.875rem;
-	}
-
-	.wallet-badge.from {
-		background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-		color: white;
-	}
-
-	.wallet-badge.to {
-		background: linear-gradient(135deg, #db2777 0%, #9d174d 100%);
-		color: white;
-	}
-
-	.arrow {
-		color: var(--accent-primary);
-		font-size: 1.25rem;
-		font-weight: 700;
-	}
-
-	.transfer-note {
-		font-size: 0.875rem;
-		color: var(--text-muted);
-		font-style: italic;
-		margin-bottom: 0.5rem;
-	}
-
-	.transfer-date {
-		font-size: 0.75rem;
-		color: var(--text-muted);
-	}
-
-	.transfer-amount {
-		font-size: 1.5rem;
-		font-weight: 700;
+	.route-arrow {
 		color: var(--accent-primary);
 	}
 
-	/* Empty State */
-	.empty-state {
-		text-align: center;
-		padding: 4rem 2rem;
-		color: var(--text-secondary);
+	.history-meta {
+		font-size: 0.72rem;
+		color: var(--text-muted);
+		display: flex;
+		gap: 5px;
+		margin-top: 2px;
 	}
 
-	.empty-icon {
-		font-size: 4rem;
-		margin-bottom: 1rem;
-	}
-
-	.empty-state h3 {
-		font-size: 1.5rem;
-		margin-bottom: 0.5rem;
+	.history-amount {
+		font-size: 0.95rem;
+		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	/* Responsive */
-	@media (max-width: 768px) {
-		.stats-card {
+	.empty-history {
+		text-align: center;
+		padding: 2rem;
+		color: var(--text-muted);
+		font-size: 0.84rem;
+	}
+
+	@media (max-width: 480px) {
+		.flow-picker-grid {
 			grid-template-columns: 1fr;
 		}
 
-		.form-grid {
+		.flow-arrow-icon {
+			margin: 0 auto;
+			transform: rotate(90deg);
+		}
+
+		.meta-inputs-grid {
 			grid-template-columns: 1fr;
-		}
-
-		.filters-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.transfer-item {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.transfer-amount {
-			align-self: flex-end;
-		}
-
-		.transfer-flow {
-			flex-wrap: wrap;
 		}
 	}
 </style>

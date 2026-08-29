@@ -8,7 +8,9 @@
 		formatDate,
 		formatDateInput,
 		createTransfer,
-		addExpense
+		addExpense,
+		createWallet,
+		loadWallets
 	} from '$lib/stores';
 	import type { Expense, Transfer, Category, Wallet } from '$lib/types';
 	import * as db from '$lib/db';
@@ -21,21 +23,19 @@
 		ArrowLeftRight,
 		ArrowUpRight,
 		ArrowDownLeft,
-		Package,
-		Inbox,
-		Loader2
+		Check,
+		Edit3,
+		Trash2,
+		X
 	} from 'lucide-svelte';
 
-	// Modal states
 	let showTransferModal = $state(false);
-	let showExpenseModal = $state(false);
-	let showManualAdjustment = $state<string | null>(null); // walletId or null
+	let showManualAdjustment = $state<string | null>(null);
+	let showNewWalletModal = $state(false);
 
-	// Filter states per wallet
-	let filterUPI = $state<'all' | 'expenses' | 'transfers'>('all');
-	let filterCash = $state<'all' | 'expenses' | 'transfers'>('all');
+	let newWalletName = $state('');
+	let newWalletBalance = $state('');
 
-	// Transfer modal form
 	let transferForm = $state({
 		fromWalletId: '',
 		toWalletId: '',
@@ -44,34 +44,13 @@
 		note: ''
 	});
 	let transferErrors = $state<Record<string, string>>({});
-	let isSubmittingTransfer = $state(false);
 
-	// Expense modal form
-	let expenseForm = $state({
-		amount: '',
-		walletId: '',
-		categoryId: '',
-		subcategory: '',
-		date: formatDateInput(new Date().toISOString()),
-		note: ''
-	});
-	let expenseErrors = $state<Record<string, string>>({});
-	let isSubmittingExpense = $state(false);
-
-	// Manual adjustment form
 	let manualAdjustmentForm = $state({
 		newBalance: ''
 	});
 
-	// Toast notification
 	let showToast = $state(false);
 	let toastMessage = $state('');
-	let toastType = $state<'success' | 'error'>('success');
-
-	// Computed values
-	let selectedCategory = $derived($categories.find((c) => c.id === expenseForm.categoryId));
-	let upiWallet = $derived($wallets.find((w) => w.name === 'UPI'));
-	let cashWallet = $derived($wallets.find((w) => w.name === 'Cash'));
 
 	let fromWallet = $derived($wallets.find((w) => w.id === transferForm.fromWalletId));
 	let toWallet = $derived($wallets.find((w) => w.id === transferForm.toWalletId));
@@ -82,79 +61,6 @@
 		fromWallet ? transferAmountInPaise > fromWallet.balance : false
 	);
 
-	let expenseAmountInPaise = $derived(
-		expenseForm.amount ? Math.round(parseFloat(expenseForm.amount) * 100) : 0
-	);
-	let selectedWallet = $derived($wallets.find((w) => w.id === expenseForm.walletId));
-	let hasInsufficientExpenseBalance = $derived(
-		selectedWallet ? expenseAmountInPaise > selectedWallet.balance : false
-	);
-
-	// Get transactions for a wallet
-	function getWalletTransactions(walletId: string, filter: 'all' | 'expenses' | 'transfers') {
-		type Transaction = {
-			id: string;
-			type: 'expense' | 'transfer-in' | 'transfer-out';
-			amount: number;
-			date: string;
-			category?: Category;
-			subcategory?: string | null;
-			note?: string | null;
-			fromWallet?: string;
-			toWallet?: string;
-		};
-
-		const transactions: Transaction[] = [];
-
-		// Add expenses
-		if (filter === 'all' || filter === 'expenses') {
-			$expenses
-				.filter((e) => e.walletId === walletId)
-				.forEach((e) => {
-					transactions.push({
-						id: e.id,
-						type: 'expense',
-						amount: -e.amount,
-						date: e.date,
-						category: $categories.find((c) => c.id === e.categoryId),
-						subcategory: e.subcategory,
-						note: e.note
-					});
-				});
-		}
-
-		// Add transfers
-		if (filter === 'all' || filter === 'transfers') {
-			$transfers.forEach((t) => {
-				if (t.fromWalletId === walletId) {
-					transactions.push({
-						id: t.id,
-						type: 'transfer-out',
-						amount: -t.amount,
-						date: t.date,
-						note: t.note,
-						toWallet: $wallets.find((w) => w.id === t.toWalletId)?.name
-					});
-				} else if (t.toWalletId === walletId) {
-					transactions.push({
-						id: t.id,
-						type: 'transfer-in',
-						amount: t.amount,
-						date: t.date,
-						note: t.note,
-						fromWallet: $wallets.find((w) => w.id === t.fromWalletId)?.name
-					});
-				}
-			});
-		}
-
-		// Sort by date (newest first) and take last 10
-		return transactions
-			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-			.slice(0, 10);
-	}
-
-	// Get wallet stats
 	function getWalletStats(walletId: string) {
 		const totalExpenses = $expenses
 			.filter((e) => e.walletId === walletId)
@@ -180,27 +86,11 @@
 		};
 	}
 
-	// Format relative time
-	function formatRelativeTime(isoDate: string): string {
-		const date = new Date(isoDate);
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffMins = Math.floor(diffMs / 60000);
-		const diffHours = Math.floor(diffMs / 3600000);
-		const diffDays = Math.floor(diffMs / 86400000);
-
-		if (diffMins < 1) return 'Just now';
-		if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
-		if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-		if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-		return formatDate(isoDate);
-	}
-
-	// Transfer modal functions
-	function openTransferModal() {
+	function openTransferModalWithSource(walletId: string) {
+		const destination = $wallets.find((w) => w.id !== walletId);
 		transferForm = {
-			fromWalletId: '',
-			toWalletId: '',
+			fromWalletId: walletId,
+			toWalletId: destination ? destination.id : '',
 			amount: '',
 			date: formatDateInput(new Date().toISOString()),
 			note: ''
@@ -209,1474 +99,575 @@
 		showTransferModal = true;
 	}
 
-	function closeTransferModal() {
-		showTransferModal = false;
+	function openManualAdjustment(wallet: Wallet) {
+		showManualAdjustment = wallet.id;
+		manualAdjustmentForm.newBalance = (wallet.balance / 100).toString();
 	}
 
-	function validateTransferForm(): boolean {
-		transferErrors = {};
-
-		if (!transferForm.amount || parseFloat(transferForm.amount) <= 0) {
-			transferErrors.amount = 'Amount must be greater than 0';
+	async function handleSaveAdjustment(walletId: string) {
+		const newBalFloat = parseFloat(manualAdjustmentForm.newBalance);
+		if (isNaN(newBalFloat) || newBalFloat < 0) {
+			alert('Please enter a valid non-negative balance.');
+			return;
 		}
 
-		if (!transferForm.fromWalletId) {
-			transferErrors.fromWalletId = 'Please select source wallet';
-		}
+		const balanceInPaise = Math.round(newBalFloat * 100);
+		await db.updateWalletBalance(walletId, balanceInPaise);
+		await loadWallets();
+		showManualAdjustment = null;
+		showSuccessToast('Wallet balance calibrated! 🎯');
+	}
 
-		if (!transferForm.toWalletId) {
-			transferErrors.toWalletId = 'Please select destination wallet';
+	async function handleCreateWallet() {
+		if (!newWalletName.trim()) {
+			alert('Please enter a wallet name.');
+			return;
 		}
+		const initialBalFloat = parseFloat(newWalletBalance) || 0;
+		const balanceInPaise = Math.round(initialBalFloat * 100);
 
-		if (
-			transferForm.fromWalletId &&
-			transferForm.toWalletId &&
-			transferForm.fromWalletId === transferForm.toWalletId
-		) {
-			transferErrors.toWalletId = 'Source and destination must be different';
-		}
-
-		if (hasInsufficientTransferBalance) {
-			transferErrors.amount = 'Insufficient balance in source wallet';
-		}
-
-		if (!transferForm.date) {
-			transferErrors.date = 'Please select a date';
-		}
-
-		return Object.keys(transferErrors).length === 0;
+		await createWallet(newWalletName.trim(), balanceInPaise);
+		newWalletName = '';
+		newWalletBalance = '';
+		showNewWalletModal = false;
+		showSuccessToast('New wallet created! 💳');
 	}
 
 	async function handleTransferSubmit() {
-		if (!validateTransferForm()) return;
-
-		isSubmittingTransfer = true;
-
-		try {
-			await createTransfer(
-				transferForm.fromWalletId,
-				transferForm.toWalletId,
-				transferAmountInPaise,
-				new Date(transferForm.date).toISOString(),
-				transferForm.note || undefined
-			);
-
-			showSuccessToast('Transfer completed successfully!');
-			closeTransferModal();
-		} catch (error) {
-			console.error('Failed to create transfer:', error);
-			showErrorToast('Failed to create transfer');
-		} finally {
-			isSubmittingTransfer = false;
+		transferErrors = {};
+		if (!transferForm.amount || parseFloat(transferForm.amount) <= 0) {
+			transferErrors.amount = 'Enter a valid amount';
+			return;
 		}
-	}
-
-	// Expense modal functions
-	function openExpenseModal() {
-		expenseForm = {
-			amount: '',
-			walletId: '',
-			categoryId: '',
-			subcategory: '',
-			date: formatDateInput(new Date().toISOString()),
-			note: ''
-		};
-		expenseErrors = {};
-		showExpenseModal = true;
-	}
-
-	function closeExpenseModal() {
-		showExpenseModal = false;
-	}
-
-	function validateExpenseForm(): boolean {
-		expenseErrors = {};
-
-		if (!expenseForm.amount || parseFloat(expenseForm.amount) <= 0) {
-			expenseErrors.amount = 'Amount must be greater than 0';
+		if (!transferForm.fromWalletId || !transferForm.toWalletId) {
+			transferErrors.toWalletId = 'Select source and destination';
+			return;
+		}
+		if (hasInsufficientTransferBalance) {
+			transferErrors.amount = 'Insufficient balance';
+			return;
 		}
 
-		if (!expenseForm.walletId) {
-			expenseErrors.walletId = 'Please select a wallet';
-		}
-
-		if (!expenseForm.categoryId) {
-			expenseErrors.categoryId = 'Please select a category';
-		}
-
-		if (!expenseForm.date) {
-			expenseErrors.date = 'Please select a date';
-		}
-
-		return Object.keys(expenseErrors).length === 0;
-	}
-
-	async function handleExpenseSubmit() {
-		if (!validateExpenseForm()) return;
-
-		isSubmittingExpense = true;
-
-		try {
-			await addExpense({
-				amount: expenseAmountInPaise,
-				walletId: expenseForm.walletId,
-				categoryId: expenseForm.categoryId,
-				subcategory: expenseForm.subcategory || null,
-				date: new Date(expenseForm.date).toISOString(),
-				note: expenseForm.note || null
-			});
-
-			showSuccessToast('Expense added successfully!');
-			closeExpenseModal();
-		} catch (error) {
-			console.error('Failed to add expense:', error);
-			showErrorToast('Failed to add expense');
-		} finally {
-			isSubmittingExpense = false;
-		}
-	}
-
-	// Manual adjustment functions
-	function openManualAdjustment(walletId: string) {
-		const wallet = $wallets.find((w) => w.id === walletId);
-		if (wallet) {
-			manualAdjustmentForm.newBalance = (wallet.balance / 100).toFixed(2);
-			showManualAdjustment = walletId;
-		}
-	}
-
-	function closeManualAdjustment() {
-		showManualAdjustment = null;
-	}
-
-	async function handleManualAdjustment(walletId: string) {
-		const wallet = $wallets.find((w) => w.id === walletId);
-		if (!wallet) return;
-
-		const newBalanceInPaise = Math.round(parseFloat(manualAdjustmentForm.newBalance) * 100);
-		const difference = newBalanceInPaise - wallet.balance;
-
-		const confirmed = confirm(
-			`Manual Balance Adjustment\n\n` +
-				`Wallet: ${wallet.name}\n` +
-				`Current Balance: ${formatCurrency(wallet.balance)}\n` +
-				`New Balance: ${formatCurrency(newBalanceInPaise)}\n` +
-				`Difference: ${difference >= 0 ? '+' : ''}${formatCurrency(Math.abs(difference))}\n\n` +
-				`⚠️ Warning: This will directly modify the wallet balance without creating a transaction record.\n` +
-				`Are you sure you want to proceed?`
+		await createTransfer(
+			transferForm.fromWalletId,
+			transferForm.toWalletId,
+			transferAmountInPaise,
+			new Date(transferForm.date).toISOString(),
+			transferForm.note.trim() || undefined
 		);
 
-		if (!confirmed) return;
-
-		try {
-			await db.updateWalletBalance(walletId, newBalanceInPaise);
-
-			// Update the wallet's updated timestamp
-			const updatedWallet = {
-				...wallet,
-				balance: newBalanceInPaise,
-				updated: new Date().toISOString()
-			};
-			await db.saveWallet(updatedWallet);
-
-			// Reload wallets to reflect changes
-			const updatedWallets = await db.getWallets();
-			wallets.set(updatedWallets);
-
-			showSuccessToast('Wallet balance updated!');
-			closeManualAdjustment();
-		} catch (error) {
-			console.error('Failed to update wallet balance:', error);
-			showErrorToast('Failed to update balance');
-		}
+		showTransferModal = false;
+		showSuccessToast('Funds transferred! ⚡');
 	}
 
-	// Toast functions
-	function showSuccessToast(message: string) {
-		toastMessage = message;
-		toastType = 'success';
+	function showSuccessToast(msg: string) {
+		toastMessage = msg;
 		showToast = true;
-		setTimeout(() => {
-			showToast = false;
-		}, 3000);
-	}
-
-	function showErrorToast(message: string) {
-		toastMessage = message;
-		toastType = 'error';
-		showToast = true;
-		setTimeout(() => {
-			showToast = false;
-		}, 3000);
+		setTimeout(() => (showToast = false), 3000);
 	}
 </script>
 
 <div class="wallets-page">
-	<!-- Toast Notification -->
 	{#if showToast}
-		<div class="toast {toastType}">{toastMessage}</div>
+		<div class="toast-pill">{toastMessage}</div>
 	{/if}
 
-	<!-- Page Header -->
 	<div class="page-header">
-		<h1 class="page-title">
-			<WalletIcon class="inline-icon" size={32} /> Wallets
-		</h1>
-		<div class="header-actions">
-			<button class="action-btn primary" onclick={openExpenseModal}>
-				<Plus size={18} /> Add Expense
-			</button>
-			<button class="action-btn secondary" onclick={openTransferModal}>
-				<ArrowLeftRight size={18} /> Transfer Money
-			</button>
+		<div>
+			<span class="campus-sub">Capital Management</span>
+			<h1 class="page-title">Wallets & Virtual Cards</h1>
 		</div>
+		<button class="add-wallet-btn" onclick={() => (showNewWalletModal = true)}>
+			<Plus size={16} />
+			<span>Add Card</span>
+		</button>
 	</div>
 
-	<!-- Wallet Cards -->
-	<div class="wallet-cards">
-		<!-- UPI Wallet -->
-		{#if upiWallet}
-			{@const stats = getWalletStats(upiWallet.id)}
-			{@const transactions = getWalletTransactions(upiWallet.id, filterUPI)}
-			<div class="wallet-card">
-				<div class="wallet-header">
-					<div class="wallet-info">
-						<h2 class="wallet-name">
-							<Smartphone class="inline-icon" size={24} /> UPI
-						</h2>
-						<span class="wallet-updated">Updated {formatRelativeTime(upiWallet.updated)}</span>
-					</div>
-					<button
-						class="manual-adjust-btn"
-						onclick={() => openManualAdjustment(upiWallet.id)}
-						title="Manual adjustment"
-					>
-						<Settings size={18} />
-					</button>
-				</div>
+	<!-- Virtual Cards Deck -->
+	<div class="virtual-cards-deck">
+		{#each $wallets as wallet, i}
+			{@const stats = getWalletStats(wallet.id)}
+			{@const isUPI = wallet.name.toLowerCase().includes('upi')}
+			{@const isCash = wallet.name.toLowerCase().includes('cash')}
 
-				<div class="wallet-balance">{formatCurrency(upiWallet.balance)}</div>
+			<div class="virtual-card" class:card-upi={isUPI} class:card-cash={isCash} class:card-bank={!isUPI && !isCash}>
+				<div class="card-glow-bg"></div>
 
-				<div class="wallet-stats">
-					<div class="stat-item">
-						<span class="stat-label">Expenses</span>
-						<span class="stat-value">{formatCurrency(stats.totalExpenses)}</span>
+				<div class="card-top-line">
+					<div class="card-chip-wrap">
+						<div class="card-chip"></div>
+						<span class="card-brand-name">{wallet.name}</span>
 					</div>
-					<div class="stat-item">
-						<span class="stat-label">Transfers</span>
-						<span class="stat-value">
-							<ArrowDownLeft size={14} class="inline" />{formatCurrency(stats.transfersIn)} /
-							<ArrowUpRight size={14} class="inline" />{formatCurrency(stats.transfersOut)}
-						</span>
-					</div>
-					<div class="stat-item">
-						<span class="stat-label">Transactions</span>
-						<span class="stat-value">{stats.transactionCount}</span>
-					</div>
-				</div>
-
-				<!-- Manual Adjustment Form -->
-				{#if showManualAdjustment === upiWallet.id}
-					<div class="manual-adjustment">
-						<h4>Manual Balance Adjustment</h4>
-						<p class="warning">
-							⚠️ This will directly modify the balance without creating a transaction record.
-						</p>
-						<div class="adjust-form">
-							<label for="upi-balance">New Balance (₹)</label>
-							<input
-								type="number"
-								id="upi-balance"
-								bind:value={manualAdjustmentForm.newBalance}
-								step="0.01"
-								min="0"
-							/>
-							<div class="adjust-actions">
-								<button class="btn-confirm" onclick={() => handleManualAdjustment(upiWallet.id)}>
-									Confirm
-								</button>
-								<button class="btn-cancel" onclick={closeManualAdjustment}>Cancel</button>
-							</div>
-						</div>
-					</div>
-				{/if}
-
-				<!-- Transaction History -->
-				<div class="transaction-section">
-					<div class="transaction-header">
-						<h3>Recent Transactions</h3>
-						<div class="filter-buttons">
-							<button
-								class="filter-btn"
-								class:active={filterUPI === 'all'}
-								onclick={() => (filterUPI = 'all')}
-							>
-								All
-							</button>
-							<button
-								class="filter-btn"
-								class:active={filterUPI === 'expenses'}
-								onclick={() => (filterUPI = 'expenses')}
-							>
-								Expenses
-							</button>
-							<button
-								class="filter-btn"
-								class:active={filterUPI === 'transfers'}
-								onclick={() => (filterUPI = 'transfers')}
-							>
-								Transfers
-							</button>
-						</div>
-					</div>
-
-					<div class="transactions-list">
-						{#if transactions.length > 0}
-							{#each transactions as transaction (transaction.id)}
-								<div class="transaction-item" class:negative={transaction.amount < 0}>
-									<div class="transaction-icon">
-										{#if transaction.type === 'expense'}
-											{#if transaction.category?.icon}
-												{transaction.category.icon}
-											{:else}
-												<Package size={20} />
-											{/if}
-										{:else if transaction.type === 'transfer-in'}
-											<ArrowDownLeft size={20} />
-										{:else}
-											<ArrowUpRight size={20} />
-										{/if}
-									</div>
-									<div class="transaction-details">
-										<div class="transaction-name">
-											{#if transaction.type === 'expense'}
-												{transaction.category?.name || 'Unknown'}
-												{#if transaction.subcategory}
-													<span class="subcategory">• {transaction.subcategory}</span>
-												{/if}
-											{:else if transaction.type === 'transfer-in'}
-												Transfer from {transaction.fromWallet || 'Unknown'}
-											{:else}
-												Transfer to {transaction.toWallet || 'Unknown'}
-											{/if}
-										</div>
-										{#if transaction.note}
-											<div class="transaction-note">{transaction.note}</div>
-										{/if}
-										<div class="transaction-date">{formatDate(transaction.date)}</div>
-									</div>
-									<div class="transaction-amount" class:positive={transaction.amount > 0}>
-										{transaction.amount >= 0 ? '+' : ''}{formatCurrency(
-											Math.abs(transaction.amount)
-										)}
-									</div>
-								</div>
-							{/each}
-						{:else}
-							<div class="empty-state">
-								<div class="empty-icon">
-									<Inbox size={48} />
-								</div>
-								<p>No transactions found</p>
-							</div>
-						{/if}
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		<!-- Cash Wallet -->
-		{#if cashWallet}
-			{@const stats = getWalletStats(cashWallet.id)}
-			{@const transactions = getWalletTransactions(cashWallet.id, filterCash)}
-			<div class="wallet-card">
-				<div class="wallet-header">
-					<div class="wallet-info">
-						<h2 class="wallet-name">
-							<Banknote class="inline-icon" size={24} /> Cash
-						</h2>
-						<span class="wallet-updated">Updated {formatRelativeTime(cashWallet.updated)}</span>
-					</div>
-					<button
-						class="manual-adjust-btn"
-						onclick={() => openManualAdjustment(cashWallet.id)}
-						title="Manual adjustment"
-					>
-						<Settings size={18} />
-					</button>
-				</div>
-
-				<div class="wallet-balance">{formatCurrency(cashWallet.balance)}</div>
-
-				<div class="wallet-stats">
-					<div class="stat-item">
-						<span class="stat-label">Expenses</span>
-						<span class="stat-value">{formatCurrency(stats.totalExpenses)}</span>
-					</div>
-					<div class="stat-item">
-						<span class="stat-label">Transfers</span>
-						<span class="stat-value"
-							>↓{formatCurrency(stats.transfersIn)} / ↑{formatCurrency(stats.transfersOut)}</span
+					<div class="card-top-actions">
+						<button
+							class="card-action-icon"
+							title="Calibrate Balance"
+							onclick={() => openManualAdjustment(wallet)}
+							aria-label="Calibrate Balance"
 						>
-					</div>
-					<div class="stat-item">
-						<span class="stat-label">Transactions</span>
-						<span class="stat-value">{stats.transactionCount}</span>
+							<Edit3 size={15} />
+						</button>
 					</div>
 				</div>
 
-				<!-- Manual Adjustment Form -->
-				{#if showManualAdjustment === cashWallet.id}
-					<div class="manual-adjustment">
-						<h4>Manual Balance Adjustment</h4>
-						<p class="warning">
-							⚠️ This will directly modify the balance without creating a transaction record.
-						</p>
-						<div class="adjust-form">
-							<label for="cash-balance">New Balance (₹)</label>
-							<input
-								type="number"
-								id="cash-balance"
-								bind:value={manualAdjustmentForm.newBalance}
-								step="0.01"
-								min="0"
-							/>
-							<div class="adjust-actions">
-								<button class="btn-confirm" onclick={() => handleManualAdjustment(cashWallet.id)}>
-									Confirm
-								</button>
-								<button class="btn-cancel" onclick={closeManualAdjustment}>Cancel</button>
-							</div>
-						</div>
-					</div>
-				{/if}
+				<div class="card-body-balance">
+					<span class="balance-sub">Liquid Balance</span>
+					<div class="card-balance-val tabular">{formatCurrency(wallet.balance)}</div>
+				</div>
 
-				<!-- Transaction History -->
-				<div class="transaction-section">
-					<div class="transaction-header">
-						<h3>Recent Transactions</h3>
-						<div class="filter-buttons">
-							<button
-								class="filter-btn"
-								class:active={filterCash === 'all'}
-								onclick={() => (filterCash = 'all')}
-							>
-								All
-							</button>
-							<button
-								class="filter-btn"
-								class:active={filterCash === 'expenses'}
-								onclick={() => (filterCash = 'expenses')}
-							>
-								Expenses
-							</button>
-							<button
-								class="filter-btn"
-								class:active={filterCash === 'transfers'}
-								onclick={() => (filterCash = 'transfers')}
-							>
-								Transfers
-							</button>
-						</div>
+				<div class="card-footer-stats">
+					<div class="card-stat-col">
+						<span class="c-stat-lbl">Outflow</span>
+						<span class="c-stat-val tabular">{formatCurrency(stats.totalExpenses)}</span>
 					</div>
-
-					<div class="transactions-list">
-						{#if transactions.length > 0}
-							{#each transactions as transaction (transaction.id)}
-								<div class="transaction-item" class:negative={transaction.amount < 0}>
-									<div class="transaction-icon">
-										{#if transaction.type === 'expense'}
-											{#if transaction.category?.icon}
-												{transaction.category.icon}
-											{:else}
-												<Package size={20} />
-											{/if}
-										{:else if transaction.type === 'transfer-in'}
-											<ArrowDownLeft size={20} />
-										{:else}
-											<ArrowUpRight size={20} />
-										{/if}
-									</div>
-									<div class="transaction-details">
-										<div class="transaction-name">
-											{#if transaction.type === 'expense'}
-												{transaction.category?.name || 'Unknown'}
-												{#if transaction.subcategory}
-													<span class="subcategory">• {transaction.subcategory}</span>
-												{/if}
-											{:else if transaction.type === 'transfer-in'}
-												Transfer from {transaction.fromWallet || 'Unknown'}
-											{:else}
-												Transfer to {transaction.toWallet || 'Unknown'}
-											{/if}
-										</div>
-										{#if transaction.note}
-											<div class="transaction-note">{transaction.note}</div>
-										{/if}
-										<div class="transaction-date">{formatDate(transaction.date)}</div>
-									</div>
-									<div class="transaction-amount" class:positive={transaction.amount > 0}>
-										{transaction.amount >= 0 ? '+' : ''}{formatCurrency(
-											Math.abs(transaction.amount)
-										)}
-									</div>
-								</div>
-							{/each}
-						{:else}
-							<div class="empty-state">
-								<div class="empty-icon">📭</div>
-								<p>No transactions found</p>
-							</div>
-						{/if}
+					<div class="card-stat-col">
+						<span class="c-stat-lbl">Transfers In</span>
+						<span class="c-stat-val tabular">+{formatCurrency(stats.transfersIn)}</span>
+					</div>
+					<div class="card-footer-cta">
+						<button
+							class="card-transfer-pill"
+							onclick={() => openTransferModalWithSource(wallet.id)}
+						>
+							<ArrowLeftRight size={13} />
+							<span>Transfer</span>
+						</button>
 					</div>
 				</div>
 			</div>
-		{/if}
+		{/each}
 	</div>
-
-	<!-- Transfer Modal -->
-	{#if showTransferModal}
-		<div
-			class="modal-overlay"
-			onclick={closeTransferModal}
-			onkeydown={(e) => e.key === 'Escape' && closeTransferModal()}
-			role="button"
-			tabindex="-1"
-			aria-label="Close modal"
-		></div>
-		<div class="modal">
-			<div class="modal-header">
-				<h2>
-					<ArrowLeftRight size={24} class="inline-icon" /> Transfer Money
-				</h2>
-				<button class="modal-close" onclick={closeTransferModal}>✕</button>
-			</div>
-
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					handleTransferSubmit();
-				}}
-			>
-				<div class="form-grid">
-					<div class="form-group">
-						<label for="from-wallet">From Wallet *</label>
-						<select
-							id="from-wallet"
-							bind:value={transferForm.fromWalletId}
-							class:error={transferErrors.fromWalletId}
-						>
-							<option value="">Select source wallet</option>
-							{#each $wallets as wallet}
-								<option value={wallet.id} disabled={wallet.id === transferForm.toWalletId}>
-									{wallet.name} ({formatCurrency(wallet.balance)})
-								</option>
-							{/each}
-						</select>
-						{#if transferErrors.fromWalletId}
-							<span class="error-message">{transferErrors.fromWalletId}</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="to-wallet">To Wallet *</label>
-						<select
-							id="to-wallet"
-							bind:value={transferForm.toWalletId}
-							class:error={transferErrors.toWalletId}
-						>
-							<option value="">Select destination wallet</option>
-							{#each $wallets as wallet}
-								<option value={wallet.id} disabled={wallet.id === transferForm.fromWalletId}>
-									{wallet.name}
-								</option>
-							{/each}
-						</select>
-						{#if transferErrors.toWalletId}
-							<span class="error-message">{transferErrors.toWalletId}</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="transfer-amount">Amount (₹) *</label>
-						<input
-							type="number"
-							id="transfer-amount"
-							bind:value={transferForm.amount}
-							placeholder="0.00"
-							step="0.01"
-							min="0"
-							class:error={transferErrors.amount}
-						/>
-						{#if transferErrors.amount}
-							<span class="error-message">{transferErrors.amount}</span>
-						{:else if hasInsufficientTransferBalance}
-							<span class="warning-message">⚠️ Insufficient balance</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="transfer-date">Date *</label>
-						<input
-							type="date"
-							id="transfer-date"
-							bind:value={transferForm.date}
-							class:error={transferErrors.date}
-						/>
-						{#if transferErrors.date}
-							<span class="error-message">{transferErrors.date}</span>
-						{/if}
-					</div>
-
-					<div class="form-group full-width">
-						<label for="transfer-note">Note (optional)</label>
-						<input
-							type="text"
-							id="transfer-note"
-							bind:value={transferForm.note}
-							placeholder="e.g., Monthly budget distribution"
-							maxlength="200"
-						/>
-					</div>
-				</div>
-
-				<!-- Preview -->
-				{#if transferForm.fromWalletId && transferForm.toWalletId && transferForm.amount && parseFloat(transferForm.amount) > 0}
-					<div class="transfer-preview">
-						<strong>Preview:</strong> This will move{' '}
-						<span class="highlight">{formatCurrency(transferAmountInPaise)}</span> from{' '}
-						<span class="highlight">{fromWallet?.name}</span> to{' '}
-						<span class="highlight">{toWallet?.name}</span>
-					</div>
-				{/if}
-
-				<div class="modal-actions">
-					<button type="button" class="btn-cancel" onclick={closeTransferModal}>Cancel</button>
-					<button
-						type="submit"
-						class="btn-submit"
-						disabled={isSubmittingTransfer || hasInsufficientTransferBalance}
-					>
-						{isSubmittingTransfer ? 'Processing...' : 'Transfer'}
-						<!-- Removed checkmark/hourglass -->
-						{#if isSubmittingTransfer}
-							<Loader2 size={16} class="animate-spin ml-2" />
-						{/if}
-					</button>
-				</div>
-			</form>
-		</div>
-	{/if}
-
-	<!-- Expense Modal -->
-	{#if showExpenseModal}
-		<div
-			class="modal-overlay"
-			onclick={closeExpenseModal}
-			onkeydown={(e) => e.key === 'Escape' && closeExpenseModal()}
-			role="button"
-			tabindex="-1"
-			aria-label="Close modal"
-		></div>
-		<div class="modal">
-			<div class="modal-header">
-				<h2>🧾 Add Expense</h2>
-				<button class="modal-close" onclick={closeExpenseModal}>✕</button>
-			</div>
-
-			<form
-				onsubmit={(e) => {
-					e.preventDefault();
-					handleExpenseSubmit();
-				}}
-			>
-				<div class="form-grid">
-					<div class="form-group">
-						<label for="expense-amount">Amount (₹) *</label>
-						<input
-							type="number"
-							id="expense-amount"
-							bind:value={expenseForm.amount}
-							placeholder="0.00"
-							step="0.01"
-							min="0"
-							class:error={expenseErrors.amount}
-						/>
-						{#if expenseErrors.amount}
-							<span class="error-message">{expenseErrors.amount}</span>
-						{/if}
-						{#if hasInsufficientExpenseBalance}
-							<span class="warning-message">⚠️ Insufficient balance in selected wallet</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="expense-wallet">Wallet *</label>
-						<select
-							id="expense-wallet"
-							bind:value={expenseForm.walletId}
-							class:error={expenseErrors.walletId}
-						>
-							<option value="">Select wallet</option>
-							{#each $wallets as wallet}
-								<option value={wallet.id}>{wallet.name} ({formatCurrency(wallet.balance)})</option>
-							{/each}
-						</select>
-						{#if expenseErrors.walletId}
-							<span class="error-message">{expenseErrors.walletId}</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="expense-category">Category *</label>
-						<select
-							id="expense-category"
-							bind:value={expenseForm.categoryId}
-							onchange={() => (expenseForm.subcategory = '')}
-							class:error={expenseErrors.categoryId}
-						>
-							<option value="">Select category</option>
-							{#each $categories as category}
-								<option value={category.id}>{category.icon} {category.name}</option>
-							{/each}
-						</select>
-						{#if expenseErrors.categoryId}
-							<span class="error-message">{expenseErrors.categoryId}</span>
-						{/if}
-					</div>
-
-					<div class="form-group">
-						<label for="expense-subcategory">Subcategory</label>
-						<select
-							id="expense-subcategory"
-							bind:value={expenseForm.subcategory}
-							disabled={!selectedCategory || selectedCategory.subcategories.length === 0}
-						>
-							<option value="">None</option>
-							{#if selectedCategory}
-								{#each selectedCategory.subcategories as sub}
-									<option value={sub}>{sub}</option>
-								{/each}
-							{/if}
-						</select>
-					</div>
-
-					<div class="form-group">
-						<label for="expense-date">Date *</label>
-						<input
-							type="date"
-							id="expense-date"
-							bind:value={expenseForm.date}
-							class:error={expenseErrors.date}
-						/>
-						{#if expenseErrors.date}
-							<span class="error-message">{expenseErrors.date}</span>
-						{/if}
-					</div>
-
-					<div class="form-group full-width">
-						<label for="expense-note">Note (optional, max 200 chars)</label>
-						<input
-							type="text"
-							id="expense-note"
-							bind:value={expenseForm.note}
-							placeholder="e.g., Coffee with friends"
-							maxlength="200"
-						/>
-						<span class="char-count">{expenseForm.note.length}/200</span>
-					</div>
-				</div>
-
-				<div class="modal-actions">
-					<button type="button" class="btn-cancel" onclick={closeExpenseModal}>Cancel</button>
-					<button type="submit" class="btn-submit" disabled={isSubmittingExpense}>
-						{isSubmittingExpense ? 'Adding...' : 'Add Expense'}
-						{#if isSubmittingExpense}
-							<Loader2 size={16} class="animate-spin ml-2" />
-						{:else}
-							<Plus size={16} class="ml-2" />
-						{/if}
-					</button>
-				</div>
-			</form>
-		</div>
-	{/if}
 </div>
+
+<!-- Manual Adjustment Calibration Sheet -->
+{#if showManualAdjustment}
+	<div
+		class="modal-backdrop"
+		onclick={() => (showManualAdjustment = null)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showManualAdjustment = null)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
+			<div class="sheet-top-row">
+				<h3>Calibrate Balance</h3>
+				<button class="close-btn" onclick={() => (showManualAdjustment = null)}>✕</button>
+			</div>
+
+			<p class="sheet-desc">Sync this wallet to your real bank account or pocket cash count.</p>
+
+			<div class="form-group-custom">
+				<label for="calib-amt">Current Actual Balance (₹)</label>
+				<input
+					id="calib-amt"
+					type="number"
+					step="0.01"
+					placeholder="0.00"
+					bind:value={manualAdjustmentForm.newBalance}
+					class="modal-input"
+				/>
+			</div>
+
+			<div class="sheet-btn-row">
+				<button class="primary-btn-full" onclick={() => handleSaveAdjustment(showManualAdjustment!)}>
+					Save Calibration
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Add New Wallet Sheet -->
+{#if showNewWalletModal}
+	<div
+		class="modal-backdrop"
+		onclick={() => (showNewWalletModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showNewWalletModal = false)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
+			<div class="sheet-top-row">
+				<h3>Add New Wallet / Card</h3>
+				<button class="close-btn" onclick={() => (showNewWalletModal = false)}>✕</button>
+			</div>
+
+			<div class="form-group-custom">
+				<label for="w-name">Wallet Name (e.g. Student Forex, ICICI Campus)</label>
+				<input id="w-name" type="text" placeholder="Wallet name..." bind:value={newWalletName} class="modal-input" />
+			</div>
+
+			<div class="form-group-custom">
+				<label for="w-bal">Initial Balance (₹)</label>
+				<input id="w-bal" type="number" step="0.01" placeholder="0.00" bind:value={newWalletBalance} class="modal-input" />
+			</div>
+
+			<div class="sheet-btn-row">
+				<button class="primary-btn-full" onclick={handleCreateWallet}>
+					Create Wallet
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Quick Transfer Sheet -->
+{#if showTransferModal}
+	<div
+		class="modal-backdrop"
+		onclick={() => (showTransferModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showTransferModal = false)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
+			<div class="sheet-top-row">
+				<h3>Transfer Funds</h3>
+				<button class="close-btn" onclick={() => (showTransferModal = false)}>✕</button>
+			</div>
+
+			<div class="form-group-custom">
+				<label for="from-w">Source Wallet</label>
+				<select id="from-w" bind:value={transferForm.fromWalletId} class="modal-input">
+					{#each $wallets as w}
+						<option value={w.id}>{w.name} ({formatCurrency(w.balance)})</option>
+					{/each}
+				</select>
+			</div>
+
+			<div class="form-group-custom">
+				<label for="to-w">Destination Wallet</label>
+				<select id="to-w" bind:value={transferForm.toWalletId} class="modal-input">
+					{#each $wallets.filter(w => w.id !== transferForm.fromWalletId) as w}
+						<option value={w.id}>{w.name} ({formatCurrency(w.balance)})</option>
+					{/each}
+				</select>
+			</div>
+
+			<div class="form-group-custom">
+				<label for="t-amt">Transfer Amount (₹)</label>
+				<input id="t-amt" type="number" step="0.01" placeholder="0.00" bind:value={transferForm.amount} class="modal-input" />
+				{#if transferErrors.amount}
+					<span class="err-txt">{transferErrors.amount}</span>
+				{/if}
+			</div>
+
+			<div class="sheet-btn-row">
+				<button class="primary-btn-full" onclick={handleTransferSubmit}>
+					Execute Transfer
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.wallets-page {
-		animation: fadeIn 0.3s ease-out;
+		max-width: 680px;
+		margin: 0 auto;
 	}
 
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* Toast */
-	.toast {
+	.toast-pill {
 		position: fixed;
-		top: 2rem;
-		right: 2rem;
-		color: white;
-		padding: 1rem 1.5rem;
-		border-radius: var(--border-radius);
+		top: 1.25rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #10B981;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.85rem;
+		padding: 0.55rem 1.25rem;
+		border-radius: var(--border-radius-pill);
 		box-shadow: var(--shadow-lg);
-		z-index: 1000;
-		animation: slideIn 0.3s ease-out;
+		z-index: 10000;
 	}
 
-	.toast.success {
-		background: var(--success);
-	}
-
-	.toast.error {
-		background: var(--danger);
-	}
-
-	@keyframes slideIn {
-		from {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	/* Page Header */
 	.page-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 2rem;
-		flex-wrap: wrap;
-		gap: 1rem;
+		align-items: flex-end;
+		margin-bottom: 1.25rem;
+	}
+
+	.campus-sub {
+		display: block;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-primary);
+		margin-bottom: 2px;
 	}
 
 	.page-title {
-		font-size: 2rem;
-		font-weight: 700;
+		font-size: 1.65rem;
+		font-weight: 800;
 		color: var(--text-primary);
+		letter-spacing: -0.04em;
 		margin: 0;
 	}
 
-	.header-actions {
-		display: flex;
-		gap: 1rem;
-	}
-
-	.action-btn {
-		padding: 0.75rem 1.5rem;
-		border-radius: var(--border-radius);
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-		border: none;
-	}
-
-	.action-btn.primary {
-		background: var(--accent-primary);
-		color: var(--bg-primary);
-	}
-
-	.action-btn.primary:hover {
-		background: var(--accent-hover);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
-	}
-
-	.action-btn.secondary {
-		background: var(--bg-card);
-		color: var(--accent-primary);
+	.add-wallet-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		background: var(--surface-2);
 		border: 1px solid var(--border-color);
+		color: var(--text-primary);
+		padding: 0.55rem 0.95rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
+		font-weight: 700;
+		transition: all 0.2s ease;
 	}
 
-	.action-btn.secondary:hover {
+	.add-wallet-btn:hover {
 		background: var(--bg-hover);
 		border-color: var(--accent-primary);
 	}
 
-	/* Wallet Cards Grid */
-	.wallet-cards {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-		gap: 1.5rem;
-		margin-bottom: 2rem;
+	/* Virtual Cards Deck */
+	.virtual-cards-deck {
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
 	}
 
-	.wallet-card {
-		border-radius: 28px; /* Super rounded */
-		padding: 2rem;
-		color: white; /* Default text white for these cards */
+	.virtual-card {
+		border-radius: 24px;
+		padding: 1.5rem;
 		position: relative;
 		overflow: hidden;
-		box-shadow: var(--shadow-lg);
-		transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		min-height: 400px; /* Taller for presence */
-		border: 1px solid rgba(168, 85, 247, 0.15);
+		box-shadow: var(--shadow-md);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: #FFFFFF;
+		transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
-	.wallet-card:hover {
-		transform: translateY(-6px);
-		box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
-	}
-
-	/* Gradient Variants */
-	.wallet-card:nth-child(1) {
-		background: linear-gradient(135deg, #0b071e 0%, #5b21b6 100%); /* Deep Violet-Black to Purple */
-		border-color: rgba(168, 85, 247, 0.35);
-	}
-
-	.wallet-card:nth-child(2) {
-		background: linear-gradient(135deg, #05020c 0%, #701a75 100%); /* Obsidian-Black to Wine-Magenta */
-		border-color: rgba(236, 72, 153, 0.25);
-	}
-
-	/* Background Decorations */
-	.wallet-card::before {
-		content: '';
-		position: absolute;
-		top: -20%;
-		right: -10%;
-		width: 200px;
-		height: 200px;
-		background: rgba(255, 255, 255, 0.1);
-		border-radius: 50%;
-		filter: blur(40px);
-	}
-
-	.wallet-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		margin-bottom: 2rem;
-		z-index: 1;
-	}
-
-	.wallet-info {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.wallet-name {
-		font-size: 1.5rem;
-		font-weight: 700;
-		color: white;
-		margin-bottom: 0.25rem;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.wallet-updated {
-		font-size: 0.8rem;
-		color: rgba(255, 255, 255, 0.7);
-	}
-
-	.manual-adjust-btn {
-		background: rgba(255, 255, 255, 0.2);
-		color: white;
-		width: 36px;
-		height: 36px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: background 0.2s;
-	}
-
-	.manual-adjust-btn:hover {
-		background: rgba(255, 255, 255, 0.3);
-	}
-
-	.wallet-balance {
-		font-size: 3rem;
-		font-weight: 800;
-		margin-bottom: 2rem;
-		z-index: 1;
-		line-height: 1;
-		letter-spacing: -1px;
-	}
-
-	/* Stats inside card */
-	.wallet-stats {
-		background: rgba(0, 0, 0, 0.15);
-		border-radius: 16px;
-		padding: 1rem;
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 0.5rem;
-		backdrop-filter: blur(10px);
-		z-index: 1;
-	}
-
-	.stat-item {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		text-align: center;
-	}
-
-	.stat-label {
-		font-size: 0.7rem;
-		text-transform: uppercase;
-		color: rgba(255, 255, 255, 0.6);
-		margin-bottom: 4px;
-	}
-
-	.stat-value {
-		font-size: 0.95rem;
-		font-weight: 600;
-		color: white;
-	}
-
-	/* Manual Adjustment */
-	.manual-adjustment {
-		background: var(--bg-secondary);
-		border: 1px solid var(--warning);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.manual-adjustment h4 {
-		margin: 0 0 0.5rem 0;
-		color: var(--text-primary);
-		font-size: 1rem;
-	}
-
-	.manual-adjustment .warning {
-		font-size: 0.875rem;
-		color: var(--warning);
-		margin: 0 0 1rem 0;
-	}
-
-	.adjust-form {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.adjust-form label {
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-	}
-
-	.adjust-form input {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-	}
-
-	.adjust-actions {
-		display: flex;
-		gap: 0.75rem;
-	}
-
-	.btn-confirm {
-		flex: 1;
-		background: var(--success);
-		color: white;
-		border: none;
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.btn-confirm:hover {
-		background: #27ae60;
-		transform: translateY(-1px);
-	}
-
-	.btn-cancel {
-		flex: 1;
-		background: var(--bg-secondary);
-		color: var(--text-secondary);
-		border: 1px solid var(--border-color);
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.btn-cancel:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-	}
-
-	/* Lists container - pulling out of card visually or nested cleanly */
-	.transaction-section {
-		background: var(--bg-card);
-		border-radius: 20px;
-		padding: 1.5rem;
-		margin-top: 1.5rem;
-		color: var(--text-primary); /* Reset text color */
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-	}
-
-	.transaction-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
-
-	.transaction-header h3 {
-		color: var(--text-primary);
-		font-size: 1.1rem;
-	}
-
-	.filter-buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.filter-btn {
-		background: var(--bg-secondary);
-		color: var(--text-secondary);
-		padding: 0.5rem 1rem;
-		border-radius: var(--border-radius);
-		cursor: pointer;
-		font-size: 0.875rem;
-		transition: all 0.2s;
-	}
-
-	.filter-btn:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-	}
-
-	.filter-btn.active {
-		background: var(--accent-primary);
-		color: var(--bg-primary);
-		border-color: var(--accent-primary);
-	}
-
-	/* Transactions List */
-	.transactions-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.transaction-item {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		transition: all 0.2s;
-	}
-
-	.transaction-item:hover {
-		background: var(--bg-hover);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.transaction-icon {
-		font-size: 2rem;
-		flex-shrink: 0;
-	}
-
-	.transaction-details {
-		flex: 1;
-	}
-
-	.transaction-name {
-		font-weight: 500;
-		color: var(--text-primary);
-		margin-bottom: 0.25rem;
-	}
-
-	.subcategory {
-		color: var(--text-secondary);
-		font-weight: 400;
-	}
-
-	.transaction-note {
-		font-size: 0.875rem;
-		color: var(--text-muted);
-		font-style: italic;
-		margin-bottom: 0.25rem;
-	}
-
-	.transaction-date {
-		font-size: 0.75rem;
-		color: var(--text-muted);
-	}
-
-	.transaction-amount {
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: var(--danger);
-		flex-shrink: 0;
-	}
-
-	.transaction-amount.positive {
-		color: var(--success);
-	}
-
-	/* Empty State */
-	.empty-state {
-		text-align: center;
-		padding: 3rem 1rem;
-	}
-
-	.empty-icon {
-		font-size: 3rem;
-		margin-bottom: 1rem;
-	}
-
-	.empty-state p {
-		color: var(--text-muted);
-		margin: 0;
-	}
-
-	/* Modal */
-	.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.7);
-		z-index: 999;
-		animation: fadeIn 0.2s ease-out;
-	}
-
-	.modal {
-		position: fixed;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 2rem;
-		max-width: 600px;
-		width: 90%;
-		max-height: 90vh;
-		overflow-y: auto;
-		z-index: 1000;
-		box-shadow: var(--shadow-lg);
-		animation: slideUp 0.3s ease-out;
-	}
-
-	@keyframes slideUp {
-		from {
-			opacity: 0;
-			transform: translate(-50%, -40%);
-		}
-		to {
-			opacity: 1;
-			transform: translate(-50%, -50%);
-		}
-	}
-
-	.modal-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1.5rem;
-	}
-
-	.modal-header h2 {
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: var(--text-primary);
-		margin: 0;
-	}
-
-	.modal-close {
-		background: none;
-		border: none;
-		color: var(--text-secondary);
-		font-size: 1.5rem;
-		cursor: pointer;
-		padding: 0;
-		width: 2rem;
-		height: 2rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 50%;
-		transition: all 0.2s;
-	}
-
-	.modal-close:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-	}
-
-	/* Form Styles */
-	.form-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.form-group.full-width {
-		grid-column: 1 / -1;
-	}
-
-	label {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--text-secondary);
-	}
-
-	input,
-	select {
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		font-size: 1rem;
-		transition: all 0.2s;
-	}
-
-	input:focus,
-	select:focus {
-		outline: none;
-		border-color: var(--accent-primary);
-		box-shadow: 0 0 0 3px rgba(192, 192, 192, 0.1);
-	}
-
-	input.error,
-	select.error {
-		border-color: var(--danger);
-	}
-
-	input:disabled,
-	select:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.error-message {
-		font-size: 0.75rem;
-		color: var(--danger);
-	}
-
-	.warning-message {
-		font-size: 0.75rem;
-		color: var(--warning);
-	}
-
-	.char-count {
-		font-size: 0.75rem;
-		color: var(--text-muted);
-		text-align: right;
-	}
-
-	/* Transfer Preview */
-	.transfer-preview {
-		background: var(--bg-secondary);
-		border: 1px solid var(--accent-primary);
-		border-radius: var(--border-radius);
-		padding: 1rem;
-		margin-bottom: 1.5rem;
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-	}
-
-	.transfer-preview .highlight {
-		color: var(--accent-primary);
-		font-weight: 600;
-	}
-
-	/* Modal Actions */
-	.modal-actions {
-		display: flex;
-		gap: 1rem;
-		justify-content: flex-end;
-	}
-
-	.btn-submit {
-		background: var(--accent-primary);
-		color: var(--bg-primary);
-		border: none;
-		padding: 0.75rem 1.5rem;
-		border-radius: var(--border-radius);
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.btn-submit:hover:not(:disabled) {
-		background: var(--accent-hover);
+	.virtual-card:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(192, 192, 192, 0.3);
 	}
 
-	.btn-submit:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
+	.card-upi {
+		background: linear-gradient(135deg, #0A1128 0%, #101F42 60%, #1C3166 100%);
 	}
 
-	/* Responsive Design */
-	@media (max-width: 768px) {
-		.wallet-cards {
-			grid-template-columns: 1fr;
-		}
+	.card-cash {
+		background: linear-gradient(135deg, #06281E 0%, #0D4736 60%, #12634C 100%);
+	}
 
-		.form-grid {
-			grid-template-columns: 1fr;
-		}
+	.card-bank {
+		background: linear-gradient(135deg, #1E1035 0%, #311A56 60%, #46257C 100%);
+	}
 
-		.header-actions {
-			width: 100%;
-		}
+	.card-glow-bg {
+		position: absolute;
+		top: -30%;
+		right: -10%;
+		width: 180px;
+		height: 180px;
+		background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+		border-radius: 50%;
+		pointer-events: none;
+	}
 
-		.action-btn {
-			flex: 1;
-		}
+	.card-top-line {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.25rem;
+		position: relative;
+		z-index: 2;
+	}
 
-		.wallet-stats {
-			grid-template-columns: 1fr;
-		}
+	.card-chip-wrap {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
 
-		.transaction-header {
-			flex-direction: column;
-			align-items: flex-start;
-		}
+	.card-chip {
+		width: 32px;
+		height: 24px;
+		border-radius: 5px;
+		background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
+		border: 1px solid rgba(0, 0, 0, 0.2);
+	}
 
-		.filter-buttons {
-			width: 100%;
-		}
+	.card-brand-name {
+		font-size: 0.92rem;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
 
-		.filter-btn {
-			flex: 1;
-		}
+	.card-action-icon {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.12);
+		color: #FFFFFF;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+	.card-action-icon:hover {
+		background: rgba(255, 255, 255, 0.24);
+	}
+
+	.card-body-balance {
+		margin-bottom: 1.35rem;
+		position: relative;
+		z-index: 2;
+	}
+
+	.balance-sub {
+		display: block;
+		font-size: 0.72rem;
+		opacity: 0.75;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		margin-bottom: 3px;
+	}
+
+	.card-balance-val {
+		font-size: 2.15rem;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		line-height: 1.1;
+	}
+
+	.card-footer-stats {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-top: 1px solid rgba(255, 255, 255, 0.12);
+		padding-top: 0.85rem;
+		position: relative;
+		z-index: 2;
+	}
+
+	.card-stat-col {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.c-stat-lbl {
+		font-size: 0.65rem;
+		opacity: 0.7;
+		text-transform: uppercase;
+	}
+
+	.c-stat-val {
+		font-size: 0.88rem;
+		font-weight: 700;
+	}
+
+	.card-transfer-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		background: rgba(255, 255, 255, 0.15);
+		color: #FFFFFF;
+		padding: 0.4rem 0.85rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.75rem;
+		font-weight: 700;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		transition: all 0.2s ease;
+	}
+
+	.card-transfer-pill:hover {
+		background: rgba(255, 255, 255, 0.28);
+	}
+
+	/* Modal Sheets */
+	.sheet-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	.sheet-top-row h3 {
+		font-size: 1.15rem;
+		font-weight: 800;
+		margin: 0;
+	}
+
+	.sheet-desc {
+		font-size: 0.84rem;
+		color: var(--text-secondary);
+		margin-bottom: 1.15rem;
+	}
+
+	.form-group-custom {
+		margin-bottom: 1rem;
+	}
+
+	.form-group-custom label {
+		display: block;
+		font-size: 0.76rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
+		margin-bottom: 0.35rem;
+	}
+
+	.modal-input {
+		width: 100%;
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+		padding: 0.75rem 1rem;
+		font-size: 0.92rem;
+		color: var(--text-primary);
+	}
+
+	.sheet-btn-row {
+		margin-top: 1.25rem;
+	}
+
+	.primary-btn-full {
+		width: 100%;
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.95rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
+	}
+
+	.err-txt {
+		font-size: 0.74rem;
+		color: var(--danger);
+		font-weight: 600;
+		margin-top: 3px;
+		display: block;
 	}
 </style>
