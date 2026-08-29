@@ -277,7 +277,14 @@
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showSatisfactionModal = false)}
 	>
-		<div class="modal-sheet" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3 class="modal-title">Spend Satisfaction Check</h3>
 				<button class="close-btn" onclick={() => (showSatisfactionModal = false)}>✕</button>

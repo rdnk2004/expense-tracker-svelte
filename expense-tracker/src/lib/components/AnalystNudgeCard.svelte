@@ -35,7 +35,7 @@
 	>
 		<div class="card-top-row">
 			<div class="analyst-badge">
-				<Bot size={14} class="bot-icon" />
+				<Bot size={14} color="var(--accent-primary)" />
 				<span>Financial Analyst Pulse</span>
 			</div>
 
@@ -137,9 +137,6 @@
 		color: var(--text-muted);
 	}
 
-	.bot-icon {
-		color: var(--accent-primary);
-	}
 
 	.cycle-pill {
 		background: var(--bg-primary);

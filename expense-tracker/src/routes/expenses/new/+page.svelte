@@ -319,7 +319,14 @@
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showWalletModal = false)}
 	>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+		<div
+			class="modal"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3>Select Wallet</h3>
 				<button class="close-btn" onclick={() => (showWalletModal = false)} aria-label="Close"
@@ -357,7 +364,14 @@
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showToWalletModal = false)}
 	>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+		<div
+			class="modal"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3>Select Destination Wallet</h3>
 				<button class="close-btn" onclick={() => (showToWalletModal = false)} aria-label="Close"
@@ -395,7 +409,14 @@
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showCategoryModal = false)}
 	>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+		<div
+			class="modal"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3>Select Category</h3>
 				<button class="close-btn" onclick={() => (showCategoryModal = false)} aria-label="Close"
@@ -432,7 +453,14 @@
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (showSubcategoryModal = false)}
 	>
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+		<div
+			class="modal"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3>Select Subcategory</h3>
 				<button class="close-btn" onclick={() => (showSubcategoryModal = false)} aria-label="Close"

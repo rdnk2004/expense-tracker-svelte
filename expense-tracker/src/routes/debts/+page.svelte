@@ -388,8 +388,21 @@
 
 <!-- Settlement Modal -->
 {#if settlementModal.open && settlementModal.debt}
-	<div class="modal-backdrop" onclick={() => (settlementModal.open = false)} role="button" tabindex="0">
-		<div class="modal-sheet" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+	<div
+		class="modal-backdrop"
+		onclick={() => (settlementModal.open = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (settlementModal.open = false)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3 class="modal-title">Settle Tab with {settlementModal.debt.person}</h3>
 				<button class="close-btn" onclick={() => (settlementModal.open = false)}>✕</button>

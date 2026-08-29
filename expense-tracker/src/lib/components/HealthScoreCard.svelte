@@ -72,7 +72,7 @@
 					<span class="badge-emoji">{badge.emoji}</span>
 					<span class="badge-title">{badge.title}</span>
 					{#if !badge.unlocked}
-						<Lock size={10} class="lock-icon" />
+						<Lock size={10} color="var(--text-muted)" />
 					{/if}
 				</div>
 			{/each}
@@ -233,9 +233,5 @@
 	.badge-pill.locked {
 		opacity: 0.45;
 		filter: grayscale(0.8);
-	}
-
-	.lock-icon {
-		color: var(--text-muted);
 	}
 </style>

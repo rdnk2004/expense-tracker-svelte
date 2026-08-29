@@ -659,12 +659,6 @@
 		line-height: 1.6;
 	}
 
-	.help-text {
-		margin-top: 1rem;
-		font-size: 0.875rem;
-		color: var(--text-muted);
-		font-style: italic;
-	}
 
 	/* Info Grid */
 	.info-grid {

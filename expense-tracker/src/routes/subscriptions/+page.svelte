@@ -292,8 +292,21 @@
 
 <!-- Add Subscription Modal -->
 {#if showAddModal}
-	<div class="modal-backdrop" onclick={() => (showAddModal = false)} role="button" tabindex="0">
-		<div class="modal-sheet" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+	<div
+		class="modal-backdrop"
+		onclick={() => (showAddModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showAddModal = false)}
+	>
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<h3 class="modal-title">Track Recurring Subscription</h3>
 				<button class="close-btn" onclick={() => (showAddModal = false)}>✕</button>

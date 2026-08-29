@@ -136,7 +136,14 @@
 		tabindex="0"
 		onkeydown={(e) => e.key === 'Escape' && (open = false)}
 	>
-		<div class="modal-sheet" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" tabindex="-1">
+		<div
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+		>
 			<div class="modal-header">
 				<div class="title-wrap">
 					<Users size={22} class="text-accent" />

@@ -35,7 +35,7 @@
 	<div class="card-header">
 		<div class="title-with-badge">
 			<span class="card-eyebrow">
-				<Zap size={14} class="glow-icon" /> Daily Safe-to-Spend
+				<Zap size={14} color="var(--accent-primary)" /> Daily Safe-to-Spend
 			</span>
 			<span class="status-pill">
 				<span class="pulse-dot"></span>
@@ -144,9 +144,6 @@
 		gap: 5px;
 	}
 
-	.glow-icon {
-		color: var(--accent-primary);
-	}
 
 	.status-pill {
 		font-size: 0.72rem;

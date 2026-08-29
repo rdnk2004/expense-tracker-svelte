@@ -435,8 +435,21 @@
 
 	<!-- Custom Split Modal -->
 	{#if showSplitModal}
-		<div class="modal-backdrop" onclick={() => (showSplitModal = false)}>
-			<div class="modal-sheet" onclick={(e) => e.stopPropagation()}>
+		<div
+			class="modal-backdrop"
+			onclick={() => (showSplitModal = false)}
+			role="button"
+			tabindex="0"
+			onkeydown={(e) => e.key === 'Escape' && (showSplitModal = false)}
+		>
+			<div
+				class="modal-sheet"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => e.stopPropagation()}
+				role="dialog"
+				aria-modal="true"
+				tabindex="-1"
+			>
 				<div class="modal-header">
 					<h3 class="modal-title">Customize 3-Bucket Split</h3>
 					<button class="close-btn" onclick={() => (showSplitModal = false)}>✕</button>
