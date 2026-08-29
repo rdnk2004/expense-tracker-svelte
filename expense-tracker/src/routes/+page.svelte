@@ -22,30 +22,21 @@
 		Receipt,
 		Smartphone,
 		Banknote,
-		Package,
 		ArrowRight,
-		ChevronDown,
-		MoreVertical,
-		Bell,
-		ArrowDownLeft,
-		ArrowUpRight,
 		ChevronRight,
 		Plus,
 		Users,
 		Sparkles,
 		PiggyBank,
-		AlertCircle
+		ArrowDownLeft,
+		ArrowUpRight,
+		Clock
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import SafeSpendCard from '$lib/components/SafeSpendCard.svelte';
 	import HealthScoreCard from '$lib/components/HealthScoreCard.svelte';
 	import AnalystNudgeCard from '$lib/components/AnalystNudgeCard.svelte';
 
-	// Computed values
-	let upiWallet = $derived($wallets.find((w) => w.name.toLowerCase().includes('upi')));
-	let cashWallet = $derived($wallets.find((w) => w.name.toLowerCase().includes('cash')));
-
-	// Calculate Income and Expense
 	let monthlyExpense = $derived(
 		$currentMonthExpenses
 			.filter((e) => e.categoryId !== 'income')
@@ -63,21 +54,12 @@
 			.slice(0, 6)
 	);
 
-	let totalOwed = $derived(
-		$unsettledDebts
-			.filter((d) => d.direction === 'give')
-			.reduce((sum, d) => sum + d.amount, 0)
-	);
-
 	let totalReceivable = $derived(
 		$unsettledDebts
 			.filter((d) => d.direction === 'receive')
 			.reduce((sum, d) => sum + d.amount, 0)
 	);
 
-	let overallBudget = $derived($currentMonthBudgets.find((b) => b.type === 'overall'));
-
-	// 3-Bucket breakdown calculations
 	let bucketSpending = $derived.by(() => {
 		let survival = 0;
 		let fun = 0;
@@ -106,35 +88,46 @@
 	function getCategoryById(id: string) {
 		return $categories.find((c) => c.id === id);
 	}
+
+	function calculateTimeCost(amount: number) {
+		const hourlyRatePaise = $studentProfile.hourlyWageRate || 20000;
+		const hours = amount / hourlyRatePaise;
+		if (hours < 0.1) return null;
+		return hours < 1 ? `${Math.round(hours * 60)}m labor` : `${hours.toFixed(1)}h labor`;
+	}
 </script>
 
-<div class="dashboard">
-	<div class="dashboard-header">
-		<div>
-			<span class="campus-badge">🎓 {$studentProfile.collegeName || 'Campus Student'} • {$studentProfile.semester || 'Active Term'}</span>
+<div class="dashboard-page">
+	<!-- Top Greeting & Action Header -->
+	<header class="dashboard-header">
+		<div class="header-titles">
+			<div class="campus-tag-pill">
+				<span class="campus-icon">🎓</span>
+				<span>{$studentProfile.collegeName || 'Campus Student'} • {$studentProfile.semester || 'Active Term'}</span>
+			</div>
 			<h1 class="page-title">Financial Command</h1>
 		</div>
 		<div class="header-actions">
-			<a href="/expenses/new" class="quick-add-btn" aria-label="Add transaction">
-				<Plus size={20} />
-				<span>Log</span>
+			<a href="/expenses/new" class="quick-log-btn" aria-label="Log new transaction">
+				<Plus size={18} />
+				<span>Log Spend</span>
 			</a>
 		</div>
-	</div>
+	</header>
 
-	<div class="dashboard-container">
-		<!-- 0. AI Financial Analyst Commentary & Proactive Nudge -->
+	<div class="dashboard-stream">
+		<!-- 1. AI Financial Analyst Commentary -->
 		<AnalystNudgeCard />
 
-		<!-- 1. Dynamic Safe-to-Spend & Runway Engine Card -->
+		<!-- 2. Dynamic Safe-to-Spend & Runway Engine -->
 		<SafeSpendCard />
 
-		<!-- 2. Wallet Overview Hero Card -->
+		<!-- 3. Obsidian Liquid Capital Card -->
 		<div class="card card-hero">
 			<div class="card-header-hero">
 				<div class="account-selector">
-					<Wallet size={15} />
-					<span>Total Liquid Wealth</span>
+					<Wallet size={15} color="#10B981" />
+					<span>Total Liquid Capital</span>
 				</div>
 				<a href="/wallets" class="icon-btn-ghost" aria-label="Manage wallets">
 					<ChevronRight size={18} />
@@ -142,47 +135,50 @@
 			</div>
 
 			<div class="balance-section">
-				<span class="label-sm">Combined Balance</span>
-				<h1 class="balance-display">{formatCurrency($totalBalance)}</h1>
+				<span class="label-sm">Combined Liquid Wealth</span>
+				<h2 class="balance-display tabular">{formatCurrency($totalBalance)}</h2>
 			</div>
 
-			<!-- Individual Wallets Mini Pills -->
+			<!-- Individual Wallets Mini Chips -->
 			<div class="wallet-pills-row">
 				{#each $wallets as w}
 					<div class="wallet-mini-pill">
 						<span class="wallet-pill-name">{w.name}</span>
-						<span class="wallet-pill-val">{formatCurrency(w.balance)}</span>
+						<span class="wallet-pill-val tabular">{formatCurrency(w.balance)}</span>
 					</div>
 				{/each}
 			</div>
 
+			<!-- Cashflow Inflow / Outflow -->
 			<div class="stats-row">
 				<div class="stat-item">
 					<div class="stat-label">
-						<ArrowDownLeft size={14} class="text-success" /> Inflow
+						<ArrowDownLeft size={14} color="#10B981" />
+						<span>Inflow</span>
 					</div>
-					<div class="stat-value text-success">{formatCurrency(monthlyIncome)}</div>
+					<div class="stat-value text-success tabular">{formatCurrency(monthlyIncome)}</div>
 				</div>
 				<div class="stat-item">
 					<div class="stat-label">
-						<ArrowUpRight size={14} class="text-danger" /> Outflow
+						<ArrowUpRight size={14} color="#F43F5E" />
+						<span>Outflow</span>
 					</div>
-					<div class="stat-value">{formatCurrency(monthlyExpense)}</div>
+					<div class="stat-value text-danger tabular">{formatCurrency(monthlyExpense)}</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- 3. Student Financial Health Score & Badges -->
+		<!-- 4. Student Financial Health Score & Badges -->
 		<HealthScoreCard />
 
-		<!-- 4. Student 3-Bucket Macro Pulse -->
-		<div class="section-card">
+		<!-- 5. 3-Bucket Macro Pulse (Survival / Fun / Future) -->
+		<div class="card section-card">
 			<div class="section-header-row">
-				<div class="section-title-group">
-					<h3 class="section-title">3-Bucket Balance</h3>
-					<span class="sub-label">Survival vs Fun vs Future</span>
+				<div>
+					<h3 class="section-title">3-Bucket Discipline</h3>
+					<span class="sub-label">Survival (50%) • Fun (30%) • Future (20%)</span>
 				</div>
-				<a href="/budgets" class="view-all-link">Details <ChevronRight size={15} /></a>
+				<a href="/budgets" class="view-all-link">Details <ChevronRight size={14} /></a>
 			</div>
 
 			<div class="bucket-bar-container">
@@ -194,31 +190,34 @@
 				<div class="bucket-legend-grid">
 					<div class="bucket-legend-item">
 						<span class="dot survival"></span>
-						<span class="b-name">Survival (50%)</span>
-						<span class="b-val">{formatCurrency(bucketSpending.survival)}</span>
+						<span class="b-name">Survival</span>
+						<span class="b-val tabular">{formatCurrency(bucketSpending.survival)}</span>
+						<span class="b-pct tabular">({bucketSpending.survivalPercent}%)</span>
 					</div>
 					<div class="bucket-legend-item">
 						<span class="dot fun"></span>
-						<span class="b-name">Fun (30%)</span>
-						<span class="b-val">{formatCurrency(bucketSpending.fun)}</span>
+						<span class="b-name">Fun</span>
+						<span class="b-val tabular">{formatCurrency(bucketSpending.fun)}</span>
+						<span class="b-pct tabular">({bucketSpending.funPercent}%)</span>
 					</div>
 					<div class="bucket-legend-item">
 						<span class="dot future"></span>
-						<span class="b-name">Future (20%)</span>
-						<span class="b-val">{formatCurrency(bucketSpending.future)}</span>
+						<span class="b-name">Future</span>
+						<span class="b-val tabular">{formatCurrency(bucketSpending.future)}</span>
+						<span class="b-pct tabular">({bucketSpending.futurePercent}%)</span>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<!-- 4. Campus Receivables & Friend Tab Alert Banner -->
+		<!-- 6. Campus Receivables & Friend Tab Alert Banner -->
 		{#if totalReceivable > 0}
 			<div class="alert-banner-receivable">
 				<div class="alert-icon-col">
-					<Handshake size={20} />
+					<Handshake size={20} color="#818CF8" />
 				</div>
 				<div class="alert-content-col">
-					<strong>{formatCurrency(totalReceivable)}</strong> owed to you from {$unsettledDebts.filter(d => d.direction === 'receive').length} friend splits.
+					<strong class="tabular">{formatCurrency(totalReceivable)}</strong> owed to you from {$unsettledDebts.filter(d => d.direction === 'receive').length} friend splits.
 				</div>
 				<a href="/debts" class="alert-action-btn">
 					Settle <ChevronRight size={14} />
@@ -226,19 +225,23 @@
 			</div>
 		{/if}
 
-		<!-- 5. Recent Activity & Mindful Value Tags -->
-		<div class="section-recent">
+		<!-- 7. Recent Transactions Feed -->
+		<div class="card section-recent">
 			<div class="section-header-row">
-				<h3 class="section-title">Recent Transactions</h3>
-				<a href="/expenses" class="view-all-link">View All <ChevronRight size={15} /></a>
+				<div>
+					<h3 class="section-title">Recent Feed</h3>
+					<span class="sub-label">Latest campus outlays</span>
+				</div>
+				<a href="/expenses" class="view-all-link">All <ChevronRight size={14} /></a>
 			</div>
 
 			<div class="transactions-list">
 				{#each recentExpenses as exp}
 					{@const cat = getCategoryById(exp.categoryId)}
-					<div class="transaction-card">
+					{@const laborCost = calculateTimeCost(exp.amount)}
+					<div class="transaction-row">
 						<div class="t-icon">
-							<CategoryIcon icon={cat?.icon || 'Receipt'} color={cat?.color || '#7C3AED'} size={20} />
+							<CategoryIcon icon={cat?.icon || 'Receipt'} color={cat?.color || '#10B981'} size={20} />
 						</div>
 						<div class="t-details">
 							<div class="t-title">{exp.note || cat?.name || 'Expense'}</div>
@@ -252,16 +255,23 @@
 								{#if exp.satisfactionRating === 'regretted'}
 									<span class="tag-pill tag-regret">💀 Regretted</span>
 								{/if}
+								{#if laborCost && exp.categoryId !== 'income'}
+									<span class="time-cost-pill" title="Time cost based on student hourly rate">
+										<Clock size={10} />
+										<span>{laborCost}</span>
+									</span>
+								{/if}
 							</div>
 						</div>
-						<div class="t-amount" class:income-amount={exp.categoryId === 'income'}>
+						<div class="t-amount tabular" class:income-amount={exp.categoryId === 'income'}>
 							{exp.categoryId === 'income' ? '+' : '-'}{formatCurrency(exp.amount)}
 						</div>
 					</div>
 				{:else}
-					<div class="empty-state-card">
-						<p>No transactions logged yet.</p>
-						<a href="/expenses/new" class="text-button">Log your first expense</a>
+					<div class="empty-state-box">
+						<Receipt size={32} color="var(--text-muted)" />
+						<p>No transactions logged in this cycle.</p>
+						<a href="/expenses/new" class="btn btn-secondary">Log your first spend</a>
 					</div>
 				{/each}
 			</div>
@@ -270,168 +280,141 @@
 </div>
 
 <style>
-	.dashboard {
-		max-width: 620px;
+	.dashboard-page {
+		max-width: 680px;
 		margin: 0 auto;
-		padding: 0 16px 120px 16px;
 	}
 
 	.dashboard-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 20px;
-		padding-top: 8px;
+		margin-bottom: 1.25rem;
+		gap: 1rem;
 	}
 
-	.campus-badge {
-		font-size: 0.76rem;
+	.campus-tag-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		font-size: 0.72rem;
 		font-weight: 700;
 		color: var(--accent-primary);
 		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		display: block;
-		margin-bottom: 2px;
+		letter-spacing: 0.05em;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 0.2rem 0.6rem;
+		border-radius: var(--border-radius-pill);
+		margin-bottom: 0.35rem;
 	}
 
 	.page-title {
 		font-size: 1.75rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.5px;
+		letter-spacing: -0.04em;
+		margin: 0;
 	}
 
-	.quick-add-btn {
-		background: var(--accent-gradient);
-		color: white;
-		padding: 10px 16px;
-		border-radius: 9999px;
+	.quick-log-btn {
+		background: var(--accent-primary);
+		color: #080C14;
+		padding: 0.55rem 1rem;
+		border-radius: var(--border-radius-pill);
 		font-weight: 700;
-		font-size: 0.88rem;
-		display: flex;
+		font-size: 0.84rem;
+		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		box-shadow: 0 8px 20px var(--accent-glow);
+		gap: 5px;
+		box-shadow: 0 2px 10px var(--accent-glow);
 		text-decoration: none;
-		transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		flex-shrink: 0;
 	}
 
-	.quick-add-btn:active {
-		transform: scale(0.96);
+	.quick-log-btn:hover {
+		filter: brightness(1.1);
 	}
 
-	.dashboard-container {
+	.dashboard-stream {
 		display: flex;
 		flex-direction: column;
-		gap: 18px;
-		animation: fadeIn 0.4s ease-out;
+		gap: 1.15rem;
 	}
 
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-			transform: translateY(8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* ===================================
-	   HERO CARD
-	   =================================== */
-	.card-hero {
-		background: var(--hero-gradient);
-		border-radius: 28px;
-		padding: 24px;
-		color: white;
-		box-shadow: 0 20px 40px -10px rgba(31, 38, 135, 0.35);
-		position: relative;
-		overflow: hidden;
-	}
-
-	.card-hero::before {
-		content: '';
-		position: absolute;
-		top: -40%;
-		right: -20%;
-		width: 260px;
-		height: 260px;
-		background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-		border-radius: 50%;
-		filter: blur(35px);
-		pointer-events: none;
-	}
-
+	/* Hero Card */
 	.card-header-hero {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 20px;
-		position: relative;
-		z-index: 2;
+		margin-bottom: 1.15rem;
 	}
 
 	.account-selector {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		background: rgba(255, 255, 255, 0.15);
-		padding: 6px 12px;
-		border-radius: 20px;
-		font-size: 0.82rem;
-		font-weight: 600;
-		backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.15);
+		gap: 6px;
+		background: rgba(255, 255, 255, 0.08);
+		padding: 4px 10px;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.76rem;
+		font-weight: 700;
+		border: 1px solid rgba(255, 255, 255, 0.12);
 	}
 
 	.icon-btn-ghost {
-		background: rgba(255, 255, 255, 0.12);
+		background: rgba(255, 255, 255, 0.08);
 		color: white;
-		padding: 6px;
+		width: 32px;
+		height: 32px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		text-decoration: none;
+		transition: all 0.2s ease;
+	}
+
+	.icon-btn-ghost:hover {
+		background: rgba(255, 255, 255, 0.16);
 	}
 
 	.balance-section {
-		margin-bottom: 20px;
-		position: relative;
-		z-index: 2;
+		margin-bottom: 1.15rem;
 	}
 
 	.label-sm {
 		display: block;
-		font-size: 0.8rem;
-		opacity: 0.8;
+		font-size: 0.74rem;
+		opacity: 0.75;
 		margin-bottom: 4px;
-		font-weight: 500;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	.balance-display {
-		font-size: 2.4rem;
+		font-size: 2.35rem;
 		font-weight: 800;
 		line-height: 1.1;
-		letter-spacing: -0.5px;
+		letter-spacing: -0.04em;
+		color: #FFFFFF;
+		margin: 0;
 	}
 
 	.wallet-pills-row {
 		display: flex;
-		gap: 8px;
-		margin-bottom: 20px;
+		gap: 6px;
+		margin-bottom: 1.15rem;
 		flex-wrap: wrap;
-		position: relative;
-		z-index: 2;
 	}
 
 	.wallet-mini-pill {
-		background: rgba(255, 255, 255, 0.12);
-		padding: 6px 12px;
-		border-radius: 12px;
-		font-size: 0.78rem;
+		background: rgba(255, 255, 255, 0.08);
+		padding: 4px 10px;
+		border-radius: var(--border-radius-xs);
+		font-size: 0.74rem;
 		display: flex;
 		align-items: center;
 		gap: 6px;
@@ -439,7 +422,7 @@
 	}
 
 	.wallet-pill-name {
-		opacity: 0.75;
+		opacity: 0.7;
 	}
 
 	.wallet-pill-val {
@@ -448,267 +431,280 @@
 
 	.stats-row {
 		display: flex;
-		gap: 24px;
-		position: relative;
-		z-index: 2;
-		border-top: 1px solid rgba(255, 255, 255, 0.12);
-		padding-top: 16px;
+		gap: 1rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		padding-top: 1rem;
 	}
 
 	.stat-item {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
+		flex: 1;
 	}
 
 	.stat-label {
 		display: flex;
 		align-items: center;
-		gap: 5px;
-		font-size: 0.78rem;
-		opacity: 0.8;
+		gap: 4px;
+		font-size: 0.72rem;
+		opacity: 0.75;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		margin-bottom: 2px;
 	}
 
 	.stat-value {
-		font-size: 1.05rem;
-		font-weight: 700;
+		font-size: 1.15rem;
+		font-weight: 800;
 	}
 
-	/* ===================================
-	   3-BUCKET SECTION
-	   =================================== */
+	.text-success {
+		color: #10B981;
+	}
+
+	.text-danger {
+		color: #F43F5E;
+	}
+
+	/* Section Card */
 	.section-card {
-		background: var(--bg-card);
-		border-radius: 24px;
-		padding: 20px;
-		border: 1px solid var(--border-color);
-		box-shadow: var(--shadow-sm);
+		padding: 1.35rem;
 	}
 
 	.section-header-row {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-start;
-		margin-bottom: 14px;
+		align-items: center;
+		margin-bottom: 1.15rem;
 	}
 
 	.section-title {
-		font-size: 1.05rem;
-		font-weight: 700;
+		font-size: 1rem;
+		font-weight: 800;
 		color: var(--text-primary);
+		margin: 0;
 	}
 
 	.sub-label {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		color: var(--text-muted);
 		display: block;
+		margin-top: 2px;
 	}
 
 	.view-all-link {
-		font-size: 0.82rem;
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		font-size: 0.78rem;
 		font-weight: 700;
 		color: var(--accent-primary);
 		text-decoration: none;
-		display: flex;
-		align-items: center;
-		gap: 2px;
 	}
 
+	/* 3-Bucket Stacked Bar */
 	.bucket-stacked-bar {
-		height: 10px;
-		background: var(--bg-primary);
-		border-radius: 9999px;
-		overflow: hidden;
 		display: flex;
-		margin-bottom: 14px;
+		height: 10px;
+		border-radius: var(--border-radius-pill);
+		overflow: hidden;
+		background: var(--surface-2);
+		margin-bottom: 1rem;
+		border: 1px solid var(--border-subtle);
 	}
 
-	.bucket-segment.survival {
-		background: #3B82F6;
-	}
-
-	.bucket-segment.fun {
-		background: #EC4899;
-	}
-
-	.bucket-segment.future {
-		background: #10B981;
-	}
+	.bucket-segment.survival { background: #10B981; }
+	.bucket-segment.fun { background: #38BDF8; }
+	.bucket-segment.future { background: #818CF8; }
 
 	.bucket-legend-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
+		gap: 0.65rem;
 	}
 
 	.bucket-legend-item {
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
-		font-size: 0.75rem;
+		background: var(--surface-2);
+		padding: 0.65rem 0.5rem;
+		border-radius: var(--border-radius-sm);
+		border: 1px solid var(--border-subtle);
+		text-align: center;
 	}
 
 	.dot {
-		width: 8px;
-		height: 8px;
+		width: 6px;
+		height: 6px;
 		border-radius: 50%;
-		display: inline-block;
-		margin-bottom: 2px;
+		margin: 0 auto 2px;
 	}
 
-	.dot.survival { background: #3B82F6; }
-	.dot.fun { background: #EC4899; }
-	.dot.future { background: #10B981; }
+	.dot.survival { background: #10B981; }
+	.dot.fun { background: #38BDF8; }
+	.dot.future { background: #818CF8; }
 
 	.b-name {
+		font-size: 0.68rem;
+		font-weight: 700;
+		text-transform: uppercase;
 		color: var(--text-muted);
-		font-size: 0.72rem;
 	}
 
 	.b-val {
-		font-weight: 700;
+		font-size: 0.88rem;
+		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	/* ===================================
-	   ALERT BANNER
-	   =================================== */
+	.b-pct {
+		font-size: 0.68rem;
+		color: var(--text-muted);
+	}
+
+	/* Receivables Alert */
 	.alert-banner-receivable {
-		background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(59, 130, 246, 0.08) 100%);
-		border: 1px solid var(--accent-primary);
-		border-radius: 20px;
-		padding: 14px 18px;
+		background: rgba(99, 102, 241, 0.1);
+		border: 1px solid rgba(99, 102, 241, 0.25);
+		border-radius: var(--border-radius);
+		padding: 0.85rem 1rem;
 		display: flex;
 		align-items: center;
-		gap: 12px;
+		gap: 0.75rem;
 	}
 
 	.alert-icon-col {
-		color: var(--accent-primary);
+		flex-shrink: 0;
 	}
 
 	.alert-content-col {
 		flex: 1;
-		font-size: 0.85rem;
+		font-size: 0.84rem;
 		color: var(--text-primary);
 	}
 
 	.alert-action-btn {
-		font-size: 0.8rem;
+		background: var(--surface-2);
+		border: 1px solid rgba(99, 102, 241, 0.3);
+		color: #818CF8;
+		padding: 4px 10px;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.74rem;
 		font-weight: 700;
-		color: white;
-		background: var(--accent-primary);
-		padding: 6px 12px;
-		border-radius: 9999px;
-		text-decoration: none;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 4px;
+		text-decoration: none;
+		flex-shrink: 0;
 	}
 
-	/* ===================================
-	   RECENT TRANSACTIONS
-	   =================================== */
+	/* Recent Transactions */
+	.section-recent {
+		padding: 1.35rem;
+	}
+
 	.transactions-list {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
-		margin-top: 12px;
+		gap: 0.5rem;
 	}
 
-	.transaction-card {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 20px;
-		padding: 14px 16px;
+	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 14px;
-		box-shadow: var(--shadow-sm);
-		transition: transform 0.2s;
+		gap: 0.85rem;
+		padding: 0.75rem 0.5rem;
+		border-radius: var(--border-radius-sm);
+		transition: background 0.2s ease;
+	}
+
+	.transaction-row:hover {
+		background: var(--surface-2);
 	}
 
 	.t-icon {
-		width: 44px;
-		height: 44px;
-		border-radius: 16px;
-		background: var(--bg-primary);
+		width: 40px;
+		height: 40px;
+		border-radius: var(--border-radius-sm);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
 	}
 
 	.t-details {
 		flex: 1;
+		min-width: 0;
 	}
 
 	.t-title {
+		font-size: 0.88rem;
 		font-weight: 700;
-		font-size: 0.95rem;
 		color: var(--text-primary);
-		margin-bottom: 3px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.t-meta {
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		color: var(--text-muted);
+		margin-top: 2px;
 		flex-wrap: wrap;
 	}
 
 	.tag-pill {
-		padding: 2px 8px;
-		border-radius: 9999px;
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		font-weight: 700;
+		padding: 1px 6px;
+		border-radius: var(--border-radius-pill);
 	}
 
-	.tag-need {
-		background: rgba(59, 130, 246, 0.12);
-		color: #2563EB;
-	}
+	.tag-need { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+	.tag-want { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
+	.tag-growth { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
+	.tag-regret { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
 
-	.tag-want {
-		background: rgba(236, 72, 153, 0.12);
-		color: #DB2777;
-	}
-
-	.tag-growth {
-		background: rgba(16, 185, 129, 0.12);
-		color: #059669;
-	}
-
-	.tag-regret {
-		background: rgba(255, 51, 102, 0.12);
-		color: #FF3366;
-	}
-
-	.t-amount {
-		font-weight: 800;
-		font-size: 0.98rem;
-		color: var(--text-primary);
-	}
-
-	.income-amount {
-		color: var(--success);
-	}
-
-	.empty-state-card {
-		text-align: center;
-		padding: 30px 20px;
-		background: var(--bg-card);
-		border-radius: 20px;
-		border: 1px dashed var(--border-color);
+	.time-cost-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 3px;
+		font-size: 0.65rem;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 1px 5px;
+		border-radius: var(--border-radius-pill);
 		color: var(--text-muted);
 	}
 
-	.text-button {
-		display: inline-block;
-		margin-top: 6px;
-		color: var(--accent-primary);
-		font-weight: 700;
-		text-decoration: none;
+	.t-amount {
+		font-size: 0.95rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		flex-shrink: 0;
+	}
+
+	.income-amount {
+		color: #10B981;
+	}
+
+	.empty-state-box {
+		text-align: center;
+		padding: 2rem 1rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.empty-state-box p {
+		font-size: 0.84rem;
+		color: var(--text-muted);
+		margin: 0;
 	}
 </style>

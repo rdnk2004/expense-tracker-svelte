@@ -7,8 +7,8 @@
 		Lightbulb,
 		ArrowRight,
 		ChevronRight,
-		Compass,
-		Bot
+		Bot,
+		Zap
 	} from 'lucide-svelte';
 
 	let insightsState = $derived($analystInsights);
@@ -35,7 +35,7 @@
 	>
 		<div class="card-top-row">
 			<div class="analyst-badge">
-				<Bot size={14} color="var(--accent-primary)" />
+				<Zap size={13} color="var(--accent-primary)" />
 				<span>Financial Analyst Pulse</span>
 			</div>
 
@@ -50,13 +50,21 @@
 		<div class="insight-content-block">
 			<div class="insight-icon-col">
 				{#if currentInsight.type === 'warning'}
-					<AlertTriangle size={20} class="text-danger" />
+					<div class="icon-bubble warning">
+						<AlertTriangle size={16} />
+					</div>
 				{:else if currentInsight.type === 'opportunity'}
-					<Sparkles size={20} class="text-accent" />
+					<div class="icon-bubble opportunity">
+						<Sparkles size={16} />
+					</div>
 				{:else if currentInsight.type === 'praise'}
-					<TrendingUp size={20} class="text-success" />
+					<div class="icon-bubble praise">
+						<TrendingUp size={16} />
+					</div>
 				{:else}
-					<Lightbulb size={20} class="text-warning" />
+					<div class="icon-bubble tip">
+						<Lightbulb size={16} />
+					</div>
 				{/if}
 			</div>
 
@@ -81,13 +89,13 @@
 	.analyst-card {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: 22px;
-		padding: 16px 18px;
-		margin-bottom: 18px;
+		border-radius: var(--border-radius);
+		padding: 1.15rem 1.25rem;
+		margin-bottom: 1.15rem;
 		position: relative;
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);
-		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
 	.analyst-card::before {
@@ -96,34 +104,39 @@
 		left: 0;
 		top: 0;
 		bottom: 0;
-		width: 5px;
+		width: 4px;
 	}
 
-	.type-warning::before { background: #FF3366; }
-	.type-opportunity::before { background: var(--accent-primary); }
-	.type-praise::before { background: #10B981; }
-	.type-tip::before { background: #F59E0B; }
+	.type-warning::before { background: var(--danger); }
+	.type-opportunity::before { background: #06B6D4; }
+	.type-praise::before { background: var(--success); }
+	.type-tip::before { background: var(--warning); }
 
 	.type-warning {
-		background: linear-gradient(135deg, rgba(255, 51, 102, 0.05) 0%, var(--bg-card) 100%);
-		border-color: rgba(255, 51, 102, 0.25);
+		background: linear-gradient(135deg, rgba(244, 63, 94, 0.06) 0%, var(--bg-card) 100%);
+		border-color: var(--danger-border);
 	}
 
 	.type-opportunity {
-		background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, var(--bg-card) 100%);
-		border-color: rgba(124, 58, 237, 0.25);
+		background: linear-gradient(135deg, rgba(6, 182, 212, 0.06) 0%, var(--bg-card) 100%);
+		border-color: rgba(6, 182, 212, 0.25);
 	}
 
 	.type-praise {
-		background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, var(--bg-card) 100%);
-		border-color: rgba(16, 185, 129, 0.25);
+		background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, var(--bg-card) 100%);
+		border-color: var(--success-border);
+	}
+
+	.type-tip {
+		background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, var(--bg-card) 100%);
+		border-color: var(--warning-border);
 	}
 
 	.card-top-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 10px;
+		margin-bottom: 0.75rem;
 	}
 
 	.analyst-badge {
@@ -133,19 +146,18 @@
 		font-size: 0.72rem;
 		font-weight: 800;
 		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		letter-spacing: 0.06em;
 		color: var(--text-muted);
 	}
 
-
 	.cycle-pill {
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		border-radius: 9999px;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-pill);
 		padding: 2px 8px;
 		font-size: 0.68rem;
 		font-weight: 700;
-		color: var(--text-muted);
+		color: var(--text-secondary);
 		display: flex;
 		align-items: center;
 		gap: 2px;
@@ -154,15 +166,29 @@
 
 	.insight-content-block {
 		display: flex;
-		gap: 12px;
+		gap: 0.85rem;
 		align-items: flex-start;
-		margin-bottom: 12px;
+		margin-bottom: 0.75rem;
 	}
 
 	.insight-icon-col {
-		margin-top: 2px;
 		flex-shrink: 0;
+		margin-top: 2px;
 	}
+
+	.icon-bubble {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.icon-bubble.warning { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+	.icon-bubble.opportunity { background: rgba(6, 182, 212, 0.15); color: #06B6D4; border: 1px solid rgba(6, 182, 212, 0.3); }
+	.icon-bubble.praise { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+	.icon-bubble.tip { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
 
 	.insight-text-col {
 		flex: 1;
@@ -172,13 +198,15 @@
 		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 4px;
+		margin-bottom: 3px;
+		line-height: 1.25;
 	}
 
 	.insight-message {
 		font-size: 0.82rem;
 		color: var(--text-secondary);
-		line-height: 1.4;
+		line-height: 1.45;
+		margin: 0;
 	}
 
 	.card-footer-row {
@@ -187,23 +215,23 @@
 	}
 
 	.action-pill-btn {
-		background: var(--bg-primary);
+		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		color: var(--accent-primary);
-		padding: 5px 12px;
-		border-radius: 9999px;
+		color: var(--text-primary);
+		padding: 4px 12px;
+		border-radius: var(--border-radius-pill);
 		font-size: 0.75rem;
 		font-weight: 700;
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
 		text-decoration: none;
-		transition: all 0.2s;
+		transition: all 0.2s ease;
 	}
 
 	.action-pill-btn:hover {
 		background: var(--accent-primary);
-		color: white;
+		color: #080C14;
 		border-color: var(--accent-primary);
 	}
 </style>

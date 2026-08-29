@@ -4,94 +4,91 @@
 
 	let { onOpenSplit = () => {} } = $props<{ onOpenSplit?: () => void }>();
 
-	// Status badge mapping
 	let statusLabel = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'Safe Daily Pace';
+		if ($runway.burnRateStatus === 'safe') return 'Safe Pace';
 		if ($runway.burnRateStatus === 'caution') return 'Caution Pace';
-		return 'Crunch Mode!';
+		return 'Crunch Mode';
 	});
 
 	let statusBg = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.15)';
-		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.15)';
-		return 'rgba(255, 51, 102, 0.15)';
+		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.12)';
+		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.12)';
+		return 'rgba(244, 63, 94, 0.12)';
 	});
 
 	let statusColor = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'var(--success, #10B981)';
-		if ($runway.burnRateStatus === 'caution') return 'var(--warning, #F59E0B)';
-		return 'var(--danger, #FF3366)';
+		if ($runway.burnRateStatus === 'safe') return '#10B981';
+		if ($runway.burnRateStatus === 'caution') return '#F59E0B';
+		return '#F43F5E';
 	});
 
 	let statusBorder = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.3)';
-		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.3)';
-		return 'rgba(255, 51, 102, 0.3)';
+		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.25)';
+		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.25)';
+		return 'rgba(244, 63, 94, 0.25)';
 	});
 </script>
 
 <div class="safe-spend-card" style="--status-color: {statusColor}; --status-bg: {statusBg}; --status-border: {statusBorder}">
-	<!-- Header with Live Status Pulse -->
-	<div class="card-header">
-		<div class="title-with-badge">
-			<span class="card-eyebrow">
-				<Zap size={14} color="var(--accent-primary)" /> Daily Safe-to-Spend
-			</span>
-			<span class="status-pill">
-				<span class="pulse-dot"></span>
-				{statusLabel}
-			</span>
+	<!-- Top Row: Eyebrow + Live Pace Status + Days Left -->
+	<div class="card-top-header">
+		<div class="header-left">
+			<div class="status-indicator-badge">
+				<span class="status-pulse-dot"></span>
+				<span class="status-text">{statusLabel}</span>
+			</div>
 		</div>
-		<div class="runway-pill" title="Days remaining in current allowance cycle">
-			<Calendar size={13} />
+		<div class="runway-cycle-pill" title="Days remaining in current allowance cycle">
+			<Calendar size={13} class="calendar-icon" />
 			<span><strong>{$runway.daysRemaining}</strong> days left</span>
 		</div>
 	</div>
 
-	<!-- Main Amount Display -->
-	<div class="amount-hero">
-		<div class="main-amount">
-			{formatCurrency($runway.dailySafeSpend)}
-			<span class="per-day">/ day</span>
+	<!-- Hero Safe-to-Spend Figure -->
+	<div class="safe-hero-block">
+		<span class="hero-sub-eyebrow">Daily Safe-to-Spend</span>
+		<div class="amount-hero-row">
+			<h2 class="amount-val tabular">{formatCurrency($runway.dailySafeSpend)}</h2>
+			<span class="per-day-tag">/ day</span>
 		</div>
-		<p class="amount-subtext">
+		<div class="amount-today-caption">
 			{#if $runway.todayRemainingLimit >= 0}
-				<span>Remaining today: <strong>{formatCurrency($runway.todayRemainingLimit)}</strong></span>
+				<span>Remaining today: <strong class="tabular">{formatCurrency($runway.todayRemainingLimit)}</strong></span>
 			{:else}
-				<span class="text-danger">Over today's limit by <strong>{formatCurrency(Math.abs($runway.todayRemainingLimit))}</strong></span>
+				<span class="over-limit-txt">Exceeded today by <strong class="tabular">{formatCurrency(Math.abs($runway.todayRemainingLimit))}</strong></span>
 			{/if}
-		</p>
+		</div>
 	</div>
 
-	<!-- Visual Gauge / Progress Track -->
-	<div class="gauge-container">
-		<div class="gauge-bar">
+	<!-- Visual Pace Gauge Track -->
+	<div class="gauge-section">
+		<div class="gauge-track">
 			<div
-				class="gauge-fill"
+				class="gauge-progress"
 				style="width: {Math.min(100, $runway.todayPacePercent)}%; background: {statusColor};"
 			></div>
 		</div>
-		<div class="gauge-labels">
-			<span>Today's spend: {formatCurrency($runway.todaySpent)}</span>
-			<span>Pace: {$runway.todayPacePercent}%</span>
+		<div class="gauge-meta-row">
+			<span>Today's Spend: <strong class="tabular">{formatCurrency($runway.todaySpent)}</strong></span>
+			<span>Pace: <strong class="tabular">{$runway.todayPacePercent}%</strong></span>
 		</div>
 	</div>
 
-	<!-- Runway & Burn Rate Metrics Footer -->
-	<div class="runway-metrics-grid">
-		<div class="metric-box">
-			<span class="metric-label">7-Day Avg Burn</span>
-			<span class="metric-val">{formatCurrency($runway.avgDailyBurnRate7Days)}/d</span>
+	<!-- 3 Precision Metric Tiles -->
+	<div class="metrics-grid">
+		<div class="metric-tile">
+			<span class="tile-label">7-Day Burn</span>
+			<span class="tile-value tabular">{formatCurrency($runway.avgDailyBurnRate7Days)}<small>/d</small></span>
 		</div>
-		<div class="metric-box">
-			<span class="metric-label">Projected Runway</span>
-			<span class="metric-val" class:text-warning={$runway.projectedRunwayDays < $runway.daysRemaining}>
-				{$runway.projectedRunwayDays} days
+		<div class="metric-tile">
+			<span class="tile-label">Projected Runway</span>
+			<span class="tile-value tabular" class:warning-val={$runway.projectedRunwayDays < $runway.daysRemaining}>
+				{$runway.projectedRunwayDays} <small>days</small>
 			</span>
 		</div>
-		<div class="metric-box">
-			<span class="metric-label">Cycle Spent</span>
-			<span class="metric-val">{formatCurrency($runway.totalCycleSpent)}</span>
+		<div class="metric-tile">
+			<span class="tile-label">Cycle Spent</span>
+			<span class="tile-value tabular">{formatCurrency($runway.totalCycleSpent)}</span>
 		</div>
 	</div>
 </div>
@@ -99,14 +96,14 @@
 <style>
 	.safe-spend-card {
 		background: var(--bg-card);
-		border-radius: 28px;
-		padding: 22px;
-		margin-bottom: 20px;
-		box-shadow: 0 10px 30px rgba(124, 58, 237, 0.08);
-		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius-lg);
+		padding: 1.35rem;
+		margin-bottom: 1.15rem;
+		border: 1px solid var(--status-border);
+		box-shadow: var(--shadow-sm);
 		position: relative;
 		overflow: hidden;
-		transition: all 0.3s ease;
+		transition: all 0.25s ease;
 	}
 
 	.safe-spend-card::before {
@@ -115,158 +112,172 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 4px;
-		background: linear-gradient(90deg, var(--status-color), var(--accent-primary));
+		height: 3px;
+		background: linear-gradient(90deg, var(--status-color), #06B6D4);
 	}
 
-	.card-header {
+	.card-top-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16px;
+		margin-bottom: 1.15rem;
 	}
 
-	.title-with-badge {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		flex-wrap: wrap;
-	}
-
-	.card-eyebrow {
-		font-size: 0.8rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.6px;
-		color: var(--text-muted);
-		display: flex;
-		align-items: center;
-		gap: 5px;
-	}
-
-
-	.status-pill {
-		font-size: 0.72rem;
-		font-weight: 700;
-		padding: 4px 10px;
-		border-radius: 9999px;
-		background: var(--status-bg);
-		color: var(--status-color);
-		border: 1px solid var(--status-border);
+	.status-indicator-badge {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
+		padding: 0.25rem 0.65rem;
+		border-radius: var(--border-radius-pill);
+		background: var(--status-bg);
+		border: 1px solid var(--status-border);
+		color: var(--status-color);
+		font-size: 0.74rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
-	.pulse-dot {
+	.status-pulse-dot {
 		width: 6px;
 		height: 6px;
 		border-radius: 50%;
 		background: var(--status-color);
-		box-shadow: 0 0 8px var(--status-color);
-		animation: pulse 1.8s infinite;
+		box-shadow: 0 0 6px var(--status-color);
 	}
 
-	@keyframes pulse {
-		0% { transform: scale(0.95); opacity: 0.8; }
-		50% { transform: scale(1.3); opacity: 1; }
-		100% { transform: scale(0.95); opacity: 0.8; }
-	}
-
-	.runway-pill {
-		font-size: 0.78rem;
-		color: var(--text-secondary);
-		background: var(--bg-primary);
-		padding: 5px 10px;
-		border-radius: 12px;
-		display: flex;
+	.runway-cycle-pill {
+		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		border: 1px solid var(--border-color);
+		gap: 5px;
+		font-size: 0.74rem;
+		color: var(--text-secondary);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 0.25rem 0.65rem;
+		border-radius: var(--border-radius-pill);
+		font-weight: 600;
 	}
 
-	.amount-hero {
-		margin-bottom: 16px;
+	/* Hero Block */
+	.safe-hero-block {
+		margin-bottom: 1.25rem;
 	}
 
-	.main-amount {
-		font-size: 2.3rem;
-		font-weight: 800;
-		color: var(--text-primary);
-		letter-spacing: -0.5px;
-		line-height: 1.1;
+	.hero-sub-eyebrow {
+		display: block;
+		font-size: 0.76rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--text-muted);
+		margin-bottom: 0.25rem;
+	}
+
+	.amount-hero-row {
 		display: flex;
 		align-items: baseline;
-		gap: 6px;
+		gap: 0.4rem;
 	}
 
-	.per-day {
+	.amount-val {
+		font-size: 2.15rem;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		color: var(--text-primary);
+		line-height: 1.1;
+		margin: 0;
+	}
+
+	.per-day-tag {
 		font-size: 0.95rem;
 		font-weight: 600;
 		color: var(--text-muted);
 	}
 
-	.amount-subtext {
-		font-size: 0.85rem;
+	.amount-today-caption {
+		font-size: 0.82rem;
 		color: var(--text-secondary);
-		margin-top: 4px;
+		margin-top: 0.35rem;
 	}
 
-	.gauge-container {
-		margin-bottom: 18px;
+	.over-limit-txt {
+		color: var(--danger);
+		font-weight: 700;
 	}
 
-	.gauge-bar {
-		height: 8px;
-		background: var(--bg-primary);
-		border-radius: 9999px;
+	/* Gauge Progress */
+	.gauge-section {
+		margin-bottom: 1.25rem;
+	}
+
+	.gauge-track {
+		height: 7px;
+		background: var(--surface-2);
+		border-radius: var(--border-radius-pill);
 		overflow: hidden;
-		position: relative;
+		border: 1px solid var(--border-subtle);
+		margin-bottom: 0.45rem;
 	}
 
-	.gauge-fill {
+	.gauge-progress {
 		height: 100%;
-		border-radius: 9999px;
-		transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+		border-radius: var(--border-radius-pill);
+		transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
-	.gauge-labels {
+	.gauge-meta-row {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.76rem;
+		font-size: 0.74rem;
 		color: var(--text-muted);
-		margin-top: 6px;
-		font-weight: 500;
 	}
 
-	.runway-metrics-grid {
+	.gauge-meta-row strong {
+		color: var(--text-primary);
+	}
+
+	/* 3 Metric Tiles */
+	.metrics-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 10px;
-		background: var(--bg-primary);
-		padding: 12px;
-		border-radius: 18px;
-		border: 1px solid var(--border-color);
+		gap: 0.65rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--border-subtle);
 	}
 
-	.metric-box {
+	.metric-tile {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-sm);
+		padding: 0.65rem 0.5rem;
+		text-align: center;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
-		text-align: center;
 	}
 
-	.metric-label {
-		font-size: 0.7rem;
-		color: var(--text-muted);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.3px;
-	}
-
-	.metric-val {
-		font-size: 0.88rem;
+	.tile-label {
+		font-size: 0.65rem;
 		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--text-muted);
+	}
+
+	.tile-value {
+		font-size: 0.88rem;
+		font-weight: 800;
 		color: var(--text-primary);
+	}
+
+	.tile-value small {
+		font-size: 0.72rem;
+		font-weight: 600;
+		color: var(--text-muted);
+	}
+
+	.warning-val {
+		color: var(--warning);
 	}
 </style>
