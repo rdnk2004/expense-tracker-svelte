@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { slide } from 'svelte/transition';
+	import { slide, fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import './layout.css';
@@ -14,7 +14,9 @@
 		goToNextMonth,
 		formatCurrency,
 		exportData,
-		getMonthName
+		getMonthName,
+		studentProfile,
+		wallets
 	} from '$lib/stores';
 	import { auth } from '$lib/stores/auth';
 	import {
@@ -29,80 +31,98 @@
 		LogOut,
 		Moon,
 		Sun,
-		Lock,
-		Plus, // FAB icon
+		Plus,
 		User,
 		ChartPie,
 		Radio,
-		PiggyBank
+		PiggyBank,
+		ChevronLeft,
+		ChevronRight,
+		Sparkles,
+		X,
+		Zap
 	} from 'lucide-svelte';
 
 	let { children } = $props();
 
-	// Sidebar state
 	let error = $state<string | null>(null);
-	let theme = $state<'light' | 'dark'>('light');
+	let theme = $state<'light' | 'dark'>('dark');
+	let showQuickActionDrawer = $state(false);
 
-	// Navigation items
-	const navItems = [
-		{ icon: LayoutDashboard, label: 'Dashboard', href: '/' },
-		{ icon: Wallet, label: 'Wallets', href: '/wallets' },
-		{ icon: Receipt, label: 'Expenses', href: '/expenses' },
-		{ icon: ChartPie, label: 'Analytics', href: '/analytics' },
-		{ icon: Handshake, label: 'Debts', href: '/debts' },
-		{ icon: Target, label: 'Budgets', href: '/budgets' },
-		{ icon: PiggyBank, label: 'Goals', href: '/goals' },
-		{ icon: Radio, label: 'Subscriptions', href: '/subscriptions' },
-		{ icon: ArrowLeftRight, label: 'Transfers', href: '/transfers' },
-		{ icon: Settings, label: 'Settings', href: '/settings' }
+	// Navigation groups for desktop sidebar
+	const navGroups = [
+		{
+			title: 'Command',
+			items: [
+				{ icon: LayoutDashboard, label: 'Dashboard', href: '/' },
+				{ icon: Receipt, label: 'Expenses', href: '/expenses' },
+				{ icon: ChartPie, label: 'Labor & ROI', href: '/analytics' }
+			]
+		},
+		{
+			title: 'Capital & Tabs',
+			items: [
+				{ icon: Wallet, label: 'Wallets & Cards', href: '/wallets' },
+				{ icon: ArrowLeftRight, label: 'Transfers', href: '/transfers' },
+				{ icon: Handshake, label: 'Campus Split Tabs', href: '/debts' }
+			]
+		},
+		{
+			title: 'Student Budgets',
+			items: [
+				{ icon: Target, label: '3-Bucket Macro', href: '/budgets' },
+				{ icon: PiggyBank, label: 'Sinking Goals', href: '/goals' },
+				{ icon: Radio, label: 'Subscriptions', href: '/subscriptions' }
+			]
+		},
+		{
+			title: 'System',
+			items: [{ icon: Settings, label: 'Settings & Data', href: '/settings' }]
+		}
 	];
 
-	// Bottom Nav Items (optimized for mobile - matches design)
-	// Design: Home | Transfer | + | Analytics | Profile
+	// Bottom Nav Items (5 items for mobile thumb ergonomics)
 	const bottomNavItems = [
 		{ icon: LayoutDashboard, label: 'Home', href: '/' },
-		{ icon: ArrowLeftRight, label: 'Transfer', href: '/transfers' },
-		// Middle is FAB (handled separately in template)
-		{ icon: ChartPie, label: 'Analytics', href: '/analytics' },
-		{ icon: User, label: 'Profile', href: '/settings' }
+		{ icon: Receipt, label: 'Expenses', href: '/expenses' },
+		// Middle is Action Trigger (+)
+		{ icon: Target, label: 'Budgets', href: '/budgets' },
+		{ icon: User, label: 'Hub', href: '/settings' }
 	];
 
-	// Initialize app on mount
 	onMount(async () => {
 		try {
-			// One-time database wipe
 			const WIPE_KEY = 'axiom_one_time_wipe_v2';
 			if (!localStorage.getItem(WIPE_KEY)) {
 				const { clearAllData } = await import('$lib/db');
 				await clearAllData();
 				localStorage.setItem(WIPE_KEY, 'true');
-				console.log('🧹 One-time database wipe completed.');
+				console.log('🧹 Database initialized for Axiom Campus OS.');
 			}
 
 			await initializeApp();
 
-			// Theme Initialization
 			const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
 			if (savedTheme) {
 				theme = savedTheme;
-			} else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+			} else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+				theme = 'light';
+			} else {
 				theme = 'dark';
 			}
 			document.documentElement.setAttribute('data-theme', theme);
 		} catch (err) {
-			console.error('Failed to initialize app:', err);
-			error = 'Failed to load data. Please refresh the page.';
+			console.error('Failed to initialize Axiom:', err);
+			error = 'Failed to load database. Please refresh.';
 		}
 	});
 
-	// Toggle Theme
 	function toggleTheme() {
 		theme = theme === 'light' ? 'dark' : 'light';
 		document.documentElement.setAttribute('data-theme', theme);
 		localStorage.setItem('theme', theme);
 	}
 
-	// Auth guard - redirect to login if not authenticated
 	$effect(() => {
 		const currentPath = $page.url.pathname;
 		if (!auth.isAuthenticated() && currentPath !== '/login') {
@@ -125,27 +145,31 @@
 		auth.logout();
 		goto('/login');
 	}
+
+	function handleQuickAction(route: string) {
+		showQuickActionDrawer = false;
+		goto(route);
+	}
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>RDNK / Axiom</title>
-	<meta
-		name="viewport"
-		content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
-	/>
+	<title>Axiom — Student Neo-Bank</title>
 </svelte:head>
 
 <div class="app">
 	<!-- Loading Overlay -->
 	{#if $isLoading}
 		<div class="loading-overlay">
-			<div class="spinner"></div>
-			<p>Loading your data...</p>
+			<div class="spinner-brand">
+				<div class="spinner-ring"></div>
+				<span class="spinner-glyph">⬡</span>
+			</div>
+			<p class="loading-text">Syncing Campus Capital...</p>
 		</div>
 	{/if}
 
-	<!-- Error Display -->
+	<!-- Error Toast -->
 	{#if error}
 		<div class="error-banner">
 			<span>⚠️ {error}</span>
@@ -153,171 +177,314 @@
 		</div>
 	{/if}
 
-	<!-- Only show Layout if authenticated or if explicitly allowing children (like login) -->
 	{#if $page.url.pathname === '/login'}
 		{@render children()}
 	{:else if $auth}
-		<!-- Mobile Top Header (Minimal) -->
+		<!-- Mobile Sticky Glass Header -->
 		<header class="mobile-header glass-panel">
-			<h1 class="mobile-title">
-				<span class="rdnk-title">RDNK</span>
-				<span class="slash-title">/</span>
-				<span class="axiom-wrapper-title">
-					<span class="axiom-title">Axiom</span>
-				</span>
-			</h1>
-			<button class="theme-toggle-btn" onclick={toggleTheme} aria-label="Toggle theme">
+			<div class="mobile-brand-wrap">
+				<div class="brand-glyph">
+					<Zap size={16} class="glyph-icon" />
+				</div>
+				<div class="brand-text-col">
+					<span class="brand-name">Axiom</span>
+					<span class="brand-tag">{$studentProfile.semester || 'Campus OS'}</span>
+				</div>
+			</div>
+
+			<!-- Compact Month Navigator for Mobile -->
+			<div class="mobile-month-pill">
+				<button class="mini-month-btn" onclick={goToPreviousMonth} aria-label="Previous Month">
+					<ChevronLeft size={14} />
+				</button>
+				<span class="mini-month-label">{getMonthName($currentMonth).slice(0, 3)}</span>
+				<button class="mini-month-btn" onclick={goToNextMonth} aria-label="Next Month">
+					<ChevronRight size={14} />
+				</button>
+			</div>
+
+			<button class="theme-btn-compact" onclick={toggleTheme} aria-label="Toggle theme">
 				{#if theme === 'light'}
-					<Moon size={20} />
+					<Moon size={18} />
 				{:else}
-					<Sun size={20} />
+					<Sun size={18} />
 				{/if}
 			</button>
 		</header>
 
-		<!-- Desktop Sidebar -->
+		<!-- Desktop Neo-Bank Sidebar -->
 		<aside class="sidebar glass-panel">
 			<div class="sidebar-header">
-				<h1 class="app-title-container">
-					<span class="rdnk-title">RDNK</span>
-					<span class="slash-title">/</span>
-					<span class="axiom-wrapper-title">
-						<span class="axiom-title">Axiom</span>
+				<div class="sidebar-brand-row">
+					<div class="brand-glyph-lg">
+						<Zap size={20} class="glyph-icon" />
+					</div>
+					<div>
+						<div class="brand-title-wrap">
+							<h1 class="brand-title">Axiom</h1>
+							<span class="campus-badge">Neo-Bank</span>
+						</div>
+						<p class="student-info-sub">{$studentProfile.collegeName || 'Campus Student'}</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Quick Liquid Net Worth Hero -->
+			<div class="sidebar-balance-hero">
+				<div class="hero-top-row">
+					<span class="hero-label">Liquid Capital</span>
+					<span class="live-pulse-badge">
+						<span class="pulse-dot"></span> Live
 					</span>
-				</h1>
-			</div>
-
-			<!-- Balance Display -->
-			<div class="balance-card">
-				<div class="balance-label">Total Balance</div>
-				<div class="balance-amount">{formatCurrency($totalBalance)}</div>
-			</div>
-
-			<!-- Month Navigator -->
-			<div class="month-navigator">
-				<button class="month-btn" onclick={goToPreviousMonth} aria-label="Previous month">
-					◀
-				</button>
-				<div class="current-month">{getMonthName($currentMonth)}</div>
-				<button class="month-btn" onclick={goToNextMonth} aria-label="Next month">▶</button>
-			</div>
-
-			<!-- Navigation -->
-			<nav class="nav">
-				{#each navItems as item}
-					<a
-						href={item.href}
-						class="nav-item"
-						class:active={$page.url.pathname === item.href}
-						aria-current={$page.url.pathname === item.href ? 'page' : undefined}
-					>
-						<span class="nav-icon">
-							<item.icon size={22} />
+				</div>
+				<div class="hero-amount tabular">{formatCurrency($totalBalance)}</div>
+				<div class="mini-wallets-strip">
+					{#each $wallets as w}
+						<span class="mini-wallet-chip" title="{w.name}: {formatCurrency(w.balance)}">
+							{w.name.slice(0, 4)}: <strong>{formatCurrency(w.balance).split('.')[0]}</strong>
 						</span>
-						<span class="nav-label">{item.label}</span>
-						{#if $page.url.pathname === item.href}
-							<div class="active-indicator" transition:slide></div>
-						{/if}
-					</a>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Month Switcher for Desktop -->
+			<div class="desktop-month-dock">
+				<button class="dock-month-btn" onclick={goToPreviousMonth} aria-label="Previous month">
+					<ChevronLeft size={16} />
+				</button>
+				<div class="dock-month-name">{getMonthName($currentMonth)}</div>
+				<button class="dock-month-btn" onclick={goToNextMonth} aria-label="Next month">
+					<ChevronRight size={16} />
+				</button>
+			</div>
+
+			<!-- Grouped Navigation List -->
+			<nav class="sidebar-nav-scroll">
+				{#each navGroups as group}
+					<div class="nav-group-section">
+						<span class="nav-group-title">{group.title}</span>
+						<div class="nav-group-items">
+							{#each group.items as item}
+								<a
+									href={item.href}
+									class="nav-link"
+									class:active={$page.url.pathname === item.href}
+									aria-current={$page.url.pathname === item.href ? 'page' : undefined}
+								>
+									<item.icon size={18} class="nav-link-icon" />
+									<span class="nav-link-text">{item.label}</span>
+									{#if $page.url.pathname === item.href}
+										<div class="active-pill-dot" transition:slide></div>
+									{/if}
+								</a>
+							{/each}
+						</div>
+					</div>
 				{/each}
 			</nav>
 
-			<!-- Footer Actions -->
+			<!-- Sidebar Footer -->
 			<div class="sidebar-footer">
-				<button class="action-btn" onclick={toggleTheme}>
+				<button class="footer-action-btn" onclick={toggleTheme}>
 					{#if theme === 'light'}
-						<Moon size={18} /> Dark Mode
+						<Moon size={16} /> <span>Dark Theme</span>
 					{:else}
-						<Sun size={18} /> Light Mode
+						<Sun size={16} /> <span>Light Theme</span>
 					{/if}
 				</button>
-				<button class="action-btn" onclick={handleExport}>
-					<Download size={18} /> Export Data
+				<button class="footer-action-btn" onclick={handleExport}>
+					<Download size={16} /> <span>Export JSON</span>
 				</button>
-				<button class="action-btn danger" onclick={handleLogout}>
-					<LogOut size={18} /> Logout
+				<button class="footer-action-btn danger" onclick={handleLogout}>
+					<LogOut size={16} /> <span>Lock OS</span>
 				</button>
 			</div>
 		</aside>
 
-		<!-- Main Content -->
+		<!-- Main Workspace Content -->
 		<main class="main-content">
 			<div class="content-wrapper">
 				{@render children()}
 			</div>
 		</main>
 
-		<!-- Mobile Bottom Navigation (Floating Island) -->
-		<nav class="bottom-nav-island">
-			{#each bottomNavItems as item, i}
-				<!-- Spacer for FAB in the middle -->
-				{#if i === 2}
-					<div style="width: 48px;"></div>
-				{/if}
-				<a href={item.href} class="bottom-nav-item" class:active={$page.url.pathname === item.href}>
-					<div class="bottom-nav-icon-container">
-						<item.icon size={24} />
-						{#if $page.url.pathname === item.href}
-							<div class="active-dot"></div>
-						{/if}
-					</div>
+		<!-- Mobile Thumb-Zone Floating Glass Dock -->
+		<nav class="bottom-dock-wrapper" aria-label="Mobile Navigation">
+			<div class="bottom-dock glass-panel">
+				<!-- Tab 1: Home -->
+				<a href="/" class="dock-item" class:active={$page.url.pathname === '/'}>
+					<LayoutDashboard size={20} />
+					<span class="dock-label">Home</span>
+					{#if $page.url.pathname === '/'}
+						<div class="dock-active-glow"></div>
+					{/if}
 				</a>
-			{/each}
 
-			<!-- Floating Action Button (FAB) -->
-			<button class="fab-btn" onclick={() => goto('/expenses/new')} aria-label="Add New">
-				<Plus size={28} />
-			</button>
+				<!-- Tab 2: Expenses -->
+				<a href="/expenses" class="dock-item" class:active={$page.url.pathname === '/expenses'}>
+					<Receipt size={20} />
+					<span class="dock-label">Feed</span>
+					{#if $page.url.pathname === '/expenses'}
+						<div class="dock-active-glow"></div>
+					{/if}
+				</a>
+
+				<!-- Center Quick Action FAB (+) -->
+				<button
+					class="center-fab"
+					onclick={() => (showQuickActionDrawer = true)}
+					aria-label="Quick Actions Menu"
+				>
+					<Plus size={24} />
+				</button>
+
+				<!-- Tab 4: Budgets -->
+				<a href="/budgets" class="dock-item" class:active={$page.url.pathname === '/budgets'}>
+					<Target size={20} />
+					<span class="dock-label">Buckets</span>
+					{#if $page.url.pathname === '/budgets'}
+						<div class="dock-active-glow"></div>
+					{/if}
+				</a>
+
+				<!-- Tab 5: Hub / Settings -->
+				<a href="/settings" class="dock-item" class:active={$page.url.pathname === '/settings'}>
+					<User size={20} />
+					<span class="dock-label">Hub</span>
+					{#if $page.url.pathname === '/settings'}
+						<div class="dock-active-glow"></div>
+					{/if}
+				</a>
+			</div>
 		</nav>
+
+		<!-- Mobile Quick Action Drawer / Bottom Sheet -->
+		{#if showQuickActionDrawer}
+			<div
+				class="modal-backdrop"
+				onclick={() => (showQuickActionDrawer = false)}
+				role="button"
+				tabindex="0"
+				onkeydown={(e) => e.key === 'Escape' && (showQuickActionDrawer = false)}
+				transition:fade={{ duration: 150 }}
+			>
+				<div
+					class="modal-sheet quick-sheet"
+					onclick={(e) => e.stopPropagation()}
+					onkeydown={(e) => e.stopPropagation()}
+					role="dialog"
+					aria-modal="true"
+					tabindex="-1"
+				>
+					<div class="sheet-handle-bar"></div>
+					<div class="quick-sheet-header">
+						<div class="quick-sheet-title-wrap">
+							<Sparkles size={18} color="var(--accent-primary)" />
+							<h3 class="quick-sheet-title">Campus Quick Actions</h3>
+						</div>
+						<button class="close-btn" onclick={() => (showQuickActionDrawer = false)}>✕</button>
+					</div>
+
+					<div class="quick-actions-grid">
+						<button class="quick-grid-card" onclick={() => handleQuickAction('/expenses/new')}>
+							<div class="quick-card-icon-badge emerald">
+								<Receipt size={22} />
+							</div>
+							<div class="quick-card-text">
+								<strong>Log Expense</strong>
+								<span>Fast keypad entry</span>
+							</div>
+						</button>
+
+						<button class="quick-grid-card" onclick={() => handleQuickAction('/debts')}>
+							<div class="quick-card-icon-badge indigo">
+								<Handshake size={22} />
+							</div>
+							<div class="quick-card-text">
+								<strong>Split Bill</strong>
+								<span>Campus UPI tab</span>
+							</div>
+						</button>
+
+						<button class="quick-grid-card" onclick={() => handleQuickAction('/transfers')}>
+							<div class="quick-card-icon-badge cyan">
+								<ArrowLeftRight size={22} />
+							</div>
+							<div class="quick-card-text">
+								<strong>Transfer</strong>
+								<span>UPI ➔ Cash sync</span>
+							</div>
+						</button>
+
+						<button class="quick-grid-card" onclick={() => handleQuickAction('/goals')}>
+							<div class="quick-card-icon-badge amber">
+								<PiggyBank size={22} />
+							</div>
+							<div class="quick-card-text">
+								<strong>Stash Goal</strong>
+								<span>Deposit / Goa Trip</span>
+							</div>
+						</button>
+					</div>
+				</div>
+			</div>
+		{/if}
 	{/if}
 </div>
-```
 
 <style>
-	/* ===================================
-	   GLOBAL LAYOUT
-	   =================================== */
-
+	/* ==========================================================================
+	   LAYOUT STRUCTURE & DESKTOP SIDEBAR
+	   ========================================================================== */
 	.app {
 		display: flex;
 		min-height: 100vh;
+		min-height: 100dvh;
 		background: var(--bg-primary);
 		color: var(--text-primary);
-		transition: background 0.4s ease;
 	}
 
-	/* ===================================
-	   LOADING OVERLAY & ERRORS
-	   =================================== */
-
+	/* Spinner Brand */
 	.loading-overlay {
 		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
+		inset: 0;
 		background: var(--bg-primary);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 1.5rem;
+		gap: 1.25rem;
 		z-index: 9999;
 	}
 
-	.spinner {
-		width: 50px;
-		height: 50px;
+	.spinner-brand {
+		position: relative;
+		width: 60px;
+		height: 60px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.spinner-ring {
+		position: absolute;
+		inset: 0;
 		border: 3px solid var(--border-color);
 		border-top-color: var(--accent-primary);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
 	}
 
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
+	.spinner-glyph {
+		font-size: 1.5rem;
+		color: var(--accent-primary);
+	}
+
+	.loading-text {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--text-secondary);
+		letter-spacing: -0.01em;
 	}
 
 	.error-banner {
@@ -327,359 +494,612 @@
 		transform: translateX(-50%);
 		background: var(--danger);
 		color: white;
-		padding: 1rem 1.5rem;
-		border-radius: var(--border-radius-lg);
+		padding: 0.75rem 1.25rem;
+		border-radius: var(--border-radius-pill);
 		display: flex;
 		align-items: center;
-		gap: 1rem;
-		z-index: var(--z-toast);
+		gap: 0.75rem;
+		z-index: 10000;
 		box-shadow: var(--shadow-lg);
+		font-weight: 600;
+		font-size: 0.88rem;
 	}
 
 	.error-banner button {
-		background: none;
 		color: white;
-		font-size: 1.2rem;
-		opacity: 0.8;
+		font-size: 1rem;
 	}
 
-	/* ===================================
-	   MOBILE HEADER
-	   =================================== */
+	/* ==========================================================================
+	   DESKTOP SIDEBAR
+	   ========================================================================== */
+	.sidebar {
+		position: fixed;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 270px;
+		border-right: 1px solid var(--border-color);
+		display: flex;
+		flex-direction: column;
+		z-index: 200;
+		background: var(--bg-card);
+	}
 
+	.sidebar-header {
+		padding: 1.5rem 1.25rem 1rem;
+	}
+
+	.sidebar-brand-row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.brand-glyph-lg {
+		width: 40px;
+		height: 40px;
+		border-radius: var(--border-radius-sm);
+		background: linear-gradient(135deg, var(--accent-primary) 0%, #06B6D4 100%);
+		color: #080C14;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 4px 14px var(--accent-glow);
+		flex-shrink: 0;
+	}
+
+	.brand-title-wrap {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.brand-title {
+		font-size: 1.35rem;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		color: var(--text-primary);
+		margin: 0;
+	}
+
+	.campus-badge {
+		font-size: 0.65rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		padding: 0.15rem 0.45rem;
+		border-radius: var(--border-radius-pill);
+		background: var(--accent-glow);
+		color: var(--accent-primary);
+		border: 1px solid var(--border-subtle);
+	}
+
+	.student-info-sub {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		margin: 0;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 170px;
+	}
+
+	/* Liquid Net Worth Hero */
+	.sidebar-balance-hero {
+		margin: 0 1rem 0.85rem;
+		padding: 1rem 1.15rem;
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius);
+	}
+
+	.hero-top-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.35rem;
+	}
+
+	.hero-label {
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-muted);
+	}
+
+	.live-pulse-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 0.68rem;
+		font-weight: 800;
+		color: var(--accent-primary);
+		text-transform: uppercase;
+	}
+
+	.hero-amount {
+		font-size: 1.55rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		margin-bottom: 0.5rem;
+	}
+
+	.mini-wallets-strip {
+		display: flex;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+	}
+
+	.mini-wallet-chip {
+		font-size: 0.68rem;
+		background: var(--bg-card);
+		border: 1px solid var(--border-subtle);
+		padding: 0.15rem 0.5rem;
+		border-radius: var(--border-radius-xs);
+		color: var(--text-secondary);
+	}
+
+	/* Month Switcher Dock */
+	.desktop-month-dock {
+		margin: 0 1rem 0.85rem;
+		display: flex;
+		align-items: center;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-pill);
+		padding: 3px;
+	}
+
+	.dock-month-btn {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--text-secondary);
+		transition: all 0.2s ease;
+	}
+
+	.dock-month-btn:hover {
+		background: var(--bg-card);
+		color: var(--text-primary);
+	}
+
+	.dock-month-name {
+		flex: 1;
+		text-align: center;
+		font-size: 0.82rem;
+		font-weight: 700;
+		color: var(--text-primary);
+	}
+
+	/* Navigation Scroll Area */
+	.sidebar-nav-scroll {
+		flex: 1;
+		padding: 0 1rem;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
+	}
+
+	.nav-group-title {
+		display: block;
+		font-size: 0.68rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+		margin-bottom: 0.35rem;
+		padding-left: 0.65rem;
+	}
+
+	.nav-group-items {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	.nav-link {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.6rem 0.75rem;
+		border-radius: var(--border-radius-sm);
+		color: var(--text-secondary);
+		font-size: 0.88rem;
+		font-weight: 600;
+		transition: all 0.2s ease;
+		position: relative;
+	}
+
+	.nav-link:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+
+	.nav-link.active {
+		background: var(--surface-2);
+		color: var(--accent-primary);
+		font-weight: 700;
+	}
+
+	.active-pill-dot {
+		margin-left: auto;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--accent-primary);
+		box-shadow: 0 0 8px var(--accent-primary);
+	}
+
+	/* Sidebar Footer */
+	.sidebar-footer {
+		padding: 1rem;
+		border-top: 1px solid var(--border-color);
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.footer-action-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		padding: 0.55rem 0.75rem;
+		border-radius: var(--border-radius-sm);
+		color: var(--text-secondary);
+		font-size: 0.82rem;
+		font-weight: 600;
+		transition: all 0.2s ease;
+		width: 100%;
+	}
+
+	.footer-action-btn:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+
+	.footer-action-btn.danger:hover {
+		background: var(--danger-bg);
+		color: var(--danger);
+	}
+
+	/* ==========================================================================
+	   MAIN WORKSPACE
+	   ========================================================================== */
+	.main-content {
+		flex: 1;
+		margin-left: 270px;
+		min-height: 100vh;
+		min-height: 100dvh;
+		background: var(--bg-primary);
+	}
+
+	.content-wrapper {
+		padding: 2rem 1.75rem 4rem;
+		max-width: 1120px;
+		margin: 0 auto;
+	}
+
+	/* ==========================================================================
+	   MOBILE HEADER & BOTTOM DOCK
+	   ========================================================================== */
 	.mobile-header {
-		display: none; /* Hidden on Desktop */
+		display: none;
 		position: fixed;
 		top: 0;
 		left: 0;
 		right: 0;
 		height: var(--header-height);
 		padding: 0 1rem;
-		justify-content: space-between;
 		align-items: center;
-		z-index: 100;
-		border-top: none;
-		border-left: none;
-		border-right: none;
+		justify-content: space-between;
+		z-index: 250;
+		background: var(--glass-bg);
 		border-bottom: 1px solid var(--border-color);
 	}
 
-	.mobile-title {
-		font-size: 1.35rem;
-		font-weight: 800;
-		letter-spacing: -1px;
+	.mobile-brand-wrap {
 		display: flex;
 		align-items: center;
-		margin: 0;
+		gap: 0.6rem;
 	}
 
-	.theme-toggle-btn {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-		padding: 0.5rem;
-		border-radius: 50%;
-		width: 40px;
-		height: 40px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid var(--border-color);
-		transition: all 0.2s ease;
-	}
-
-	.theme-toggle-btn:hover {
-		background: var(--border-color);
-		transform: scale(1.05);
-	}
-
-	.theme-toggle-btn:active {
-		transform: scale(0.95);
-	}
-
-	/* ===================================
-	   SIDEBAR (DESKTOP)
-	   =================================== */
-
-	.sidebar {
-		position: fixed;
-		left: 0;
-		top: 0;
-		bottom: 0;
-		width: 280px;
-		border-right: 1px solid var(--border-color);
-		display: flex;
-		flex-direction: column;
-		z-index: 200;
-		/* background provided by glass-panel */
-	}
-
-	.sidebar-header {
-		padding: 2rem 1.5rem;
-	}
-
-	/* Branding Logic */
-	.app-title-container {
-		font-size: 1.75rem;
-		font-weight: 800;
-		margin: 0;
-		display: flex;
-		align-items: center;
-		letter-spacing: -1px;
-	}
-
-	.rdnk-title {
-		color: var(--text-primary);
-	}
-	.slash-title {
-		color: var(--text-secondary);
-		margin: 0 0.2rem;
-		font-weight: 300;
-	}
-	.axiom-wrapper-title {
-		overflow: hidden;
-		display: flex;
-	}
-
-	.axiom-title {
-		background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
-		-webkit-background-clip: text;
-		background-clip: text;
-		color: transparent;
-		transform: translateX(-100%);
-		animation: slideOut 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s;
-		opacity: 0;
-	}
-
-	@keyframes slideOut {
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	/* Balance Card */
-	.balance-card {
-		margin: 0 1.5rem 1.5rem;
-		padding: 1.5rem;
-		background: linear-gradient(135deg, var(--bg-card), var(--bg-hover));
-		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		text-align: center;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.balance-label {
-		font-size: 0.75rem;
-		color: var(--text-secondary);
-		text-transform: uppercase;
-		font-weight: 600;
-		letter-spacing: 1px;
-		margin-bottom: 0.5rem;
-	}
-
-	.balance-amount {
-		font-size: 2rem;
-		font-weight: 800;
-		color: var(--accent-primary);
-		letter-spacing: -1px;
-	}
-
-	/* Month Nav */
-	.month-navigator {
-		margin: 0 1.5rem 1rem;
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		background: var(--bg-hover);
-		padding: 4px;
-		border-radius: var(--border-radius);
-	}
-
-	.month-btn {
+	.brand-glyph {
 		width: 32px;
 		height: 32px;
-		border-radius: var(--border-radius);
+		border-radius: 8px;
+		background: linear-gradient(135deg, var(--accent-primary) 0%, #06B6D4 100%);
+		color: #080C14;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--text-secondary);
-		background: transparent;
 	}
 
-	.month-btn:hover {
-		background: var(--bg-card);
-		color: var(--text-primary);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.current-month {
-		flex: 1;
-		text-align: center;
-		font-weight: 600;
-		font-size: 0.9rem;
-	}
-
-	/* Nav List */
-	.nav {
-		flex: 1;
-		padding: 0 1rem;
+	.brand-text-col {
 		display: flex;
 		flex-direction: column;
-		gap: 4px;
-		overflow-y: auto;
 	}
 
-	.nav-item {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 0.75rem 1rem;
-		border-radius: var(--border-radius);
-		color: var(--text-secondary);
-		transition: all 0.2s;
-		font-weight: 500;
-	}
-
-	.nav-item:hover {
-		background: var(--bg-hover);
+	.brand-name {
+		font-size: 1.05rem;
+		font-weight: 800;
+		line-height: 1.1;
 		color: var(--text-primary);
 	}
 
-	.nav-item.active {
-		background: var(--bg-card);
+	.brand-tag {
+		font-size: 0.65rem;
+		font-weight: 700;
 		color: var(--accent-primary);
-		box-shadow: var(--shadow-sm);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
-	.sidebar-footer {
-		padding: 1.5rem;
-		border-top: 1px solid var(--border-color);
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.action-btn {
-		width: 100%;
+	.mobile-month-pill {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem;
-		border-radius: var(--border-radius);
-		background: transparent;
-		color: var(--text-secondary);
-		font-weight: 500;
-		font-size: 0.9rem;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-pill);
+		padding: 2px 4px;
 	}
 
-	.action-btn:hover {
-		background: var(--bg-hover);
-		color: var(--text-primary);
-	}
-
-	.action-btn.danger:hover {
-		background: var(--danger-bg);
-		color: var(--danger);
-	}
-
-	/* ===================================
-	   MAIN CONTENT
-	   =================================== */
-
-	.main-content {
-		flex: 1;
-		margin-left: 280px; /* Sidebar width */
-		min-height: 100vh;
-		background: var(--bg-primary);
-		padding-bottom: 0; /* No bottom pad on desktop */
-	}
-
-	.content-wrapper {
-		padding: 2.5rem;
-		max-width: 1200px;
-		margin: 0 auto;
-	}
-
-	/* ===================================
-	   BOTTOM NAVIGATION (FLOATING ISLAND)
-	   =================================== */
-
-	/* Styles handled in layout.css media query mainly, but adding specific item styles here */
-
-	.bottom-nav-item {
+	.mini-month-btn {
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 48px;
-		height: 48px;
+		color: var(--text-secondary);
+	}
+
+	.mini-month-label {
+		font-size: 0.78rem;
+		font-weight: 700;
+		padding: 0 4px;
+		color: var(--text-primary);
+	}
+
+	.theme-btn-compact {
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
-		color: var(--text-muted);
-		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		color: var(--text-secondary);
+	}
+
+	/* Floating Bottom Glass Dock */
+	.bottom-dock-wrapper {
+		display: none;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: 0 1rem calc(0.85rem + var(--safe-bottom));
+		z-index: 300;
+		pointer-events: none;
+		justify-content: center;
+	}
+
+	.bottom-dock {
+		pointer-events: auto;
+		width: 100%;
+		max-width: 420px;
+		height: var(--bottom-nav-height);
+		border-radius: var(--border-radius-pill);
+		background: var(--glass-bg);
+		backdrop-filter: blur(24px);
+		-webkit-backdrop-filter: blur(24px);
+		border: 1px solid var(--border-medium);
+		box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: space-around;
+		padding: 0 0.5rem;
 		position: relative;
 	}
 
-	.bottom-nav-item.active {
+	.dock-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 3px;
+		width: 54px;
+		height: 54px;
+		border-radius: var(--border-radius-pill);
+		color: var(--text-muted);
+		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		position: relative;
+	}
+
+	.dock-item.active {
 		color: var(--accent-primary);
-		background: var(--bg-hover);
 	}
 
-	.active-dot {
+	.dock-label {
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+	}
+
+	.dock-active-glow {
 		position: absolute;
-		bottom: 8px;
-		left: 50%;
-		transform: translateX(-50%);
-		width: 4px;
-		height: 4px;
+		top: 4px;
+		width: 12px;
+		height: 2px;
+		border-radius: var(--border-radius-pill);
 		background: var(--accent-primary);
-		border-radius: 50%;
+		box-shadow: 0 0 8px var(--accent-primary);
 	}
 
-	.fab-btn {
-		position: absolute;
-		bottom: 24px; /* Float above nav */
-		left: 50%;
-		transform: translateX(-50%);
-		width: 56px;
-		height: 56px;
+	/* Center Action Button (+) */
+	.center-fab {
+		width: 50px;
+		height: 50px;
 		border-radius: 50%;
-		background: var(--accent-gradient);
-		box-shadow: var(--shadow-glow);
-		color: white;
+		background: linear-gradient(135deg, var(--accent-primary) 0%, #06B6D4 100%);
+		color: #080C14;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: 1100;
-		transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		box-shadow: 0 4px 16px var(--accent-glow);
+		transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		margin: 0 2px;
+		flex-shrink: 0;
 	}
 
-	.fab-btn:active {
-		transform: translateX(-50%) scale(0.9);
+	.center-fab:active {
+		transform: scale(0.92);
 	}
 
-	/* ===================================
-	   RESPONSIVE (MOBILE)
-	   =================================== */
+	/* Quick Action Bottom Sheet */
+	.quick-sheet {
+		max-width: 480px;
+	}
 
+	.sheet-handle-bar {
+		width: 38px;
+		height: 4px;
+		border-radius: var(--border-radius-pill);
+		background: var(--border-strong);
+		margin: 0 auto 1.25rem;
+	}
+
+	.quick-sheet-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.25rem;
+	}
+
+	.quick-sheet-title-wrap {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.quick-sheet-title {
+		font-size: 1.15rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		margin: 0;
+	}
+
+
+	.quick-actions-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.85rem;
+	}
+
+	.quick-grid-card {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		padding: 1rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
+		text-align: left;
+		transition: all 0.2s ease;
+	}
+
+	.quick-grid-card:hover {
+		background: var(--bg-hover);
+		border-color: var(--border-medium);
+	}
+
+	.quick-grid-card:active {
+		transform: scale(0.965);
+	}
+
+	.quick-card-icon-badge {
+		width: 44px;
+		height: 44px;
+		border-radius: var(--border-radius-sm);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.quick-card-icon-badge.emerald {
+		background: var(--success-bg);
+		color: var(--success);
+		border: 1px solid var(--success-border);
+	}
+
+	.quick-card-icon-badge.indigo {
+		background: rgba(99, 102, 241, 0.15);
+		color: #818CF8;
+		border: 1px solid rgba(99, 102, 241, 0.3);
+	}
+
+	.quick-card-icon-badge.cyan {
+		background: var(--info-bg);
+		color: var(--info);
+		border: 1px solid var(--info-border);
+	}
+
+	.quick-card-icon-badge.amber {
+		background: var(--warning-bg);
+		color: var(--warning);
+		border: 1px solid var(--warning-border);
+	}
+
+	.quick-card-text {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.quick-card-text strong {
+		font-size: 0.92rem;
+		font-weight: 700;
+		color: var(--text-primary);
+		line-height: 1.2;
+	}
+
+	.quick-card-text span {
+		font-size: 0.72rem;
+		color: var(--text-muted);
+		margin-top: 2px;
+	}
+
+	/* ==========================================================================
+	   RESPONSIVE BREAKPOINTS
+	   ========================================================================== */
 	@media (max-width: 768px) {
 		.sidebar {
 			display: none;
 		}
+
 		.mobile-header {
 			display: flex;
 		}
 
 		.main-content {
 			margin-left: 0;
-			padding-top: var(--header-height);
-			padding-bottom: 100px; /* Space for floating nav */
+			padding-top: calc(var(--header-height) + 0.5rem);
+			padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 2rem);
 		}
 
-		.bottom-nav-island {
+		.content-wrapper {
+			padding: 1rem 1rem 2rem;
+		}
+
+		.bottom-dock-wrapper {
 			display: flex;
-			/* Specific positioning in layout.css */
 		}
-
-		/* Reposition FAB into the nav bar for tighter integration if preferred,
-		   or keep floating above. Current design: Floating above center. */
 	}
 </style>
