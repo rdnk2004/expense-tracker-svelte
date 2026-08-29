@@ -1,6 +1,7 @@
 // Svelte store for Student 3-Bucket Budgeting (Survival 50%, Fun 30%, Future 20%)
 import { derived } from 'svelte/store';
-import { categories, currentMonthExpenses, currentMonthBudgets, studentProfile, currentMonth } from '$lib/stores';
+import { categories, currentMonthExpenses, currentMonthBudgets, currentMonth } from './core';
+import { studentProfile } from './profile';
 import type { BudgetBucketType, Category } from '$lib/types';
 import * as db from '$lib/db';
 

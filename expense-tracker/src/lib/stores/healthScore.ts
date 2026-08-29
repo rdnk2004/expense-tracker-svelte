@@ -1,6 +1,11 @@
 // Svelte store for Student Financial Health Score (0-100) & Gamified Badges
 import { derived } from 'svelte/store';
-import { runway, debts, subscriptionStats, goalStats, analytics, studentProfile } from './index';
+import { debts } from './core';
+import { runway } from './runway';
+import { subscriptionStats } from './subscriptions';
+import { goalStats } from './goals';
+import { analytics } from './analytics';
+import { studentProfile } from './profile';
 import type { FinancialHealthScore, FinancialBadge } from '$lib/types';
 
 export const healthScore = derived(

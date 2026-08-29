@@ -1,6 +1,8 @@
 // Svelte store for Behavioral Economics, Emotional ROI, and Labor-Time Valuation
 import { derived } from 'svelte/store';
-import { expenses, categories, studentProfile, goals } from './index';
+import { expenses, categories } from './core';
+import { studentProfile } from './profile';
+import { goals } from './goals';
 import { calculateHoursOfWork } from '$lib/utils';
 import type { Expense, ValueTag, SatisfactionRating } from '$lib/types';
 

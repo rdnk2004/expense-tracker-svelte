@@ -2,7 +2,7 @@
 import { writable, derived, get } from 'svelte/store';
 import type { SavingsGoal, GoalCategory } from '$lib/types';
 import * as db from '$lib/db';
-import { wallets, loadWallets } from './index';
+import { wallets, loadWallets } from './core';
 
 function createGoalsStore() {
     const { subscribe, set, update } = writable<SavingsGoal[]>([]);

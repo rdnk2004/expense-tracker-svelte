@@ -1,6 +1,6 @@
 // Svelte derived store and calculations for Student Financial Runway & Safe-to-Spend Engine
 import { derived } from 'svelte/store';
-import { wallets, expenses, totalBalance } from '$lib/stores';
+import { wallets, expenses, totalBalance } from './core';
 import { studentProfile } from './profile';
 import type { AllowanceCycle, BurnRateStatus } from '$lib/types';
 

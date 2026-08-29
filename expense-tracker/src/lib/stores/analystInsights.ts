@@ -1,6 +1,12 @@
 // Svelte derived store for FP&A Financial Analyst Commentary & Proactive Nudges
 import { derived } from 'svelte/store';
-import { runway, debts, subscriptionStats, goalStats, analytics, buckets, studentProfile, formatCurrency } from './index';
+import { debts, formatCurrency } from './core';
+import { runway } from './runway';
+import { subscriptionStats } from './subscriptions';
+import { goalStats } from './goals';
+import { analytics } from './analytics';
+import { buckets } from './buckets';
+import { studentProfile } from './profile';
 import type { AnalystInsight } from '$lib/types';
 
 export const analystInsights = derived(
