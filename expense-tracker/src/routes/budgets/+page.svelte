@@ -21,11 +21,8 @@
 		ChevronRight,
 		ChartPie,
 		CheckCircle,
-		CircleAlert,
 		Wallet,
 		FolderOpen,
-		TrendingUp,
-		Loader2,
 		ShieldCheck,
 		Sparkles,
 		PiggyBank,
@@ -37,7 +34,6 @@
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 
-	// Form & modal state
 	let overallBudgetAmount = $state('');
 	let categoryBudgetInputs = $state<Record<string, string>>({});
 	let selectedMonth = $state($currentMonth);
@@ -46,12 +42,10 @@
 	let showSplitModal = $state(false);
 	let activeTab = $state<'buckets' | 'categories'>('buckets');
 
-	// Split adjustment state
 	let customSurvival = $state($studentProfile.survivalBucketPercent || 50);
 	let customFun = $state($studentProfile.funBucketPercent || 30);
 	let customFuture = $state($studentProfile.futureBucketPercent || 20);
 
-	// Computed values
 	let overallBudget = $derived(
 		$budgets.find((b) => b.type === 'overall' && b.month === selectedMonth)
 	);
@@ -85,55 +79,43 @@
 		})
 	);
 
-	let daysInMonth = $derived(
-		new Date(
-			parseInt(selectedMonth.split('-')[0]),
-			parseInt(selectedMonth.split('-')[1]),
-			0
-		).getDate()
-	);
-	let daysElapsed = $derived(selectedMonth === $currentMonth ? new Date().getDate() : daysInMonth);
-	let daysRemaining = $derived(Math.max(0, daysInMonth - daysElapsed));
-	let averageDailySpending = $derived(daysElapsed > 0 ? totalExpenses / daysElapsed : 0);
-	let projectedMonthlySpending = $derived(averageDailySpending * daysInMonth);
-
 	async function handleSetOverallBudget() {
 		if (!overallBudgetAmount || parseFloat(overallBudgetAmount) <= 0) {
-			showSuccessToast('Please enter a valid amount');
+			showToastMessage('Please enter a valid amount');
 			return;
 		}
 
 		try {
 			await setBudget('overall', Math.round(parseFloat(overallBudgetAmount) * 100));
 			overallBudgetAmount = '';
-			showSuccessToast('Monthly budget updated!');
+			showToastMessage('Monthly budget updated! 🎯');
 		} catch (error) {
 			console.error('Failed to set budget:', error);
-			showSuccessToast('Failed to set budget');
+			showToastMessage('Failed to set budget');
 		}
 	}
 
 	async function handleSetCategoryBudget(categoryId: string) {
 		const amount = categoryBudgetInputs[categoryId];
 		if (!amount || parseFloat(amount) <= 0) {
-			showSuccessToast('Please enter a valid amount');
+			showToastMessage('Please enter a valid amount');
 			return;
 		}
 
 		try {
 			await setBudget('category', Math.round(parseFloat(amount) * 100), categoryId);
 			categoryBudgetInputs = { ...categoryBudgetInputs, [categoryId]: '' };
-			showSuccessToast('Category budget set successfully!');
+			showToastMessage('Category limit saved!');
 		} catch (error) {
 			console.error('Failed to set budget:', error);
-			showSuccessToast('Failed to set budget');
+			showToastMessage('Failed to set budget');
 		}
 	}
 
 	async function handleCategoryBucketChange(categoryId: string, bucketType: BudgetBucketType) {
 		try {
 			await setCategoryBucket(categoryId, bucketType);
-			showSuccessToast('Category bucket updated!');
+			showToastMessage('Category bucket updated!');
 		} catch (err) {
 			console.error(err);
 		}
@@ -142,69 +124,67 @@
 	async function handleSaveCustomSplit() {
 		const total = Number(customSurvival) + Number(customFun) + Number(customFuture);
 		if (total !== 100) {
-			showSuccessToast(`Percentages must add up to 100% (currently ${total}%)`);
+			showToastMessage(`Percentages must add up to 100% (currently ${total}%)`);
 			return;
 		}
 		await updateBucketSplit(Number(customSurvival), Number(customFun), Number(customFuture));
 		showSplitModal = false;
-		showSuccessToast('3-Bucket allocations saved!');
+		showToastMessage('3-Bucket allocations saved! 🚀');
 	}
 
-	function showSuccessToast(message: string) {
-		toastMessage = message;
+	function showToastMessage(msg: string) {
+		toastMessage = msg;
 		showToast = true;
-		setTimeout(() => {
-			showToast = false;
-		}, 3000);
+		setTimeout(() => (showToast = false), 3000);
 	}
 
 	function getBudgetColor(percentage: number): string {
-		if (percentage < 70) return 'var(--success, #10B981)';
-		if (percentage < 90) return 'var(--warning, #F59E0B)';
-		if (percentage < 100) return '#fb8c00';
-		return 'var(--danger, #FF3366)';
+		if (percentage < 70) return '#10B981';
+		if (percentage < 90) return '#F59E0B';
+		return '#F43F5E';
 	}
 </script>
 
 <div class="budgets-page">
 	{#if showToast}
-		<div class="toast">{toastMessage}</div>
+		<div class="toast-pill">{toastMessage}</div>
 	{/if}
 
-	<div class="page-header-row">
+	<!-- Header -->
+	<div class="page-header">
 		<div>
-			<span class="eyebrow">Smart Allocation</span>
-			<h1 class="page-title">Student Budgeting</h1>
+			<span class="campus-sub">Macro Budgeting</span>
+			<h1 class="page-title">3-Bucket Framework</h1>
 		</div>
-		<button class="settings-btn" onclick={() => (showSplitModal = true)} aria-label="Adjust 3-Bucket Split">
-			<Sliders size={18} />
-			<span>Adjust Split</span>
+		<button class="adjust-split-btn" onclick={() => (showSplitModal = true)}>
+			<Sliders size={15} />
+			<span>Customize Split</span>
 		</button>
 	</div>
 
-	<!-- Month Selector -->
-	<div class="month-selector-card">
-		<button class="month-nav-btn" onclick={goToPreviousMonth} aria-label="Previous month">
-			<ChevronLeft size={22} />
+	<!-- Month Switcher Dock -->
+	<div class="month-dock-card">
+		<button class="m-dock-btn" onclick={goToPreviousMonth} aria-label="Previous month">
+			<ChevronLeft size={18} />
 		</button>
-		<div class="month-display">{getMonthName(selectedMonth)}</div>
-		<button class="month-nav-btn" onclick={goToNextMonth} aria-label="Next month">
-			<ChevronRight size={22} />
+		<div class="m-dock-name">{getMonthName(selectedMonth)}</div>
+		<button class="m-dock-btn" onclick={goToNextMonth} aria-label="Next month">
+			<ChevronRight size={18} />
 		</button>
 	</div>
 
-	<!-- Tab Switcher -->
-	<div class="tab-control">
+	<!-- View Toggle Tabs -->
+	<div class="tab-pill-switcher">
 		<button
-			class="tab-btn"
+			class="tab-pill"
 			class:active={activeTab === 'buckets'}
 			onclick={() => (activeTab = 'buckets')}
 		>
 			<ChartPie size={16} />
-			<span>3-Bucket System (50/30/20)</span>
+			<span>3-Bucket Macro</span>
 		</button>
 		<button
-			class="tab-btn"
+			class="tab-pill"
 			class:active={activeTab === 'categories'}
 			onclick={() => (activeTab = 'categories')}
 		>
@@ -214,215 +194,222 @@
 	</div>
 
 	{#if activeTab === 'buckets'}
-		<!-- 3-BUCKET SYSTEM -->
-		<div class="buckets-container">
+		<!-- 3-BUCKET SYSTEM DECK -->
+		<div class="buckets-deck">
 			<!-- Survival 50% Card -->
-			<div class="bucket-card-hero bucket-survival">
-				<div class="bucket-card-header">
-					<div class="bucket-title-group">
-						<div class="bucket-icon-badge survival">
-							<ShieldCheck size={20} />
+			<div class="bucket-hero-card survival-theme">
+				<div class="bucket-top-line">
+					<div class="bucket-brand-group">
+						<div class="bucket-badge-icon survival">
+							<ShieldCheck size={18} />
 						</div>
 						<div>
-							<h3 class="b-title">{$buckets.survival.name} ({$buckets.survival.targetPercent}%)</h3>
-							<p class="b-desc">{$buckets.survival.description}</p>
+							<h3 class="bucket-heading">{$buckets.survival.name} ({$buckets.survival.targetPercent}%)</h3>
+							<p class="bucket-sub-desc">{$buckets.survival.description}</p>
 						</div>
 					</div>
-					<span class="bucket-status-badge status-{$buckets.survival.status}">
+					<span class="status-indicator-tag status-{$buckets.survival.status}">
 						{$buckets.survival.status === 'safe' ? 'On Track' : $buckets.survival.status === 'warning' ? 'Near Limit' : 'Exceeded'}
 					</span>
 				</div>
 
-				<div class="bucket-figures">
-					<div class="spent-figure">
-						<span class="fig-label">Spent</span>
-						<span class="fig-val">{formatCurrency($buckets.survival.spentAmount)}</span>
+				<div class="bucket-figures-row">
+					<div class="figure-block">
+						<span class="figure-lbl">Spent</span>
+						<span class="figure-val tabular">{formatCurrency($buckets.survival.spentAmount)}</span>
 					</div>
-					<div class="limit-figure">
-						<span class="fig-label">Allocated</span>
-						<span class="fig-val">{formatCurrency($buckets.survival.allocatedAmount)}</span>
+					<div class="figure-block align-right">
+						<span class="figure-lbl">Allocated</span>
+						<span class="figure-val tabular">{formatCurrency($buckets.survival.allocatedAmount)}</span>
 					</div>
 				</div>
 
-				<div class="progress-track">
+				<div class="progress-track-neo">
 					<div
-						class="progress-bar-fill survival-fill"
+						class="progress-fill-neo survival-bar"
 						style="width: {Math.min(100, $buckets.survival.spentPercent)}%;"
 					></div>
 				</div>
 
-				<div class="bucket-categories-chips">
+				<div class="category-chips-strip">
 					{#each $buckets.survival.categories as cat}
-						<span class="cat-chip">
-							<CategoryIcon icon={cat.icon} size={14} />
-							{cat.name}
+						<span class="mini-cat-chip">
+							<CategoryIcon icon={cat.icon} size={13} />
+							<span>{cat.name}</span>
 						</span>
 					{/each}
 				</div>
 			</div>
 
 			<!-- Fun & Social 30% Card -->
-			<div class="bucket-card-hero bucket-fun">
-				<div class="bucket-card-header">
-					<div class="bucket-title-group">
-						<div class="bucket-icon-badge fun">
-							<Sparkles size={20} />
+			<div class="bucket-hero-card fun-theme">
+				<div class="bucket-top-line">
+					<div class="bucket-brand-group">
+						<div class="bucket-badge-icon fun">
+							<Sparkles size={18} />
 						</div>
 						<div>
-							<h3 class="b-title">{$buckets.fun.name} ({$buckets.fun.targetPercent}%)</h3>
-							<p class="b-desc">{$buckets.fun.description}</p>
+							<h3 class="bucket-heading">{$buckets.fun.name} ({$buckets.fun.targetPercent}%)</h3>
+							<p class="bucket-sub-desc">{$buckets.fun.description}</p>
 						</div>
 					</div>
-					<span class="bucket-status-badge status-{$buckets.fun.status}">
-						{$buckets.fun.status === 'safe' ? 'Guilt-Free' : $buckets.fun.status === 'warning' ? 'High Fun Burn' : 'Exceeded'}
+					<span class="status-indicator-tag status-{$buckets.fun.status}">
+						{$buckets.fun.status === 'safe' ? 'Guilt-Free' : $buckets.fun.status === 'warning' ? 'High Pace' : 'Exceeded'}
 					</span>
 				</div>
 
-				<div class="bucket-figures">
-					<div class="spent-figure">
-						<span class="fig-label">Spent</span>
-						<span class="fig-val">{formatCurrency($buckets.fun.spentAmount)}</span>
+				<div class="bucket-figures-row">
+					<div class="figure-block">
+						<span class="figure-lbl">Spent</span>
+						<span class="figure-val tabular">{formatCurrency($buckets.fun.spentAmount)}</span>
 					</div>
-					<div class="limit-figure">
-						<span class="fig-label">Allocated</span>
-						<span class="fig-val">{formatCurrency($buckets.fun.allocatedAmount)}</span>
+					<div class="figure-block align-right">
+						<span class="figure-lbl">Allocated</span>
+						<span class="figure-val tabular">{formatCurrency($buckets.fun.allocatedAmount)}</span>
 					</div>
 				</div>
 
-				<div class="progress-track">
+				<div class="progress-track-neo">
 					<div
-						class="progress-bar-fill fun-fill"
+						class="progress-fill-neo fun-bar"
 						style="width: {Math.min(100, $buckets.fun.spentPercent)}%;"
 					></div>
 				</div>
 
-				<div class="bucket-categories-chips">
+				<div class="category-chips-strip">
 					{#each $buckets.fun.categories as cat}
-						<span class="cat-chip">
-							<CategoryIcon icon={cat.icon} size={14} />
-							{cat.name}
+						<span class="mini-cat-chip">
+							<CategoryIcon icon={cat.icon} size={13} />
+							<span>{cat.name}</span>
 						</span>
 					{/each}
 				</div>
 			</div>
 
 			<!-- Future & Sinking Buffer 20% Card -->
-			<div class="bucket-card-hero bucket-future">
-				<div class="bucket-card-header">
-					<div class="bucket-title-group">
-						<div class="bucket-icon-badge future">
-							<PiggyBank size={20} />
+			<div class="bucket-hero-card future-theme">
+				<div class="bucket-top-line">
+					<div class="bucket-brand-group">
+						<div class="bucket-badge-icon future">
+							<PiggyBank size={18} />
 						</div>
 						<div>
-							<h3 class="b-title">{$buckets.future.name} ({$buckets.future.targetPercent}%)</h3>
-							<p class="b-desc">{$buckets.future.description}</p>
+							<h3 class="bucket-heading">{$buckets.future.name} ({$buckets.future.targetPercent}%)</h3>
+							<p class="bucket-sub-desc">{$buckets.future.description}</p>
 						</div>
 					</div>
-					<span class="bucket-status-badge status-{$buckets.future.status}">
+					<span class="status-indicator-tag status-{$buckets.future.status}">
 						{$buckets.future.status === 'safe' ? 'Buffer Protected' : 'Low Savings'}
 					</span>
 				</div>
 
-				<div class="bucket-figures">
-					<div class="spent-figure">
-						<span class="fig-label">Saved / Allocated</span>
-						<span class="fig-val">{formatCurrency($buckets.future.spentAmount)}</span>
+				<div class="bucket-figures-row">
+					<div class="figure-block">
+						<span class="figure-lbl">Allocated</span>
+						<span class="figure-val tabular">{formatCurrency($buckets.future.spentAmount)}</span>
 					</div>
-					<div class="limit-figure">
-						<span class="fig-label">Goal Target</span>
-						<span class="fig-val">{formatCurrency($buckets.future.allocatedAmount)}</span>
+					<div class="figure-block align-right">
+						<span class="figure-lbl">Goal Target</span>
+						<span class="figure-val tabular">{formatCurrency($buckets.future.allocatedAmount)}</span>
 					</div>
 				</div>
 
-				<div class="progress-track">
+				<div class="progress-track-neo">
 					<div
-						class="progress-bar-fill future-fill"
+						class="progress-fill-neo future-bar"
 						style="width: {Math.min(100, $buckets.future.spentPercent)}%;"
 					></div>
 				</div>
 
-				<div class="bucket-categories-chips">
+				<div class="category-chips-strip">
 					{#each $buckets.future.categories as cat}
-						<span class="cat-chip">
-							<CategoryIcon icon={cat.icon} size={14} />
-							{cat.name}
+						<span class="mini-cat-chip">
+							<CategoryIcon icon={cat.icon} size={13} />
+							<span>{cat.name}</span>
 						</span>
 					{/each}
 				</div>
 			</div>
 		</div>
 	{:else}
-		<!-- CATEGORY BUDGETS -->
-		<div class="category-budgets-section">
-			<!-- Overall Budget Setup -->
-			<div class="card-section">
-				<div class="section-title-bar">
-					<Wallet size={20} class="text-accent" />
-					<h2 class="card-title">Base Monthly Budget</h2>
+		<!-- CATEGORY LIMITS VIEW -->
+		<div class="category-limits-view">
+			<!-- Overall Base Budget -->
+			<div class="card base-budget-card">
+				<div class="card-top-line">
+					<div class="base-budget-title">
+						<Wallet size={18} color="var(--accent-primary)" />
+						<h3>Base Monthly Cap</h3>
+					</div>
+					{#if overallBudget}
+						<span class="active-cap-tag tabular">{formatCurrency(overallBudget.amount)}</span>
+					{/if}
 				</div>
 
-				<div class="budget-form-row">
+				<div class="base-input-row">
 					<input
 						type="number"
 						bind:value={overallBudgetAmount}
 						placeholder={overallBudget ? `${overallBudget.amount / 100}` : 'e.g. 8000'}
 						step="1"
 						min="0"
+						class="base-input"
 					/>
-					<button class="primary-btn" onclick={handleSetOverallBudget}>
-						{overallBudget ? 'Update Limit' : 'Set Budget'}
+					<button class="save-cap-btn" onclick={handleSetOverallBudget}>
+						{overallBudget ? 'Update Limit' : 'Set Cap'}
 					</button>
 				</div>
 			</div>
 
 			<!-- Individual Category Limits List -->
-			<div class="category-list-grid">
+			<div class="category-cards-grid">
 				{#each categoriesWithBudgets as { category, budget, spent, percentage } (category.id)}
-					<div class="category-card-item">
-						<div class="cat-top-row">
-							<div class="cat-info">
-								<span class="cat-icon-wrap">
-									<CategoryIcon icon={category.icon} size={20} />
-								</span>
+					<div class="card cat-budget-card">
+						<div class="cat-card-header">
+							<div class="cat-info-group">
+								<div class="cat-icon-frame" style="background: {category.color}20; color: {category.color};">
+									<CategoryIcon icon={category.icon} size={18} />
+								</div>
 								<div>
-									<div class="cat-name">{category.name}</div>
-									<div class="cat-bucket-select">
-										<select
-											value={category.bucketType || 'fun'}
-											onchange={(e) => handleCategoryBucketChange(category.id, e.currentTarget.value as BudgetBucketType)}
-										>
-											<option value="survival">Survival (50%)</option>
-											<option value="fun">Fun & Social (30%)</option>
-											<option value="future">Future/Savings (20%)</option>
-										</select>
-									</div>
+									<h4 class="cat-title">{category.name}</h4>
+									<select
+										class="bucket-dropdown"
+										value={category.bucketType || 'fun'}
+										onchange={(e) => handleCategoryBucketChange(category.id, e.currentTarget.value as BudgetBucketType)}
+									>
+										<option value="survival">Survival (50%)</option>
+										<option value="fun">Fun (30%)</option>
+										<option value="future">Future (20%)</option>
+									</select>
 								</div>
 							</div>
-							<div class="cat-spent-col">
-								<div class="spent-val">{formatCurrency(spent)}</div>
+
+							<div class="cat-spent-stats">
+								<span class="cat-spent-val tabular">{formatCurrency(spent)}</span>
 								{#if budget}
-									<div class="budget-limit-val">/ {formatCurrency(budget.amount)}</div>
+									<span class="cat-limit-sub tabular">/ {formatCurrency(budget.amount)}</span>
 								{/if}
 							</div>
 						</div>
 
 						{#if budget}
-							<div class="progress-track mini">
+							<div class="progress-track-neo mini">
 								<div
-									class="progress-bar-fill"
+									class="progress-fill-neo"
 									style="width: {Math.min(100, percentage)}%; background: {getBudgetColor(percentage)};"
 								></div>
 							</div>
 						{:else}
-							<div class="cat-quick-set">
+							<div class="cat-quick-input-row">
 								<input
 									type="number"
 									bind:value={categoryBudgetInputs[category.id]}
-									placeholder="Set limit..."
+									placeholder="Set monthly limit (₹)..."
 									step="1"
 									min="0"
+									class="cat-limit-input"
 								/>
-								<button class="mini-btn" onclick={() => handleSetCategoryBudget(category.id)}>
+								<button class="cat-save-btn" onclick={() => handleSetCategoryBudget(category.id)}>
 									Save
 								</button>
 							</div>
@@ -432,589 +419,575 @@
 			</div>
 		</div>
 	{/if}
+</div>
 
-	<!-- Custom Split Modal -->
-	{#if showSplitModal}
+<!-- 3-Bucket Split Customizer Bottom Sheet -->
+{#if showSplitModal}
+	<div
+		class="modal-backdrop"
+		onclick={() => (showSplitModal = false)}
+		role="button"
+		tabindex="0"
+		onkeydown={(e) => e.key === 'Escape' && (showSplitModal = false)}
+	>
 		<div
-			class="modal-backdrop"
-			onclick={() => (showSplitModal = false)}
-			role="button"
-			tabindex="0"
-			onkeydown={(e) => e.key === 'Escape' && (showSplitModal = false)}
+			class="modal-sheet"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
 		>
-			<div
-				class="modal-sheet"
-				onclick={(e) => e.stopPropagation()}
-				onkeydown={(e) => e.stopPropagation()}
-				role="dialog"
-				aria-modal="true"
-				tabindex="-1"
-			>
-				<div class="modal-header">
-					<h3 class="modal-title">Customize 3-Bucket Split</h3>
-					<button class="close-btn" onclick={() => (showSplitModal = false)}>✕</button>
-				</div>
-				<p class="modal-sub">Allocate your monthly allowance across your 3 student macro-buckets.</p>
+			<div class="sheet-top-row">
+				<h3>Customize 3-Bucket Allocations</h3>
+				<button class="close-btn" onclick={() => (showSplitModal = false)}>✕</button>
+			</div>
 
-				<div class="sliders-stack">
-					<div class="slider-box survival-box">
-						<div class="slider-label-row">
-							<span>🛡️ Survival & Essentials</span>
-							<strong>{customSurvival}%</strong>
-						</div>
-						<input type="range" min="20" max="80" bind:value={customSurvival} />
-					</div>
+			<p class="sheet-sub">Calibrate your allowance distribution according to your campus expenses.</p>
 
-					<div class="slider-box fun-box">
-						<div class="slider-label-row">
-							<span>✨ Fun & Social</span>
-							<strong>{customFun}%</strong>
-						</div>
-						<input type="range" min="10" max="60" bind:value={customFun} />
+			<div class="sliders-stack">
+				<div class="slider-block survival-theme-block">
+					<div class="slider-header-line">
+						<span>🛡️ Survival (Mess, Rent, Books)</span>
+						<strong class="tabular">{customSurvival}%</strong>
 					</div>
-
-					<div class="slider-box future-box">
-						<div class="slider-label-row">
-							<span>🐖 Future Buffer & Goals</span>
-							<strong>{customFuture}%</strong>
-						</div>
-						<input type="range" min="5" max="50" bind:value={customFuture} />
-					</div>
+					<input type="range" min="20" max="80" bind:value={customSurvival} class="range-slider" />
 				</div>
 
-				<div class="modal-total-bar" class:invalid={Number(customSurvival) + Number(customFun) + Number(customFuture) !== 100}>
-					Total: <strong>{Number(customSurvival) + Number(customFun) + Number(customFuture)}%</strong>
-					{#if Number(customSurvival) + Number(customFun) + Number(customFuture) !== 100}
-						<span class="warning-text">(Must equal 100%)</span>
-					{/if}
+				<div class="slider-block fun-theme-block">
+					<div class="slider-header-line">
+						<span>✨ Fun & Social (Canteen, Outings)</span>
+						<strong class="tabular">{customFun}%</strong>
+					</div>
+					<input type="range" min="10" max="60" bind:value={customFun} class="range-slider" />
 				</div>
 
-				<div class="modal-actions">
-					<button class="secondary-btn" onclick={() => (showSplitModal = false)}>Cancel</button>
-					<button class="primary-btn" onclick={handleSaveCustomSplit}>Save Allocations</button>
+				<div class="slider-block future-theme-block">
+					<div class="slider-header-line">
+						<span>🐖 Future Buffer (Sinking Funds)</span>
+						<strong class="tabular">{customFuture}%</strong>
+					</div>
+					<input type="range" min="5" max="50" bind:value={customFuture} class="range-slider" />
 				</div>
 			</div>
+
+			<div class="total-allocation-bar" class:invalid={Number(customSurvival) + Number(customFun) + Number(customFuture) !== 100}>
+				<span>Total: <strong class="tabular">{Number(customSurvival) + Number(customFun) + Number(customFuture)}%</strong></span>
+				{#if Number(customSurvival) + Number(customFun) + Number(customFuture) !== 100}
+					<span class="warning-tag">Must equal 100%</span>
+				{/if}
+			</div>
+
+			<div class="sheet-action-row">
+				<button class="save-split-btn" onclick={handleSaveCustomSplit}>
+					Apply Allocation Split
+				</button>
+			</div>
 		</div>
-	{/if}
-</div>
+	</div>
+{/if}
 
 <style>
 	.budgets-page {
-		max-width: 620px;
+		max-width: 680px;
 		margin: 0 auto;
-		padding: 0 16px 120px 16px;
-		animation: fadeIn 0.3s ease-out;
+		display: flex;
+		flex-direction: column;
+		gap: 1.15rem;
 	}
 
-	.page-header-row {
+	.toast-pill {
+		position: fixed;
+		top: 1.25rem;
+		left: 50%;
+		transform: translateX(-50%);
+		background: #10B981;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.85rem;
+		padding: 0.55rem 1.25rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: var(--shadow-lg);
+		z-index: 10000;
+	}
+
+	.page-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 18px;
-		padding-top: 8px;
 	}
 
-	.eyebrow {
-		font-size: 0.76rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+	.campus-sub {
 		display: block;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-primary);
 		margin-bottom: 2px;
 	}
 
 	.page-title {
-		font-size: 1.75rem;
+		font-size: 1.65rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.5px;
+		letter-spacing: -0.04em;
+		margin: 0;
 	}
 
-	.settings-btn {
-		background: var(--bg-card);
+	.adjust-split-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
-		padding: 8px 14px;
-		border-radius: 9999px;
+		padding: 0.55rem 0.95rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.82rem;
 		font-weight: 700;
-		font-size: 0.8rem;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		box-shadow: var(--shadow-sm);
+		transition: all 0.2s ease;
 	}
 
-	.month-selector-card {
+	.adjust-split-btn:hover {
+		background: var(--bg-hover);
+		border-color: var(--accent-primary);
+	}
+
+	/* Month Dock */
+	.month-dock-card {
 		display: flex;
+		align-items: center;
 		justify-content: space-between;
-		align-items: center;
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 20px;
-		padding: 10px 16px;
-		margin-bottom: 18px;
-		box-shadow: var(--shadow-sm);
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-pill);
+		padding: 4px 6px;
 	}
 
-	.month-nav-btn {
-		background: transparent;
-		border: none;
-		color: var(--accent-primary);
-		cursor: pointer;
+	.m-dock-btn {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
 		display: flex;
 		align-items: center;
+		justify-content: center;
+		color: var(--text-secondary);
+		transition: all 0.2s ease;
 	}
 
-	.month-display {
-		font-weight: 800;
-		font-size: 1.05rem;
+	.m-dock-btn:hover {
+		background: var(--bg-card);
 		color: var(--text-primary);
 	}
 
-	/* Tab Control */
-	.tab-control {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 8px;
-		background: var(--bg-card);
-		padding: 6px;
-		border-radius: 18px;
-		border: 1px solid var(--border-color);
-		margin-bottom: 20px;
+	.m-dock-name {
+		font-size: 0.88rem;
+		font-weight: 800;
+		color: var(--text-primary);
 	}
 
-	.tab-btn {
+	/* Tab Switcher */
+	.tab-pill-switcher {
+		display: flex;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 3px;
+		border-radius: var(--border-radius-pill);
+	}
+
+	.tab-pill {
+		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 6px;
-		padding: 10px;
-		border-radius: 14px;
-		border: none;
-		background: transparent;
+		padding: 0.55rem 0.85rem;
+		border-radius: var(--border-radius-pill);
 		font-size: 0.82rem;
 		font-weight: 700;
-		color: var(--text-muted);
-		cursor: pointer;
-		transition: all 0.2s;
+		color: var(--text-secondary);
+		transition: all 0.2s ease;
 	}
 
-	.tab-btn.active {
-		background: var(--accent-primary);
-		color: white;
-		box-shadow: 0 4px 15px var(--accent-glow);
+	.tab-pill.active {
+		background: var(--bg-card);
+		color: var(--text-primary);
+		box-shadow: var(--shadow-xs);
 	}
 
-	/* Buckets Hero Stack */
-	.buckets-container {
+	/* Buckets Deck */
+	.buckets-deck {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 1.15rem;
 	}
 
-	.bucket-card-hero {
-		background: var(--bg-card);
-		border-radius: 26px;
-		padding: 22px;
-		border: 1px solid var(--border-color);
+	.bucket-hero-card {
+		border-radius: 24px;
+		padding: 1.35rem;
 		box-shadow: var(--shadow-sm);
-		position: relative;
-		overflow: hidden;
+		border: 1px solid var(--border-color);
+		background: var(--bg-card);
 	}
 
-	.bucket-card-hero::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 4px;
+	.survival-theme {
+		border-top: 3px solid #10B981;
 	}
 
-	.bucket-survival::before { background: #3B82F6; }
-	.bucket-fun::before { background: #EC4899; }
-	.bucket-future::before { background: #10B981; }
+	.fun-theme {
+		border-top: 3px solid #38BDF8;
+	}
 
-	.bucket-card-header {
+	.future-theme {
+		border-top: 3px solid #818CF8;
+	}
+
+	.bucket-top-line {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		margin-bottom: 18px;
+		margin-bottom: 1.15rem;
+		gap: 8px;
 	}
 
-	.bucket-title-group {
+	.bucket-brand-group {
 		display: flex;
+		gap: 0.75rem;
 		align-items: center;
-		gap: 12px;
 	}
 
-	.bucket-icon-badge {
-		width: 44px;
-		height: 44px;
-		border-radius: 14px;
+	.bucket-badge-icon {
+		width: 38px;
+		height: 38px;
+		border-radius: var(--border-radius-sm);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
 	}
 
-	.bucket-icon-badge.survival { background: rgba(59, 130, 246, 0.12); color: #2563EB; }
-	.bucket-icon-badge.fun { background: rgba(236, 72, 153, 0.12); color: #DB2777; }
-	.bucket-icon-badge.future { background: rgba(16, 185, 129, 0.12); color: #059669; }
+	.bucket-badge-icon.survival { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+	.bucket-badge-icon.fun { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); }
+	.bucket-badge-icon.future { background: rgba(99, 102, 241, 0.15); color: #818CF8; border: 1px solid rgba(99, 102, 241, 0.3); }
 
-	.b-title {
-		font-size: 1.05rem;
+	.bucket-heading {
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
+		margin: 0;
 	}
 
-	.b-desc {
+	.bucket-sub-desc {
 		font-size: 0.74rem;
 		color: var(--text-muted);
-		margin-top: 1px;
+		margin: 2px 0 0;
 	}
 
-	.bucket-status-badge {
-		font-size: 0.72rem;
-		font-weight: 700;
-		padding: 4px 10px;
-		border-radius: 9999px;
+	.status-indicator-tag {
+		font-size: 0.68rem;
+		font-weight: 800;
+		padding: 0.2rem 0.55rem;
+		border-radius: var(--border-radius-pill);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		flex-shrink: 0;
 	}
 
-	.status-safe { background: rgba(16, 185, 129, 0.12); color: #059669; }
-	.status-warning { background: rgba(245, 158, 11, 0.12); color: #D97706; }
-	.status-exceeded { background: rgba(255, 51, 102, 0.12); color: #FF3366; }
+	.status-safe { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+	.status-warning { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
+	.status-exceeded { background: rgba(244, 63, 94, 0.15); color: #F43F5E; border: 1px solid rgba(244, 63, 94, 0.3); }
 
-	.bucket-figures {
+	.bucket-figures-row {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 12px;
+		margin-bottom: 0.75rem;
 	}
 
-	.fig-label {
-		display: block;
-		font-size: 0.72rem;
-		color: var(--text-muted);
+	.figure-block {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.figure-lbl {
+		font-size: 0.68rem;
+		font-weight: 700;
 		text-transform: uppercase;
-		font-weight: 600;
+		color: var(--text-muted);
 	}
 
-	.fig-val {
+	.figure-val {
 		font-size: 1.25rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
-	.progress-track {
-		height: 10px;
-		background: var(--bg-primary);
-		border-radius: 9999px;
+	.align-right {
+		text-align: right;
+	}
+
+	.progress-track-neo {
+		height: 8px;
+		background: var(--surface-2);
+		border-radius: var(--border-radius-pill);
 		overflow: hidden;
-		margin-bottom: 16px;
+		border: 1px solid var(--border-subtle);
+		margin-bottom: 1rem;
 	}
 
-	.progress-track.mini {
-		height: 6px;
-		margin-top: 10px;
-		margin-bottom: 0;
-	}
-
-	.progress-bar-fill {
+	.progress-fill-neo {
 		height: 100%;
-		border-radius: 9999px;
-		transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+		border-radius: var(--border-radius-pill);
+		transition: width 0.4s ease;
 	}
 
-	.survival-fill { background: #3B82F6; }
-	.fun-fill { background: #EC4899; }
-	.future-fill { background: #10B981; }
+	.survival-bar { background: #10B981; }
+	.fun-bar { background: #38BDF8; }
+	.future-bar { background: #818CF8; }
 
-	.bucket-categories-chips {
+	.category-chips-strip {
 		display: flex;
 		gap: 6px;
 		flex-wrap: wrap;
 	}
 
-	.cat-chip {
+	.mini-cat-chip {
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		padding: 4px 10px;
-		border-radius: 10px;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		font-size: 0.75rem;
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		padding: 0.25rem 0.55rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.72rem;
+		font-weight: 700;
 		color: var(--text-secondary);
-		font-weight: 600;
 	}
 
 	/* Category Limits View */
-	.category-budgets-section {
+	.category-limits-view {
 		display: flex;
 		flex-direction: column;
-		gap: 16px;
+		gap: 1.15rem;
 	}
 
-	.card-section {
-		background: var(--bg-card);
-		border-radius: 22px;
-		padding: 18px;
-		border: 1px solid var(--border-color);
+	.base-budget-card {
+		padding: 1.25rem;
 	}
 
-	.section-title-bar {
+	.base-budget-title {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		margin-bottom: 12px;
+		gap: 6px;
 	}
 
-	.card-title {
+	.base-budget-title h3 {
 		font-size: 1rem;
-		font-weight: 700;
-		color: var(--text-primary);
+		font-weight: 800;
+		margin: 0;
 	}
 
-	.budget-form-row {
+	.active-cap-tag {
+		font-size: 0.88rem;
+		font-weight: 800;
+		color: var(--accent-primary);
+	}
+
+	.base-input-row {
 		display: flex;
-		gap: 10px;
+		gap: 8px;
+		margin-top: 0.85rem;
 	}
 
-	.budget-form-row input {
+	.base-input {
 		flex: 1;
-		padding: 10px 14px;
-		border-radius: 14px;
+		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		color: var(--text-primary);
-		font-weight: 700;
+		border-radius: var(--border-radius);
+		padding: 0.65rem 1rem;
+		font-size: 0.95rem;
 	}
 
-	.primary-btn {
-		background: var(--accent-gradient);
-		color: white;
-		border: none;
-		padding: 10px 18px;
-		border-radius: 14px;
-		font-weight: 700;
-		cursor: pointer;
+	.save-cap-btn {
+		background: var(--accent-primary);
+		color: #080C14;
+		font-weight: 800;
+		padding: 0.65rem 1.15rem;
+		border-radius: var(--border-radius-pill);
+		font-size: 0.88rem;
 	}
 
-	.category-list-grid {
+	.category-cards-grid {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
+		gap: 0.75rem;
 	}
 
-	.category-card-item {
-		background: var(--bg-card);
-		border: 1px solid var(--border-color);
-		border-radius: 18px;
-		padding: 14px 16px;
+	.cat-budget-card {
+		padding: 1rem 1.25rem;
 	}
 
-	.cat-top-row {
+	.cat-card-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		margin-bottom: 0.65rem;
 	}
 
-	.cat-info {
+	.cat-info-group {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 0.75rem;
 	}
 
-	.cat-icon-wrap {
+	.cat-icon-frame {
 		width: 36px;
 		height: 36px;
-		border-radius: 12px;
-		background: var(--bg-primary);
+		border-radius: var(--border-radius-sm);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
 	}
 
-	.cat-name {
-		font-weight: 700;
-		font-size: 0.92rem;
+	.cat-title {
+		font-size: 0.88rem;
+		font-weight: 800;
 		color: var(--text-primary);
+		margin: 0 0 2px;
 	}
 
-	.cat-bucket-select select {
-		font-size: 0.7rem;
-		border: none;
-		background: transparent;
-		color: var(--text-muted);
-		font-weight: 600;
-		cursor: pointer;
-		padding: 0;
+	.bucket-dropdown {
+		background: var(--surface-2);
+		border: 1px solid var(--border-subtle);
+		border-radius: var(--border-radius-pill);
+		font-size: 0.68rem;
+		font-weight: 700;
+		color: var(--text-secondary);
+		padding: 2px 6px;
+		min-height: auto;
 	}
 
-	.cat-spent-col {
+	.cat-spent-stats {
 		text-align: right;
 	}
 
-	.spent-val {
-		font-weight: 800;
+	.cat-spent-val {
 		font-size: 0.95rem;
+		font-weight: 800;
 		color: var(--text-primary);
+		display: block;
 	}
 
-	.budget-limit-val {
-		font-size: 0.75rem;
+	.cat-limit-sub {
+		font-size: 0.72rem;
 		color: var(--text-muted);
 	}
 
-	.cat-quick-set {
+	.cat-quick-input-row {
 		display: flex;
-		gap: 8px;
-		margin-top: 10px;
+		gap: 6px;
+		margin-top: 0.5rem;
 	}
 
-	.cat-quick-set input {
+	.cat-limit-input {
 		flex: 1;
-		padding: 6px 10px;
-		border-radius: 10px;
-		border: 1px solid var(--border-color);
-		background: var(--bg-primary);
-		font-size: 0.8rem;
+		min-height: 36px;
+		padding: 0.4rem 0.75rem;
+		font-size: 0.82rem;
 	}
 
-	.mini-btn {
-		background: var(--accent-primary);
-		color: white;
-		border: none;
-		padding: 6px 12px;
-		border-radius: 10px;
-		font-size: 0.8rem;
+	.cat-save-btn {
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
+		color: var(--text-primary);
+		font-size: 0.78rem;
 		font-weight: 700;
-		cursor: pointer;
+		padding: 0 0.85rem;
+		border-radius: var(--border-radius);
 	}
 
-	/* Modal */
-	.modal-backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
-		z-index: 999;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
-	}
-
-	.modal-sheet {
-		background: var(--bg-card);
-		border-radius: 28px 28px 0 0;
-		padding: 24px;
-		width: 100%;
-		max-width: 600px;
-		box-shadow: var(--shadow-lg);
-		border: 1px solid var(--border-color);
-	}
-
-	.modal-header {
+	/* Split Modal Sheet */
+	.sheet-top-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 6px;
+		margin-bottom: 0.5rem;
 	}
 
-	.modal-title {
-		font-size: 1.2rem;
+	.sheet-top-row h3 {
+		font-size: 1.15rem;
 		font-weight: 800;
-		color: var(--text-primary);
 	}
 
-	.close-btn {
-		background: transparent;
-		border: none;
-		font-size: 1.2rem;
-		color: var(--text-muted);
-		cursor: pointer;
-	}
-
-	.modal-sub {
+	.sheet-sub {
 		font-size: 0.82rem;
-		color: var(--text-muted);
-		margin-bottom: 20px;
+		color: var(--text-secondary);
+		margin-bottom: 1.25rem;
 	}
 
 	.sliders-stack {
 		display: flex;
 		flex-direction: column;
-		gap: 14px;
-		margin-bottom: 18px;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
 	}
 
-	.slider-box {
-		background: var(--bg-primary);
-		padding: 14px;
-		border-radius: 16px;
-		border: 1px solid var(--border-color);
+	.slider-block {
+		background: var(--surface-2);
+		border-radius: var(--border-radius);
+		padding: 0.85rem 1rem;
+		border: 1px solid var(--border-subtle);
 	}
 
-	.slider-label-row {
+	.slider-header-line {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.85rem;
+		font-size: 0.82rem;
 		font-weight: 700;
+		margin-bottom: 0.5rem;
 		color: var(--text-primary);
-		margin-bottom: 8px;
 	}
 
-	.slider-box input[type='range'] {
+	.range-slider {
 		width: 100%;
 		accent-color: var(--accent-primary);
 	}
 
-	.modal-total-bar {
-		font-size: 0.9rem;
+	.total-allocation-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		background: var(--surface-2);
+		border-radius: var(--border-radius-pill);
+		font-size: 0.88rem;
 		font-weight: 700;
-		color: var(--text-primary);
-		text-align: center;
-		padding: 10px;
-		margin-bottom: 18px;
+		margin-bottom: 1.25rem;
 	}
 
-	.modal-total-bar.invalid {
+	.total-allocation-bar.invalid {
+		border: 1px solid var(--danger);
 		color: var(--danger);
 	}
 
-	.modal-actions {
+	.warning-tag {
+		font-size: 0.74rem;
+		color: var(--danger);
+	}
+
+	.sheet-action-row {
 		display: flex;
-		gap: 12px;
 	}
 
-	.secondary-btn {
-		flex: 1;
-		background: var(--bg-primary);
-		border: 1px solid var(--border-color);
-		color: var(--text-primary);
-		padding: 12px;
-		border-radius: 14px;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.modal-actions .primary-btn {
-		flex: 1;
-		padding: 12px;
-	}
-
-	.toast {
-		position: fixed;
-		top: 24px;
-		left: 50%;
-		transform: translateX(-50%);
+	.save-split-btn {
+		width: 100%;
 		background: var(--accent-primary);
-		color: white;
-		padding: 10px 20px;
-		border-radius: 9999px;
-		font-size: 0.85rem;
-		font-weight: 700;
-		box-shadow: var(--shadow-md);
-		z-index: 1001;
+		color: #080C14;
+		font-weight: 800;
+		font-size: 0.95rem;
+		padding: 0.85rem;
+		border-radius: var(--border-radius-pill);
+		box-shadow: 0 4px 14px var(--accent-glow);
 	}
 </style>
