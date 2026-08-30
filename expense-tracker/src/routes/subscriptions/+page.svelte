@@ -360,6 +360,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -373,11 +374,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.add-sub-btn {
@@ -395,7 +403,7 @@
 
 	/* Drain Hero Card */
 	.drain-hero-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
@@ -473,7 +481,7 @@
 
 	/* Habit Calculator */
 	.habit-calc-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.calc-header-row {
@@ -600,7 +608,7 @@
 
 	/* Subs Ledger */
 	.subs-ledger-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.card-heading {
@@ -619,7 +627,7 @@
 	.sub-item-card {
 		background: var(--surface-2);
 		border-radius: var(--border-radius);
-		padding: 0.95rem;
+		padding: 0.85rem 1rem;
 		border: 1px solid var(--border-subtle);
 		display: flex;
 		flex-direction: column;
@@ -639,8 +647,8 @@
 	}
 
 	.sub-icon-badge {
-		width: 34px;
-		height: 34px;
+		width: 42px;
+		height: 42px;
 		border-radius: var(--border-radius-xs);
 		background: var(--bg-card);
 		border: 1px solid var(--border-subtle);

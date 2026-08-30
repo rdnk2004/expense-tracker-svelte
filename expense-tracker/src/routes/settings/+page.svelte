@@ -455,7 +455,7 @@
 	}
 
 	.page-header {
-		margin-bottom: 0.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -469,11 +469,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.card-header-line {
@@ -518,7 +525,7 @@
 
 	/* Profile Card */
 	.profile-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.form-grid-two {
@@ -552,7 +559,7 @@
 
 	/* Theme Card */
 	.theme-card {
-		padding: 1.15rem 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.theme-switch-row {
@@ -591,7 +598,7 @@
 
 	/* Badges */
 	.badges-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.badges-grid {
@@ -643,7 +650,7 @@
 
 	/* Data Card */
 	.data-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.data-actions-row {

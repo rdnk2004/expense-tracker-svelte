@@ -467,6 +467,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -480,11 +481,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.split-bill-hero-btn {
@@ -507,8 +515,8 @@
 
 	/* Net Position Card */
 	.net-position-card {
-		border-radius: 24px;
-		padding: 1.35rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		box-shadow: var(--shadow-sm);
 		border: 1px solid var(--border-color);
 		background: var(--bg-card);
@@ -590,7 +598,7 @@
 
 	/* Quick Tab Card */
 	.quick-tab-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.card-heading {
@@ -707,8 +715,8 @@
 	}
 
 	.friend-avatar {
-		width: 40px;
-		height: 40px;
+		width: 42px;
+		height: 42px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -751,7 +759,7 @@
 	.tag-give { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
 
 	.debt-meta-line {
-		font-size: 0.76rem;
+		font-size: 0.75rem;
 		color: var(--text-muted);
 		display: flex;
 		align-items: center;
@@ -777,7 +785,7 @@
 	}
 
 	.debt-amount-figure {
-		font-size: 1.1rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 	}
 

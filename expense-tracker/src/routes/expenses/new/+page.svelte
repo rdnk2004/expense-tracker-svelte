@@ -752,9 +752,9 @@
 	}
 
 	.cat-icon-wrap {
-		width: 44px;
-		height: 44px;
-		border-radius: var(--border-radius-sm);
+		width: 42px;
+		height: 42px;
+		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
 		justify-content: center;
