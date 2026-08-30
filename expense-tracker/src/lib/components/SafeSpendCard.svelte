@@ -96,8 +96,8 @@
 <style>
 	.safe-spend-card {
 		background: var(--bg-card);
-		border-radius: var(--border-radius-lg);
-		padding: 1.35rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		border: 1px solid var(--status-border);
 		box-shadow: var(--shadow-sm);
 		position: relative;

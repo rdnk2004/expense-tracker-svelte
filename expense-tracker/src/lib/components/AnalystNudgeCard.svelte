@@ -89,8 +89,8 @@
 	.analyst-card {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.35rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		position: relative;
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);

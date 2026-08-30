@@ -83,7 +83,7 @@
 			<span class="badges-title">Milestone Badges ({score.unlockedBadgesCount}/{score.badges.length})</span>
 		</div>
 
-		<div class="badges-strip touch-scroll-x">
+		<div class="badges-strip">
 			{#each score.badges as badge}
 				<div class="badge-pill" class:locked={!badge.unlocked} title="{badge.title}: {badge.desc}">
 					<span class="badge-emoji">{badge.emoji}</span>
@@ -101,8 +101,8 @@
 	.health-score-card {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.35rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		box-shadow: var(--shadow-sm);
 	}
 
@@ -260,9 +260,8 @@
 
 	.badges-strip {
 		display: flex;
-		gap: 0.55rem;
-		overflow-x: auto;
-		padding-bottom: 4px;
+		flex-wrap: wrap;
+		gap: 0.5rem;
 	}
 
 	.badge-pill {
