@@ -362,7 +362,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.toast-pill {
@@ -384,7 +384,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.campus-sub {
@@ -398,7 +398,7 @@
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
@@ -408,27 +408,27 @@
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
 	.add-goal-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
+		gap: 5px;
 		background: var(--accent-primary);
 		color: #080C14;
-		padding: 0.55rem 1rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
-		box-shadow: 0 4px 14px var(--accent-glow);
+		box-shadow: 0 3px 12px var(--accent-glow);
 		transition: all 0.2s ease;
 	}
 
 	/* Hero Card */
 	.goals-hero-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
@@ -436,11 +436,11 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.hero-label {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -448,7 +448,7 @@
 	}
 
 	.hero-amount {
-		font-size: 2rem;
+		font-size: 1.75rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		line-height: 1.1;
@@ -457,22 +457,22 @@
 	.progress-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: 4px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
-		padding: 0.35rem 0.75rem;
+		padding: 0.25rem 0.65rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.76rem;
+		font-size: 0.72rem;
 		color: var(--text-secondary);
 	}
 
 	.macro-track {
-		height: 8px;
+		height: 7px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		border: 1px solid var(--border-subtle);
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.macro-fill {
@@ -485,7 +485,7 @@
 	.hero-bottom-stats {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.76rem;
+		font-size: 0.72rem;
 		color: var(--text-muted);
 	}
 
@@ -497,11 +497,11 @@
 	.presets-section {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 5px;
 	}
 
 	.presets-label {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -511,14 +511,14 @@
 	.preset-chips-grid {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: 8px;
+		gap: 6px;
 	}
 
 	.preset-card-item {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		padding: 0.85rem 1rem;
+		gap: 6px;
+		padding: 0.65rem 0.85rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
@@ -532,8 +532,8 @@
 	}
 
 	.preset-icon {
-		width: 42px;
-		height: 42px;
+		width: 36px;
+		height: 36px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
@@ -547,38 +547,38 @@
 	}
 
 	.p-title {
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		color: var(--text-primary);
 	}
 
 	.p-val {
-		font-size: 0.74rem;
+		font-size: 0.7rem;
 		color: var(--text-muted);
 	}
 
 	/* Active Goals */
 	.goals-ledger-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.card-heading {
-		font-size: 1rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.goals-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.85rem;
+		gap: 0.65rem;
 	}
 
 	.goal-card-item {
 		background: var(--surface-2);
 		border-radius: var(--border-radius);
-		padding: 0.85rem 1rem;
+		padding: 0.65rem 0.85rem;
 		border: 1px solid var(--border-subtle);
 		display: flex;
 		flex-direction: column;

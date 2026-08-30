@@ -407,7 +407,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.campus-sub {
@@ -421,7 +421,7 @@
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
@@ -431,7 +431,7 @@
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
@@ -442,9 +442,9 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
-		padding: 0.55rem 0.95rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
 	}
@@ -458,12 +458,12 @@
 	.virtual-cards-deck {
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.virtual-card {
 		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		position: relative;
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);
@@ -503,7 +503,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 		position: relative;
 		z-index: 2;
 	}
@@ -515,23 +515,23 @@
 	}
 
 	.card-chip {
-		width: 32px;
-		height: 24px;
-		border-radius: 5px;
+		width: 30px;
+		height: 22px;
+		border-radius: 4px;
 		background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%);
 		border: 1px solid rgba(0, 0, 0, 0.2);
 	}
 
 	.card-brand-name {
-		font-size: 0.92rem;
+		font-size: 0.88rem;
 		font-weight: 800;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 	}
 
 	.card-action-icon {
-		width: 32px;
-		height: 32px;
+		width: 30px;
+		height: 30px;
 		border-radius: 50%;
 		background: rgba(255, 255, 255, 0.12);
 		color: #FFFFFF;
@@ -546,22 +546,22 @@
 	}
 
 	.card-body-balance {
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 		position: relative;
 		z-index: 2;
 	}
 
 	.balance-sub {
 		display: block;
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		opacity: 0.75;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		margin-bottom: 3px;
+		margin-bottom: 2px;
 	}
 
 	.card-balance-val {
-		font-size: 1.85rem;
+		font-size: 1.65rem;
 		font-weight: 800;
 		letter-spacing: -0.04em;
 		line-height: 1.1;
@@ -569,7 +569,7 @@
 
 	@media (min-width: 768px) {
 		.card-balance-val {
-			font-size: 2.15rem;
+			font-size: 1.95rem;
 		}
 	}
 
@@ -578,7 +578,7 @@
 		align-items: center;
 		justify-content: space-between;
 		border-top: 1px solid rgba(255, 255, 255, 0.16);
-		padding-top: 0.75rem;
+		padding-top: 0.65rem;
 		position: relative;
 		z-index: 2;
 	}

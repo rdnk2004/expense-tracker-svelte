@@ -296,7 +296,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.toast-pill {
@@ -315,7 +315,7 @@
 	}
 
 	.page-header {
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.campus-sub {
@@ -329,7 +329,7 @@
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
@@ -339,7 +339,7 @@
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
@@ -348,12 +348,12 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
 	.v-label {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -361,7 +361,7 @@
 	}
 
 	.v-amount {
-		font-size: 1.75rem;
+		font-size: 1.55rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
@@ -369,34 +369,34 @@
 	.summary-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
+		gap: 4px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
-		padding: 0.35rem 0.75rem;
+		padding: 0.25rem 0.65rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.76rem;
+		font-size: 0.72rem;
 		font-weight: 700;
 		color: var(--text-secondary);
 	}
 
 	/* Transfer Form Card */
 	.transfer-form-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.card-section-title {
-		font-size: 1.05rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.flow-picker-grid {
 		display: grid;
-		grid-template-columns: 1fr 30px 1fr;
-		gap: 8px;
+		grid-template-columns: 1fr 28px 1fr;
+		gap: 6px;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.flow-col {
@@ -408,22 +408,22 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.75rem 1rem;
-		font-size: 16px;
+		padding: 0.65rem 0.85rem;
+		font-size: 15px;
 		color: var(--text-primary);
-		min-height: 48px;
+		min-height: 44px;
 	}
 
 	.flow-arrow-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-top: 18px;
+		margin-top: 16px;
 	}
 
 	/* Amount entry */
 	.amount-entry-section {
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.amount-input-wrap {
@@ -434,17 +434,17 @@
 
 	.currency-glyph {
 		position: absolute;
-		left: 14px;
-		font-size: 1.5rem;
+		left: 12px;
+		font-size: 1.35rem;
 		font-weight: 800;
 		color: var(--accent-primary);
 	}
 
 	.giant-amount-input {
-		padding-left: 36px;
-		font-size: 1.85rem;
+		padding-left: 32px;
+		font-size: 1.55rem;
 		font-weight: 800;
-		height: 60px;
+		height: 52px;
 	}
 
 	.error-msg {
