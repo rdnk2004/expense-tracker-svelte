@@ -205,7 +205,7 @@
 	}
 
 	.page-header {
-		margin-bottom: 0.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -472,8 +472,8 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.65rem 0.5rem;
-		border-radius: var(--border-radius-sm);
+		padding: 0.85rem 1rem;
+		border-radius: var(--border-radius);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 	}
@@ -481,12 +481,12 @@
 	.cat-rank-left {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
+		gap: 0.75rem;
 	}
 
 	.cat-icon-frame {
-		width: 38px;
-		height: 38px;
+		width: 42px;
+		height: 42px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
@@ -495,14 +495,14 @@
 	}
 
 	.cat-name {
-		font-size: 0.9rem;
-		font-weight: 800;
+		font-size: 0.92rem;
+		font-weight: 700;
 		color: var(--text-primary);
 		display: block;
 	}
 
 	.cat-count-sub {
-		font-size: 0.74rem;
+		font-size: 0.75rem;
 		color: var(--text-muted);
 		font-weight: 600;
 	}
@@ -513,7 +513,7 @@
 	}
 
 	.cat-total-amt {
-		font-size: 0.95rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}

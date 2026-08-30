@@ -285,7 +285,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.15rem;
 		gap: 0.75rem;
 	}
 
@@ -306,17 +306,17 @@
 	}
 
 	.page-title {
-		font-size: 1.55rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
-		line-height: 1.15;
+		line-height: 1.2;
 	}
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.85rem;
+			font-size: 1.65rem;
 		}
 	}
 
@@ -486,7 +486,7 @@
 
 	/* Section Card */
 	.section-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.section-header-row {
@@ -587,7 +587,7 @@
 	.alert-banner-receivable {
 		background: rgba(99, 102, 241, 0.14);
 		border: 1px solid rgba(99, 102, 241, 0.35);
-		border-radius: var(--border-radius-lg);
+		border-radius: var(--border-radius);
 		padding: 1rem 1.15rem;
 		display: flex;
 		align-items: center;
@@ -624,7 +624,7 @@
 
 	/* Recent Transactions */
 	.section-recent {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.transactions-list {
@@ -636,8 +636,8 @@
 	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
-		padding: 0.75rem 0.65rem;
+		gap: 0.75rem;
+		padding: 0.85rem 1rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
@@ -651,8 +651,8 @@
 	}
 
 	.t-icon {
-		width: 44px;
-		height: 44px;
+		width: 42px;
+		height: 42px;
 		border-radius: var(--border-radius-xs);
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
@@ -668,8 +668,8 @@
 	}
 
 	.t-title {
-		font-size: 0.98rem;
-		font-weight: 800;
+		font-size: 0.92rem;
+		font-weight: 700;
 		color: var(--text-primary);
 		white-space: nowrap;
 		overflow: hidden;
@@ -680,17 +680,17 @@
 	.t-meta {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		font-size: 0.82rem;
+		gap: 4px;
+		font-size: 0.75rem;
 		color: var(--text-muted);
-		margin-top: 3px;
+		margin-top: 2px;
 		flex-wrap: wrap;
 	}
 
 	.tag-pill {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 800;
-		padding: 2px 7px;
+		padding: 1px 6px;
 		border-radius: var(--border-radius-pill);
 	}
 
@@ -703,17 +703,17 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
-		font-size: 0.74rem;
+		font-size: 0.72rem;
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		padding: 2px 7px;
+		padding: 1px 6px;
 		border-radius: var(--border-radius-pill);
 		color: var(--text-secondary);
 		font-weight: 700;
 	}
 
 	.t-amount {
-		font-size: 1.1rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		flex-shrink: 0;
