@@ -544,7 +544,7 @@
 	/* Hero Amount */
 	.hero-amount-display {
 		text-align: center;
-		padding: 1.25rem 0 0.5rem;
+		padding: 0.85rem 0 0.35rem;
 		display: flex;
 		align-items: baseline;
 		justify-content: center;
@@ -552,13 +552,13 @@
 	}
 
 	.currency-symbol {
-		font-size: 2rem;
+		font-size: 1.65rem;
 		font-weight: 800;
 		color: var(--accent-primary);
 	}
 
 	.amount-digits {
-		font-size: 3.25rem;
+		font-size: 2.65rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		line-height: 1;
@@ -570,12 +570,12 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		gap: 6px;
+		gap: 5px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
-		padding: 0.35rem 0.85rem;
+		padding: 0.28rem 0.75rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.76rem;
+		font-size: 0.72rem;
 		color: var(--text-secondary);
 		margin: 0 auto;
 	}
@@ -588,20 +588,20 @@
 	.value-tag-selector {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 6px;
+		gap: 5px;
 	}
 
 	.tag-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 5px;
-		padding: 0.55rem 0.35rem;
+		gap: 4px;
+		padding: 0.45rem 0.3rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
 		color: var(--text-secondary);
-		font-size: 0.76rem;
+		font-size: 0.74rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
 	}
@@ -617,24 +617,24 @@
 	/* Selector Pills Row */
 	.pill-selectors-row {
 		display: flex;
-		gap: 6px;
+		gap: 5px;
 		flex-wrap: wrap;
 	}
 
 	.selector-pill {
 		flex: 1;
-		min-width: 120px;
+		min-width: 110px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-pill);
-		padding: 0.55rem 0.85rem;
+		padding: 0.45rem 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 6px;
-		font-size: 0.82rem;
+		gap: 5px;
+		font-size: 0.78rem;
 		color: var(--text-primary);
-		min-height: 42px;
+		min-height: 38px;
 	}
 
 	.pill-text {
@@ -654,10 +654,10 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.85rem 1rem;
-		font-size: 16px;
+		padding: 0.65rem 0.85rem;
+		font-size: 15px;
 		color: var(--text-primary);
-		min-height: 48px;
+		min-height: 44px;
 	}
 
 	/* Keypad & Confirm */
@@ -665,20 +665,20 @@
 		margin-top: auto;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
-		padding-top: 0.5rem;
+		gap: 8px;
+		padding-top: 0.4rem;
 	}
 
 	.confirm-submit-btn {
 		background: var(--accent-primary);
 		color: #FFFFFF;
 		font-weight: 800;
-		font-size: 1rem;
-		padding: 0.85rem;
+		font-size: 0.92rem;
+		padding: 0.7rem;
 		border-radius: var(--border-radius-pill);
-		box-shadow: 0 4px 14px var(--accent-glow);
+		box-shadow: 0 3px 12px var(--accent-glow);
 		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-		min-height: 52px;
+		min-height: 44px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -697,29 +697,29 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.sheet-top-row h3 {
-		font-size: 1.1rem;
+		font-size: 0.98rem;
 		font-weight: 800;
 	}
 
 	.sheet-options-list {
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 5px;
 	}
 
 	.sheet-option-item {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.85rem 1rem;
+		padding: 0.65rem 0.85rem;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
 		border-radius: var(--border-radius);
-		font-size: 0.92rem;
+		font-size: 0.86rem;
 		font-weight: 600;
 		color: var(--text-primary);
 	}
@@ -732,18 +732,18 @@
 	.categories-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 8px;
+		gap: 6px;
 	}
 
 	.cat-tile {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 6px;
+		gap: 4px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
 		border-radius: var(--border-radius);
-		padding: 0.85rem 0.5rem;
+		padding: 0.65rem 0.4rem;
 		text-align: center;
 	}
 
@@ -752,8 +752,8 @@
 	}
 
 	.cat-icon-wrap {
-		width: 42px;
-		height: 42px;
+		width: 38px;
+		height: 38px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
@@ -761,7 +761,7 @@
 	}
 
 	.cat-name {
-		font-size: 0.76rem;
+		font-size: 0.72rem;
 		font-weight: 700;
 		color: var(--text-primary);
 	}

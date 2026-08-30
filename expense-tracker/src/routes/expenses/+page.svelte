@@ -349,43 +349,43 @@
 	}
 
 	.header-section {
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 		line-height: 1.2;
 	}
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
 	.search-wrap {
 		position: relative;
-		margin-bottom: 0.65rem;
+		margin-bottom: 0.55rem;
 	}
 
 	.search-wrap input {
 		width: 100%;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 0.75rem 1rem 0.75rem 2.6rem;
+		padding: 0.65rem 0.85rem 0.65rem 2.4rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 16px;
+		font-size: 15px;
 		color: var(--text-primary);
-		min-height: 46px;
+		min-height: 42px;
 	}
 
 	.search-icon {
 		position: absolute;
-		left: 14px;
+		left: 12px;
 		top: 50%;
 		transform: translateY(-50%);
 		color: var(--text-muted);
@@ -395,17 +395,17 @@
 	.segment-tabs {
 		display: flex;
 		background: var(--surface-2);
-		padding: 3px;
+		padding: 2.5px;
 		border-radius: var(--border-radius-pill);
 		border: 1px solid var(--border-color);
-		margin-bottom: 0.65rem;
+		margin-bottom: 0.55rem;
 	}
 
 	.segment-btn {
 		flex: 1;
-		padding: 0.5rem 0.4rem;
+		padding: 0.4rem 0.35rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.8rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		color: var(--text-secondary);
 		transition: all 0.2s ease;
@@ -421,14 +421,14 @@
 	.filter-chips-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 6px;
-		margin-bottom: 0.85rem;
+		gap: 5px;
+		margin-bottom: 0.75rem;
 	}
 
 	.filter-chip {
-		padding: 0.35rem 0.8rem;
+		padding: 0.3rem 0.7rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.76rem;
+		font-size: 0.74rem;
 		font-weight: 700;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
@@ -447,20 +447,20 @@
 	.feed-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.45rem;
 	}
 
 	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.85rem 1rem;
+		gap: 0.65rem;
+		padding: 0.65rem 0.85rem;
 		cursor: pointer;
 	}
 
 	.icon-wrap {
-		width: 42px;
-		height: 42px;
+		width: 38px;
+		height: 38px;
 		border-radius: var(--border-radius-xs);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
@@ -483,7 +483,7 @@
 	}
 
 	.tx-title {
-		font-size: 0.92rem;
+		font-size: 0.88rem;
 		font-weight: 700;
 		color: var(--text-primary);
 	}
@@ -494,7 +494,7 @@
 	}
 
 	.meta-line {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		color: var(--text-muted);
 		display: flex;
 		align-items: center;
@@ -514,9 +514,9 @@
 	}
 
 	.tag-pill {
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		font-weight: 800;
-		padding: 1px 6px;
+		padding: 1px 5px;
 		border-radius: var(--border-radius-pill);
 	}
 
@@ -527,7 +527,7 @@
 	.tag-regret { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
 
 	.amount-col {
-		font-size: 1.05rem;
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		flex-shrink: 0;
