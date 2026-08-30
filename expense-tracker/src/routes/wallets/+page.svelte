@@ -407,7 +407,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -421,11 +421,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.add-wallet-btn {
@@ -455,11 +462,11 @@
 	}
 
 	.virtual-card {
-		border-radius: 24px;
-		padding: 1.5rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		position: relative;
 		overflow: hidden;
-		box-shadow: var(--shadow-md);
+		box-shadow: var(--shadow-sm);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		color: #FFFFFF;
 		transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -496,7 +503,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.25rem;
+		margin-bottom: 1rem;
 		position: relative;
 		z-index: 2;
 	}
@@ -539,7 +546,7 @@
 	}
 
 	.card-body-balance {
-		margin-bottom: 1.35rem;
+		margin-bottom: 1.15rem;
 		position: relative;
 		z-index: 2;
 	}
@@ -571,7 +578,7 @@
 		align-items: center;
 		justify-content: space-between;
 		border-top: 1px solid rgba(255, 255, 255, 0.16);
-		padding-top: 0.85rem;
+		padding-top: 0.75rem;
 		position: relative;
 		z-index: 2;
 	}
@@ -599,9 +606,9 @@
 		gap: 5px;
 		background: rgba(255, 255, 255, 0.18);
 		color: #FFFFFF;
-		padding: 0.45rem 0.95rem;
+		padding: 0.4rem 0.85rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.78rem;
+		font-size: 0.76rem;
 		font-weight: 800;
 		border: 1px solid rgba(255, 255, 255, 0.25);
 		transition: all 0.2s ease;

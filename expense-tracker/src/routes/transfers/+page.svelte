@@ -315,7 +315,7 @@
 	}
 
 	.page-header {
-		margin-bottom: 0.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -329,11 +329,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	/* Volume Summary Card */
@@ -341,7 +348,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1.15rem 1.35rem;
+		padding: 1.15rem;
 		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
@@ -374,7 +381,7 @@
 
 	/* Transfer Form Card */
 	.transfer-form-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.card-section-title {
@@ -524,7 +531,7 @@
 
 	/* History */
 	.history-section-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.history-list {
@@ -537,20 +544,18 @@
 		display: flex;
 		align-items: center;
 		gap: 0.85rem;
-		padding: 0.65rem 0.35rem;
-		border-bottom: 1px solid var(--border-subtle);
-	}
-
-	.history-row:last-child {
-		border-bottom: none;
+		padding: 0.85rem 1rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
 	}
 
 	.history-icon-box {
-		width: 36px;
-		height: 36px;
-		border-radius: var(--border-radius-sm);
-		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		width: 42px;
+		height: 42px;
+		border-radius: var(--border-radius-xs);
+		background: var(--bg-card);
+		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -563,7 +568,8 @@
 	}
 
 	.history-route {
-		font-size: 0.88rem;
+		font-size: 0.92rem;
+		font-weight: 700;
 		color: var(--text-primary);
 		display: flex;
 		align-items: center;
@@ -575,7 +581,7 @@
 	}
 
 	.history-meta {
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		color: var(--text-muted);
 		display: flex;
 		gap: 5px;
@@ -583,7 +589,7 @@
 	}
 
 	.history-amount {
-		font-size: 0.95rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
