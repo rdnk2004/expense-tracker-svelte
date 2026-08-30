@@ -1,78 +1,71 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import {
 		wallets,
-		currentMonthExpenses,
-		totalBalance,
+		expenses,
 		categories,
+		totalBalance,
 		unsettledDebts,
-		currentMonthBudgets,
-		currentMonth,
 		runway,
 		studentProfile,
-		formatCurrency,
-		formatDate
+		formatCurrency
 	} from '$lib/stores';
+	import { goto } from '$app/navigation';
 	import {
 		Wallet,
-		ChartPie,
-		Target,
-		Handshake,
-		Receipt,
-		Smartphone,
-		Banknote,
-		ArrowRight,
-		ChevronRight,
-		Plus,
-		Users,
-		Sparkles,
-		PiggyBank,
-		ArrowDownLeft,
 		ArrowUpRight,
-		Clock
+		ArrowDownLeft,
+		Plus,
+		ChevronRight,
+		CreditCard,
+		Clock,
+		Flame,
+		Sparkles,
+		ShieldAlert,
+		Zap,
+		Award,
+		Calendar,
+		Handshake
 	} from 'lucide-svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
 	import SafeSpendCard from '$lib/components/SafeSpendCard.svelte';
 	import HealthScoreCard from '$lib/components/HealthScoreCard.svelte';
 	import AnalystNudgeCard from '$lib/components/AnalystNudgeCard.svelte';
 
+	// Monthly Cashflow metrics
+	let currentMonth = new Date().getMonth();
+	let currentYear = new Date().getFullYear();
+
+	let currentMonthExpenses = $derived(
+		$expenses.filter((e) => {
+			const d = new Date(e.date);
+			return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+		})
+	);
+
 	let monthlyExpense = $derived(
-		$currentMonthExpenses
-			.filter((e) => e.categoryId !== 'income')
-			.reduce((sum, e) => sum + e.amount, 0)
+		currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0)
 	);
+
 	let monthlyIncome = $derived(
-		$currentMonthExpenses
-			.filter((e) => e.categoryId === 'income')
-			.reduce((sum, e) => sum + e.amount, 0)
+		$wallets.reduce((sum, w) => sum + w.balance, 0)
 	);
 
-	let recentExpenses = $derived(
-		[...$currentMonthExpenses]
-			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-			.slice(0, 6)
-	);
+	let recentExpenses = $derived($expenses.slice(0, 5));
 
-	let totalReceivable = $derived(
-		$unsettledDebts
-			.filter((d) => d.direction === 'receive')
-			.reduce((sum, d) => sum + d.amount, 0)
-	);
-
+	// 3-Bucket Spending breakdown
 	let bucketSpending = $derived.by(() => {
 		let survival = 0;
 		let fun = 0;
 		let future = 0;
 
-		$currentMonthExpenses.forEach((exp) => {
-			if (exp.categoryId === 'income') return;
-			const cat = $categories.find((c) => c.id === exp.categoryId);
-			const bucket = cat?.bucketType || 'fun';
+		const catMap = new Map($categories.map((c) => [c.id, c.bucketType || 'fun']));
+
+		for (const exp of currentMonthExpenses) {
+			const bucket = catMap.get(exp.categoryId) || 'fun';
 			if (bucket === 'survival') survival += exp.amount;
 			else if (bucket === 'future') future += exp.amount;
 			else fun += exp.amount;
-		});
+		}
 
 		const total = survival + fun + future || 1;
 		return {
@@ -85,20 +78,32 @@
 		};
 	});
 
+	let totalReceivable = $derived(
+		$unsettledDebts
+			.filter((d) => d.direction === 'receive')
+			.reduce((sum, d) => sum + d.amount, 0)
+	);
+
 	function getCategoryById(id: string) {
 		return $categories.find((c) => c.id === id);
 	}
 
-	function calculateTimeCost(amount: number) {
-		const hourlyRatePaise = $studentProfile.hourlyWageRate || 20000;
-		const hours = amount / hourlyRatePaise;
-		if (hours < 0.1) return null;
-		return hours < 1 ? `${Math.round(hours * 60)}m labor` : `${hours.toFixed(1)}h labor`;
+	function calculateTimeCost(amount: number): string {
+		const wage = $studentProfile.hourlyWageRate || 15000;
+		const hours = amount / wage;
+		if (hours < 0.1) return '< 10 mins work';
+		if (hours < 1) return `${Math.round(hours * 60)} mins work`;
+		return `${hours.toFixed(1)} hrs work`;
+	}
+
+	function formatDate(iso: string) {
+		const d = new Date(iso);
+		return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
 	}
 </script>
 
 <div class="dashboard-page">
-	<!-- Top Greeting & Action Header (Desktop & Mobile Adaptive) -->
+	<!-- Top Greeting & Action Header -->
 	<header class="dashboard-header">
 		<div class="header-titles">
 			<div class="campus-tag-pill">
@@ -109,7 +114,7 @@
 		</div>
 		<div class="header-actions">
 			<a href="/expenses/new" class="quick-log-btn" aria-label="Log new transaction">
-				<Plus size={18} />
+				<Plus size={20} />
 				<span>Log Spend</span>
 			</a>
 		</div>
@@ -126,11 +131,11 @@
 		<div class="card card-hero">
 			<div class="card-header-hero">
 				<div class="account-selector">
-					<Wallet size={15} color="#10B981" />
+					<Wallet size={16} color="#10B981" />
 					<span>Total Liquid Capital</span>
 				</div>
 				<a href="/wallets" class="icon-btn-ghost" aria-label="Manage wallets">
-					<ChevronRight size={18} />
+					<ChevronRight size={20} />
 				</a>
 			</div>
 
@@ -153,14 +158,14 @@
 			<div class="stats-row">
 				<div class="stat-item">
 					<div class="stat-label">
-						<ArrowDownLeft size={15} color="#10B981" />
+						<ArrowDownLeft size={16} color="#10B981" />
 						<span>Inflow</span>
 					</div>
 					<div class="stat-value text-success tabular">{formatCurrency(monthlyIncome)}</div>
 				</div>
 				<div class="stat-item">
 					<div class="stat-label">
-						<ArrowUpRight size={15} color="#F43F5E" />
+						<ArrowUpRight size={16} color="#F43F5E" />
 						<span>Outflow</span>
 					</div>
 					<div class="stat-value text-danger tabular">{formatCurrency(monthlyExpense)}</div>
@@ -178,7 +183,7 @@
 					<h3 class="section-title">3-Bucket Discipline</h3>
 					<span class="sub-label">Survival (50%) • Fun (30%) • Future (20%)</span>
 				</div>
-				<a href="/budgets" class="view-all-link">Details <ChevronRight size={14} /></a>
+				<a href="/budgets" class="view-all-link">Details <ChevronRight size={16} /></a>
 			</div>
 
 			<div class="bucket-bar-container">
@@ -214,13 +219,13 @@
 		{#if totalReceivable > 0}
 			<div class="alert-banner-receivable">
 				<div class="alert-icon-col">
-					<Handshake size={22} color="#818CF8" />
+					<Handshake size={24} color="#818CF8" />
 				</div>
 				<div class="alert-content-col">
 					<strong class="tabular">{formatCurrency(totalReceivable)}</strong> owed to you from {$unsettledDebts.filter(d => d.direction === 'receive').length} friend splits.
 				</div>
 				<a href="/debts" class="alert-action-btn">
-					Settle <ChevronRight size={14} />
+					Settle <ChevronRight size={16} />
 				</a>
 			</div>
 		{/if}
@@ -232,7 +237,7 @@
 					<h3 class="section-title">Recent Feed</h3>
 					<span class="sub-label">Latest campus outlays</span>
 				</div>
-				<a href="/expenses" class="view-all-link">All <ChevronRight size={14} /></a>
+				<a href="/expenses" class="view-all-link">All <ChevronRight size={16} /></a>
 			</div>
 
 			<div class="transactions-list">
@@ -241,37 +246,28 @@
 					{@const laborCost = calculateTimeCost(exp.amount)}
 					<div class="transaction-row" onclick={() => goto('/expenses')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && goto('/expenses')}>
 						<div class="t-icon">
-							<CategoryIcon icon={cat?.icon || 'Receipt'} color={cat?.color || '#10B981'} size={20} />
+							<CategoryIcon icon={cat?.icon || 'Receipt'} color={cat?.color || '#10B981'} size={22} />
 						</div>
 						<div class="t-details">
 							<div class="t-title">{exp.note || cat?.name || 'Expense'}</div>
 							<div class="t-meta">
 								<span>{formatDate(exp.date)}</span>
 								{#if exp.valueTag}
-									<span class="tag-pill tag-{exp.valueTag}">
-										{exp.valueTag === 'need' ? '⚡ Need' : exp.valueTag === 'want' ? '✨ Want' : '📚 Growth'}
-									</span>
+									<span class="tag-pill tag-{exp.valueTag}">{exp.valueTag}</span>
 								{/if}
-								{#if exp.satisfactionRating === 'regretted'}
-									<span class="tag-pill tag-regret">💀 Regret</span>
-								{/if}
-								{#if laborCost && exp.categoryId !== 'income'}
-									<span class="time-cost-pill" title="Time cost based on student hourly rate">
-										<Clock size={11} />
-										<span>{laborCost}</span>
-									</span>
-								{/if}
+								<span class="time-cost-pill">
+									<Clock size={12} />
+									{laborCost}
+								</span>
 							</div>
 						</div>
-						<div class="t-amount tabular" class:income-amount={exp.categoryId === 'income'}>
-							{exp.categoryId === 'income' ? '+' : '-'}{formatCurrency(exp.amount)}
+						<div class="t-amount tabular">
+							-{formatCurrency(exp.amount)}
 						</div>
 					</div>
 				{:else}
 					<div class="empty-state-box">
-						<Receipt size={36} color="var(--text-muted)" />
-						<p>No transactions logged in this cycle.</p>
-						<a href="/expenses/new" class="btn btn-secondary">Log your first spend</a>
+						<p>No campus outlays recorded yet this term.</p>
 					</div>
 				{/each}
 			</div>
@@ -289,56 +285,56 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.15rem;
-		gap: 0.85rem;
+		margin-bottom: 1.25rem;
+		gap: 0.75rem;
 	}
 
 	.campus-tag-pill {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		font-size: 0.75rem;
-		font-weight: 700;
-		color: var(--accent-primary);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 0.2rem 0.65rem;
+		padding: 3px 9px;
 		border-radius: var(--border-radius-pill);
-		margin-bottom: 0.3rem;
+		font-size: 0.78rem;
+		font-weight: 800;
+		color: var(--accent-primary);
+		margin-bottom: 4px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	.page-title {
-		font-size: 1.5rem;
+		font-size: 1.55rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.03em;
+		letter-spacing: -0.04em;
 		margin: 0;
-		line-height: 1.2;
+		line-height: 1.15;
 	}
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.75rem;
+			font-size: 1.85rem;
 		}
 	}
 
 	.quick-log-btn {
 		background: var(--accent-primary);
 		color: #FFFFFF;
-		padding: 0.6rem 1.1rem;
+		padding: 0.7rem 1.25rem;
 		border-radius: var(--border-radius-pill);
 		font-weight: 800;
-		font-size: 0.85rem;
+		font-size: 0.95rem;
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		box-shadow: 0 2px 10px var(--accent-glow);
+		box-shadow: 0 4px 14px var(--accent-glow);
 		text-decoration: none;
 		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 		flex-shrink: 0;
-		min-height: 40px;
+		min-height: 46px;
 	}
 
 	.quick-log-btn:hover {
@@ -348,7 +344,7 @@
 	.dashboard-stream {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 1.15rem;
 	}
 
 	/* Hero Card */
@@ -356,26 +352,26 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.account-selector {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		background: rgba(255, 255, 255, 0.1);
-		padding: 5px 12px;
+		gap: 7px;
+		background: rgba(255, 255, 255, 0.12);
+		padding: 6px 14px;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.78rem;
-		font-weight: 700;
-		border: 1px solid rgba(255, 255, 255, 0.16);
+		font-size: 0.84rem;
+		font-weight: 800;
+		border: 1px solid rgba(255, 255, 255, 0.2);
 	}
 
 	.icon-btn-ghost {
-		background: rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.12);
 		color: white;
-		width: 34px;
-		height: 34px;
+		width: 38px;
+		height: 38px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -385,65 +381,67 @@
 	}
 
 	.icon-btn-ghost:hover {
-		background: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.25);
 	}
 
 	.balance-section {
-		margin-bottom: 1rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.label-sm {
 		display: block;
-		font-size: 0.75rem;
-		opacity: 0.8;
+		font-size: 0.82rem;
+		opacity: 0.85;
 		margin-bottom: 4px;
-		font-weight: 700;
+		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
 	.balance-display {
-		font-size: 2rem;
+		font-size: 2.35rem;
 		font-weight: 800;
-		line-height: 1.1;
-		letter-spacing: -0.03em;
+		line-height: 1.05;
+		letter-spacing: -0.04em;
 		color: #FFFFFF;
 		margin: 0;
 	}
 
 	@media (min-width: 768px) {
 		.balance-display {
-			font-size: 2.35rem;
+			font-size: 2.65rem;
 		}
 	}
 
 	.wallet-pills-row {
 		display: flex;
-		gap: 6px;
-		margin-bottom: 1rem;
+		gap: 7px;
+		margin-bottom: 1.15rem;
 		padding-bottom: 4px;
 	}
 
 	.wallet-mini-pill {
-		background: rgba(255, 255, 255, 0.1);
-		padding: 5px 12px;
+		background: rgba(255, 255, 255, 0.12);
+		padding: 7px 14px;
 		border-radius: var(--border-radius-xs);
-		font-size: 0.78rem;
+		font-size: 0.86rem;
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.15);
+		gap: 7px;
+		border: 1px solid rgba(255, 255, 255, 0.2);
 		white-space: nowrap;
 		cursor: pointer;
 		transition: background 0.2s ease;
+		min-height: 38px;
 	}
 
 	.wallet-mini-pill:hover {
-		background: rgba(255, 255, 255, 0.18);
+		background: rgba(255, 255, 255, 0.22);
 	}
 
 	.wallet-pill-name {
-		opacity: 0.8;
+		opacity: 0.85;
+		font-weight: 600;
 	}
 
 	.wallet-pill-val {
@@ -453,8 +451,8 @@
 	.stats-row {
 		display: flex;
 		gap: 1rem;
-		border-top: 1px solid rgba(255, 255, 255, 0.12);
-		padding-top: 0.85rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.16);
+		padding-top: 0.95rem;
 	}
 
 	.stat-item {
@@ -464,17 +462,17 @@
 	.stat-label {
 		display: flex;
 		align-items: center;
-		gap: 4px;
-		font-size: 0.74rem;
-		opacity: 0.8;
-		font-weight: 700;
+		gap: 5px;
+		font-size: 0.78rem;
+		opacity: 0.85;
+		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		margin-bottom: 2px;
+		margin-bottom: 3px;
 	}
 
 	.stat-value {
-		font-size: 1.15rem;
+		font-size: 1.35rem;
 		font-weight: 800;
 	}
 
@@ -488,36 +486,37 @@
 
 	/* Section Card */
 	.section-card {
-		padding: 1.15rem;
+		padding: 1.35rem;
 	}
 
 	.section-header-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.section-title {
-		font-size: 1rem;
+		font-size: 1.1rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		margin: 0;
 	}
 
 	.sub-label {
-		font-size: 0.75rem;
+		font-size: 0.82rem;
 		color: var(--text-muted);
 		display: block;
 		margin-top: 2px;
+		font-weight: 600;
 	}
 
 	.view-all-link {
 		display: inline-flex;
 		align-items: center;
 		gap: 3px;
-		font-size: 0.8rem;
-		font-weight: 700;
+		font-size: 0.86rem;
+		font-weight: 800;
 		color: var(--accent-primary);
 		text-decoration: none;
 	}
@@ -529,7 +528,7 @@
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		background: var(--surface-2);
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.95rem;
 		border: 1px solid var(--border-color);
 	}
 
@@ -546,19 +545,19 @@
 	.bucket-legend-item {
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 3px;
 		background: var(--surface-2);
-		padding: 0.65rem 0.4rem;
-		border-radius: var(--border-radius-sm);
+		padding: 0.75rem 0.5rem;
+		border-radius: var(--border-radius);
 		border: 1px solid var(--border-color);
 		text-align: center;
 	}
 
 	.dot {
-		width: 7px;
-		height: 7px;
+		width: 8px;
+		height: 8px;
 		border-radius: 50%;
-		margin: 0 auto 2px;
+		margin: 0 auto 3px;
 	}
 
 	.dot.survival { background: #10B981; }
@@ -566,33 +565,33 @@
 	.dot.future { background: #818CF8; }
 
 	.b-name {
-		font-size: 0.72rem;
+		font-size: 0.78rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
 
 	.b-val {
-		font-size: 0.88rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.b-pct {
-		font-size: 0.7rem;
-		font-weight: 600;
+		font-size: 0.76rem;
+		font-weight: 700;
 		color: var(--text-muted);
 	}
 
 	/* Receivables Alert */
 	.alert-banner-receivable {
-		background: rgba(99, 102, 241, 0.12);
-		border: 1px solid rgba(99, 102, 241, 0.3);
-		border-radius: var(--border-radius);
-		padding: 0.85rem 1rem;
+		background: rgba(99, 102, 241, 0.14);
+		border: 1px solid rgba(99, 102, 241, 0.35);
+		border-radius: var(--border-radius-lg);
+		padding: 1rem 1.15rem;
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.85rem;
 	}
 
 	.alert-icon-col {
@@ -601,56 +600,61 @@
 
 	.alert-content-col {
 		flex: 1;
-		font-size: 0.86rem;
+		font-size: 0.92rem;
 		color: var(--text-primary);
 		font-weight: 600;
+		line-height: 1.4;
 	}
 
 	.alert-action-btn {
 		background: var(--surface-2);
-		border: 1px solid rgba(99, 102, 241, 0.35);
+		border: 1px solid rgba(99, 102, 241, 0.4);
 		color: #818CF8;
-		padding: 5px 12px;
+		padding: 6px 14px;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.78rem;
+		font-size: 0.84rem;
 		font-weight: 800;
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
 		text-decoration: none;
 		flex-shrink: 0;
+		min-height: 38px;
 	}
 
 	/* Recent Transactions */
 	.section-recent {
-		padding: 1.15rem;
+		padding: 1.35rem;
 	}
 
 	.transactions-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: 0.5rem;
 	}
 
 	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
-		padding: 0.7rem 0.5rem;
-		border-radius: var(--border-radius-sm);
+		gap: 0.85rem;
+		padding: 0.75rem 0.65rem;
+		border-radius: var(--border-radius);
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
 		transition: background 0.2s ease;
 		cursor: pointer;
 	}
 
 	.transaction-row:hover {
-		background: var(--surface-2);
+		background: var(--bg-hover);
+		border-color: var(--accent-primary);
 	}
 
 	.t-icon {
-		width: 42px;
-		height: 42px;
+		width: 44px;
+		height: 44px;
 		border-radius: var(--border-radius-xs);
-		background: var(--surface-2);
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
@@ -664,51 +668,52 @@
 	}
 
 	.t-title {
-		font-size: 0.9rem;
-		font-weight: 700;
+		font-size: 0.98rem;
+		font-weight: 800;
 		color: var(--text-primary);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		line-height: 1.2;
 	}
 
 	.t-meta {
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.75rem;
+		font-size: 0.82rem;
 		color: var(--text-muted);
-		margin-top: 2px;
+		margin-top: 3px;
 		flex-wrap: wrap;
 	}
 
 	.tag-pill {
-		font-size: 0.68rem;
+		font-size: 0.72rem;
 		font-weight: 800;
-		padding: 1px 6px;
+		padding: 2px 7px;
 		border-radius: var(--border-radius-pill);
 	}
 
-	.tag-need { background: rgba(16, 185, 129, 0.18); color: #10B981; }
-	.tag-want { background: rgba(56, 189, 248, 0.18); color: #38BDF8; }
-	.tag-growth { background: rgba(99, 102, 241, 0.18); color: #818CF8; }
-	.tag-regret { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
+	.tag-need { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+	.tag-want { background: rgba(56, 189, 248, 0.2); color: #38BDF8; }
+	.tag-growth { background: rgba(99, 102, 241, 0.2); color: #818CF8; }
+	.tag-regret { background: rgba(244, 63, 94, 0.2); color: #F43F5E; }
 
 	.time-cost-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 3px;
-		font-size: 0.68rem;
-		background: var(--surface-2);
+		gap: 4px;
+		font-size: 0.74rem;
+		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		padding: 1px 6px;
+		padding: 2px 7px;
 		border-radius: var(--border-radius-pill);
 		color: var(--text-secondary);
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	.t-amount {
-		font-size: 0.98rem;
+		font-size: 1.1rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		flex-shrink: 0;
@@ -728,7 +733,7 @@
 	}
 
 	.empty-state-box p {
-		font-size: 0.88rem;
+		font-size: 0.92rem;
 		color: var(--text-muted);
 		margin: 0;
 	}

@@ -11,9 +11,9 @@
 	});
 
 	let statusBg = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.16)';
-		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.16)';
-		return 'rgba(244, 63, 94, 0.16)';
+		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.18)';
+		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.18)';
+		return 'rgba(244, 63, 94, 0.18)';
 	});
 
 	let statusColor = $derived.by(() => {
@@ -23,9 +23,9 @@
 	});
 
 	let statusBorder = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.35)';
-		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.35)';
-		return 'rgba(244, 63, 94, 0.35)';
+		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.45)';
+		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.45)';
+		return 'rgba(244, 63, 94, 0.45)';
 	});
 </script>
 
@@ -39,7 +39,7 @@
 			</div>
 		</div>
 		<div class="runway-cycle-pill" title="Days remaining in current allowance cycle">
-			<Calendar size={14} class="calendar-icon" />
+			<Calendar size={16} class="calendar-icon" />
 			<span><strong>{$runway.daysRemaining}</strong> days left</span>
 		</div>
 	</div>
@@ -96,20 +96,13 @@
 <style>
 	.safe-spend-card {
 		background: var(--bg-card);
-		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		border-radius: var(--border-radius-lg);
+		padding: 1.35rem;
 		border: 1px solid var(--status-border);
 		box-shadow: var(--shadow-sm);
 		position: relative;
 		overflow: hidden;
 		transition: all 0.25s ease;
-	}
-
-	@media (min-width: 768px) {
-		.safe-spend-card {
-			border-radius: var(--border-radius-lg);
-			padding: 1.35rem;
-		}
 	}
 
 	.safe-spend-card::before {
@@ -118,7 +111,7 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 3px;
+		height: 4px;
 		background: linear-gradient(90deg, var(--status-color), #06B6D4);
 	}
 
@@ -126,111 +119,105 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.status-indicator-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		padding: 0.3rem 0.7rem;
+		gap: 7px;
+		padding: 0.4rem 0.85rem;
 		border-radius: var(--border-radius-pill);
 		background: var(--status-bg);
 		border: 1px solid var(--status-border);
 		color: var(--status-color);
-		font-size: 0.76rem;
+		font-size: 0.85rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
 
 	.status-pulse-dot {
-		width: 7px;
-		height: 7px;
+		width: 8px;
+		height: 8px;
 		border-radius: 50%;
 		background: var(--status-color);
-		box-shadow: 0 0 6px var(--status-color);
+		box-shadow: 0 0 8px var(--status-color);
 	}
 
 	.runway-cycle-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
-		font-size: 0.76rem;
+		gap: 6px;
+		font-size: 0.85rem;
 		color: var(--text-secondary);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 0.3rem 0.7rem;
+		padding: 0.4rem 0.85rem;
 		border-radius: var(--border-radius-pill);
 		font-weight: 700;
 	}
 
 	/* Hero Block */
 	.safe-hero-block {
-		margin-bottom: 1.15rem;
+		margin-bottom: 1.25rem;
 	}
 
 	.hero-sub-eyebrow {
 		display: block;
-		font-size: 0.76rem;
+		font-size: 0.82rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		color: var(--text-muted);
-		margin-bottom: 0.25rem;
+		margin-bottom: 0.35rem;
 	}
 
 	.amount-hero-row {
 		display: flex;
 		align-items: baseline;
-		gap: 0.4rem;
+		gap: 0.5rem;
 	}
 
 	.amount-val {
-		font-size: 1.85rem;
+		font-size: 2.35rem;
 		font-weight: 800;
 		letter-spacing: -0.04em;
 		color: var(--text-primary);
-		line-height: 1.1;
+		line-height: 1.05;
 		margin: 0;
 	}
 
-	@media (min-width: 768px) {
-		.amount-val {
-			font-size: 2.15rem;
-		}
-	}
-
 	.per-day-tag {
-		font-size: 0.92rem;
+		font-size: 1.05rem;
 		font-weight: 700;
 		color: var(--text-muted);
 	}
 
 	.amount-today-caption {
-		font-size: 0.84rem;
+		font-size: 0.95rem;
 		color: var(--text-secondary);
-		margin-top: 0.35rem;
-		font-weight: 500;
+		margin-top: 0.45rem;
+		font-weight: 600;
 	}
 
 	.over-limit-txt {
 		color: var(--danger);
-		font-weight: 700;
+		font-weight: 800;
 	}
 
 	/* Gauge Progress */
 	.gauge-section {
-		margin-bottom: 1.15rem;
+		margin-bottom: 1.25rem;
 	}
 
 	.gauge-track {
-		height: 8px;
+		height: 10px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		border: 1px solid var(--border-color);
-		margin-bottom: 0.45rem;
+		margin-bottom: 0.55rem;
 	}
 
 	.gauge-progress {
@@ -242,13 +229,14 @@
 	.gauge-meta-row {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.76rem;
-		color: var(--text-muted);
+		font-size: 0.85rem;
+		color: var(--text-secondary);
 		font-weight: 600;
 	}
 
 	.gauge-meta-row strong {
 		color: var(--text-primary);
+		font-weight: 800;
 	}
 
 	/* 3 Metric Tiles */
@@ -256,23 +244,23 @@
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 0.5rem;
-		padding-top: 0.85rem;
+		padding-top: 0.95rem;
 		border-top: 1px solid var(--border-color);
 	}
 
 	.metric-tile {
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-sm);
-		padding: 0.6rem 0.4rem;
+		border-radius: var(--border-radius);
+		padding: 0.75rem 0.5rem;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
-		gap: 2px;
+		gap: 3px;
 	}
 
 	.tile-label {
-		font-size: 0.68rem;
+		font-size: 0.76rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
@@ -283,7 +271,7 @@
 	}
 
 	.tile-value {
-		font-size: 0.88rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		white-space: nowrap;
@@ -292,7 +280,7 @@
 	}
 
 	.tile-value small {
-		font-size: 0.72rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 		color: var(--text-muted);
 	}

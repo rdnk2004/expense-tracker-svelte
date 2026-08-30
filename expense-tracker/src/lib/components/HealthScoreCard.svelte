@@ -11,7 +11,7 @@
 	<div class="card-header">
 		<div class="header-title-wrap">
 			<div class="award-icon-box">
-				<Award size={18} color="var(--accent-primary)" />
+				<Award size={20} color="var(--accent-primary)" />
 			</div>
 			<div>
 				<span class="card-title">Campus Health Score</span>
@@ -89,7 +89,7 @@
 					<span class="badge-emoji">{badge.emoji}</span>
 					<span class="badge-title">{badge.title}</span>
 					{#if !badge.unlocked}
-						<Lock size={11} color="var(--text-muted)" />
+						<Lock size={13} color="var(--text-muted)" />
 					{/if}
 				</div>
 			{/each}
@@ -101,23 +101,16 @@
 	.health-score-card {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		border-radius: var(--border-radius-lg);
+		padding: 1.35rem;
 		box-shadow: var(--shadow-sm);
-	}
-
-	@media (min-width: 768px) {
-		.health-score-card {
-			border-radius: var(--border-radius-lg);
-			padding: 1.35rem;
-		}
 	}
 
 	.card-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 1.15rem;
 		flex-wrap: wrap;
 		gap: 8px;
 	}
@@ -125,13 +118,13 @@
 	.header-title-wrap {
 		display: flex;
 		align-items: center;
-		gap: 0.65rem;
+		gap: 0.75rem;
 	}
 
 	.award-icon-box {
-		width: 36px;
-		height: 36px;
-		border-radius: var(--border-radius-xs);
+		width: 40px;
+		height: 40px;
+		border-radius: var(--border-radius-sm);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		display: flex;
@@ -142,7 +135,7 @@
 
 	.card-title {
 		display: block;
-		font-size: 0.98rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		line-height: 1.2;
@@ -150,15 +143,16 @@
 
 	.card-sub {
 		display: block;
-		font-size: 0.74rem;
+		font-size: 0.82rem;
 		color: var(--text-muted);
 		font-weight: 600;
+		margin-top: 2px;
 	}
 
 	.grade-pill {
-		font-size: 0.76rem;
+		font-size: 0.82rem;
 		font-weight: 800;
-		padding: 0.25rem 0.65rem;
+		padding: 0.35rem 0.75rem;
 		border-radius: var(--border-radius-pill);
 		border: 1px solid currentColor;
 		text-transform: uppercase;
@@ -168,11 +162,11 @@
 	/* Score Breakdown Grid */
 	.score-breakdown-row {
 		display: grid;
-		grid-template-columns: 105px 1fr;
+		grid-template-columns: 110px 1fr;
 		gap: 1rem;
 		align-items: center;
-		margin-bottom: 1rem;
-		padding-bottom: 1rem;
+		margin-bottom: 1.15rem;
+		padding-bottom: 1.15rem;
 		border-bottom: 1px solid var(--border-color);
 	}
 
@@ -180,8 +174,8 @@
 		text-align: center;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-sm);
-		padding: 0.85rem 0.5rem;
+		border-radius: var(--border-radius);
+		padding: 1rem 0.5rem;
 	}
 
 	.score-number-wrap {
@@ -191,45 +185,45 @@
 	}
 
 	.big-score {
-		font-size: 2rem;
+		font-size: 2.25rem;
 		font-weight: 800;
 		line-height: 1;
 	}
 
 	.score-out-of {
-		font-size: 0.8rem;
-		font-weight: 700;
+		font-size: 0.88rem;
+		font-weight: 800;
 		color: var(--text-muted);
 	}
 
 	.score-caption {
 		display: block;
-		font-size: 0.68rem;
+		font-size: 0.74rem;
 		font-weight: 800;
 		color: var(--text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		margin-top: 4px;
+		margin-top: 5px;
 	}
 
 	.pillars-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.65rem;
 	}
 
 	.pillar-row {
 		display: flex;
 		flex-direction: column;
-		gap: 3px;
+		gap: 4px;
 	}
 
 	.pillar-info {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.78rem;
+		font-size: 0.86rem;
 		color: var(--text-secondary);
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	.pillar-score {
@@ -238,7 +232,7 @@
 	}
 
 	.mini-track {
-		height: 6px;
+		height: 8px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
@@ -253,11 +247,11 @@
 
 	/* Badges Strip */
 	.badges-header {
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.65rem;
 	}
 
 	.badges-title {
-		font-size: 0.74rem;
+		font-size: 0.82rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -266,7 +260,7 @@
 
 	.badges-strip {
 		display: flex;
-		gap: 0.45rem;
+		gap: 0.55rem;
 		overflow-x: auto;
 		padding-bottom: 4px;
 	}
@@ -274,35 +268,35 @@
 	.badge-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: 6px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 0.35rem 0.7rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.76rem;
-		font-weight: 700;
+		font-size: 0.84rem;
+		font-weight: 800;
 		color: var(--text-primary);
 		white-space: nowrap;
 		flex-shrink: 0;
 	}
 
 	.badge-pill.locked {
-		opacity: 0.5;
+		opacity: 0.55;
 		filter: grayscale(0.8);
 	}
 
 	.badge-emoji {
-		font-size: 0.88rem;
+		font-size: 1.05rem;
 	}
 
 	.badge-title {
-		font-size: 0.76rem;
+		font-size: 0.84rem;
 	}
 
 	@media (max-width: 480px) {
 		.score-breakdown-row {
-			grid-template-columns: 95px 1fr;
-			gap: 0.75rem;
+			grid-template-columns: 100px 1fr;
+			gap: 0.85rem;
 		}
 	}
 </style>

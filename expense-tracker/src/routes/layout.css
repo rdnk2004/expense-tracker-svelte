@@ -24,6 +24,12 @@ html {
 	height: 100%;
 }
 
+@media (max-width: 768px) {
+	html {
+		font-size: 17px;
+	}
+}
+
 body {
 	min-height: 100%;
 	min-height: 100dvh;
@@ -46,53 +52,53 @@ body {
 	--font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
 	/* LIGHT THEME (Crisp Neo-Slate & Sharp Emerald) */
-	--bg-primary: #F4F6F9;
+	--bg-primary: #F1F5F9;
 	--bg-secondary: #FFFFFF;
 	--bg-card: #FFFFFF;
-	--bg-hover: #EAEFF5;
+	--bg-hover: #E2E8F0;
 	--bg-subtle: #F8FAFC;
 
 	/* Neo-Bank Brand Primaries */
 	--accent-primary: #059669;
 	--accent-secondary: #10B981;
 	--accent-gradient: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-	--accent-glow: rgba(16, 185, 129, 0.2);
+	--accent-glow: rgba(5, 150, 105, 0.25);
 
 	/* Hero Card */
 	--hero-gradient: linear-gradient(135deg, #0B1120 0%, #1E293B 60%, #334155 100%);
 	--hero-text: #FFFFFF;
 
 	/* Status Colors - High Contrast */
-	--success: #059669;
-	--success-bg: rgba(16, 185, 129, 0.14);
-	--success-border: rgba(16, 185, 129, 0.35);
-	--warning: #D97706;
-	--warning-bg: rgba(245, 158, 11, 0.14);
-	--warning-border: rgba(245, 158, 11, 0.35);
-	--danger: #E11D48;
-	--danger-bg: rgba(244, 63, 94, 0.14);
-	--danger-border: rgba(244, 63, 94, 0.35);
-	--info: #0284C7;
-	--info-bg: rgba(2, 132, 199, 0.14);
-	--info-border: rgba(2, 132, 199, 0.35);
+	--success: #047857;
+	--success-bg: rgba(16, 185, 129, 0.16);
+	--success-border: rgba(5, 150, 105, 0.4);
+	--warning: #B45309;
+	--warning-bg: rgba(245, 158, 11, 0.16);
+	--warning-border: rgba(217, 119, 6, 0.4);
+	--danger: #BE123C;
+	--danger-bg: rgba(244, 63, 94, 0.16);
+	--danger-border: rgba(225, 29, 72, 0.4);
+	--info: #0369A1;
+	--info-bg: rgba(2, 132, 199, 0.16);
+	--info-border: rgba(3, 105, 161, 0.4);
 
 	/* Typography Colors - High Legibility */
 	--text-primary: #0F172A;
-	--text-secondary: #334155;
-	--text-muted: #64748B;
+	--text-secondary: #1E293B;
+	--text-muted: #475569;
 	--text-inverse: #FFFFFF;
 
 	/* Borders & Surfaces */
-	--border-color: rgba(15, 23, 42, 0.12);
-	--border-subtle: rgba(15, 23, 42, 0.07);
-	--border-medium: rgba(15, 23, 42, 0.18);
-	--border-strong: rgba(15, 23, 42, 0.28);
+	--border-color: rgba(15, 23, 42, 0.14);
+	--border-subtle: rgba(15, 23, 42, 0.09);
+	--border-medium: rgba(15, 23, 42, 0.22);
+	--border-strong: rgba(15, 23, 42, 0.35);
 
 	/* Surface Hierarchy */
-	--surface-0: #F4F6F9;
+	--surface-0: #F1F5F9;
 	--surface-1: #FFFFFF;
-	--surface-2: #EEF2F6;
-	--surface-3: #E2E8F0;
+	--surface-2: #E2E8F0;
+	--surface-3: #CBD5E1;
 	--surface-elevated: #FFFFFF;
 
 	/* Border Radii */
@@ -104,21 +110,21 @@ body {
 	--border-radius-pill: 9999px;
 
 	/* Precision Shadows */
-	--shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
-	--shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-	--shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.06);
-	--shadow-lg: 0 20px 32px -8px rgba(15, 23, 42, 0.14), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+	--shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.06);
+	--shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.1), 0 1px 2px rgba(15, 23, 42, 0.05);
+	--shadow-md: 0 8px 24px -4px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.08);
+	--shadow-lg: 0 20px 32px -8px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.1);
 	--shadow-glow: 0 0 25px rgba(16, 185, 129, 0.25);
 
 	/* Glassmorphism */
-	--glass-bg: rgba(255, 255, 255, 0.92);
-	--glass-border: rgba(15, 23, 42, 0.12);
-	--glass-blur: 20px;
+	--glass-bg: rgba(255, 255, 255, 0.95);
+	--glass-border: rgba(15, 23, 42, 0.16);
+	--glass-blur: 24px;
 
 	/* Mobile Layout Metrics */
-	--header-height: 56px;
-	--subnav-height: 46px;
-	--bottom-nav-height: 70px;
+	--header-height: 60px;
+	--subnav-height: 52px;
+	--bottom-nav-height: 74px;
 	--safe-bottom: env(safe-area-inset-bottom, 0px);
 	--safe-top: env(safe-area-inset-top, 0px);
 }
@@ -128,60 +134,60 @@ body {
 	--bg-primary: #060911;
 	--bg-secondary: #0D1322;
 	--bg-card: #0D1322;
-	--bg-hover: #162035;
+	--bg-hover: #182238;
 	--bg-subtle: #090E1A;
 
 	--accent-primary: #10B981;
 	--accent-secondary: #34D399;
 	--accent-gradient: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
-	--accent-glow: rgba(16, 185, 129, 0.3);
+	--accent-glow: rgba(16, 185, 129, 0.35);
 
 	--hero-gradient: linear-gradient(135deg, #0D1322 0%, #151F36 50%, #1E2B4A 100%);
 	--hero-text: #FFFFFF;
 
 	/* Status Colors - Vibrant in Dark Mode */
 	--success: #10B981;
-	--success-bg: rgba(16, 185, 129, 0.18);
-	--success-border: rgba(16, 185, 129, 0.4);
+	--success-bg: rgba(16, 185, 129, 0.2);
+	--success-border: rgba(16, 185, 129, 0.45);
 	--warning: #F59E0B;
-	--warning-bg: rgba(245, 158, 11, 0.18);
-	--warning-border: rgba(245, 158, 11, 0.4);
+	--warning-bg: rgba(245, 158, 11, 0.2);
+	--warning-border: rgba(245, 158, 11, 0.45);
 	--danger: #F43F5E;
-	--danger-bg: rgba(244, 63, 94, 0.18);
-	--danger-border: rgba(244, 63, 94, 0.4);
+	--danger-bg: rgba(244, 63, 94, 0.2);
+	--danger-border: rgba(244, 63, 94, 0.45);
 	--info: #38BDF8;
-	--info-bg: rgba(56, 189, 248, 0.18);
-	--info-border: rgba(56, 189, 248, 0.4);
+	--info-bg: rgba(56, 189, 248, 0.2);
+	--info-border: rgba(56, 189, 248, 0.45);
 
-	/* Typography Colors - Crystal Clear Contrast */
+	/* Typography Colors - Crystal Clear High Contrast */
 	--text-primary: #FFFFFF;
-	--text-secondary: #D1D5DB;
-	--text-muted: #9CA3AF;
+	--text-secondary: #E2E8F0;
+	--text-muted: #CBD5E1;
 	--text-inverse: #060911;
 
 	/* Borders & Surfaces - Visible Outline Discipline */
-	--border-color: rgba(255, 255, 255, 0.12);
-	--border-subtle: rgba(255, 255, 255, 0.08);
-	--border-medium: rgba(255, 255, 255, 0.2);
-	--border-strong: rgba(255, 255, 255, 0.32);
+	--border-color: rgba(255, 255, 255, 0.16);
+	--border-subtle: rgba(255, 255, 255, 0.1);
+	--border-medium: rgba(255, 255, 255, 0.24);
+	--border-strong: rgba(255, 255, 255, 0.38);
 
 	/* Surface Hierarchy */
 	--surface-0: #060911;
 	--surface-1: #0D1322;
-	--surface-2: #141C30;
-	--surface-3: #1E2945;
-	--surface-elevated: #162035;
+	--surface-2: #162035;
+	--surface-3: #223050;
+	--surface-elevated: #1B2640;
 
 	/* Precision Shadows */
 	--shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
 	--shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
 	--shadow-md: 0 10px 30px -4px rgba(0, 0, 0, 0.8), 0 2px 8px -1px rgba(0, 0, 0, 0.5);
 	--shadow-lg: 0 24px 48px -8px rgba(0, 0, 0, 0.9);
-	--shadow-glow: 0 0 30px rgba(16, 185, 129, 0.3);
+	--shadow-glow: 0 0 30px rgba(16, 185, 129, 0.35);
 
 	/* Glassmorphism */
-	--glass-bg: rgba(13, 19, 34, 0.88);
-	--glass-border: rgba(255, 255, 255, 0.14);
+	--glass-bg: rgba(13, 19, 34, 0.92);
+	--glass-border: rgba(255, 255, 255, 0.18);
 	--glass-blur: 24px;
 }
 
@@ -196,24 +202,24 @@ h1, h2, h3, h4, h5, h6 {
 	color: var(--text-primary);
 }
 
-h1 { font-size: 1.5rem; }
-h2 { font-size: 1.3rem; }
-h3 { font-size: 1.125rem; }
-h4 { font-size: 0.975rem; font-weight: 700; }
-h5 { font-size: 0.875rem; font-weight: 700; }
-h6 { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.2rem; }
+h4 { font-size: 1.05rem; font-weight: 700; }
+h5 { font-size: 0.95rem; font-weight: 700; }
+h6 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
 
 @media (min-width: 768px) {
-	h1 { font-size: 1.85rem; }
-	h2 { font-size: 1.5rem; }
-	h3 { font-size: 1.25rem; }
-	h4 { font-size: 1.05rem; }
+	h1 { font-size: 1.95rem; }
+	h2 { font-size: 1.6rem; }
+	h3 { font-size: 1.35rem; }
+	h4 { font-size: 1.15rem; }
 }
 
 p {
 	color: var(--text-secondary);
-	font-size: 0.9rem;
-	line-height: 1.5;
+	font-size: 0.95rem;
+	line-height: 1.55;
 }
 
 /* Tabular Numerics for Financial Precision */
