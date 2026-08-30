@@ -144,8 +144,8 @@
 				<h2 class="balance-display tabular">{formatCurrency($totalBalance)}</h2>
 			</div>
 
-			<!-- Individual Wallets Mini Chips (Horizontal Touch Scroll) -->
-			<div class="wallet-pills-row touch-scroll-x">
+			<!-- Individual Wallets Mini Chips -->
+			<div class="wallet-pills-row">
 				{#each $wallets as w}
 					<div class="wallet-mini-pill" onclick={() => goto('/wallets')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && goto('/wallets')}>
 						<span class="wallet-pill-name">{w.name}</span>
@@ -415,9 +415,9 @@
 
 	.wallet-pills-row {
 		display: flex;
-		gap: 7px;
+		flex-wrap: wrap;
+		gap: 6px;
 		margin-bottom: 1.15rem;
-		padding-bottom: 4px;
 	}
 
 	.wallet-mini-pill {

@@ -523,9 +523,8 @@
 
 	.habit-chips-row {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 6px;
-		overflow-x: auto;
-		padding-bottom: 4px;
 		margin-bottom: 0.85rem;
 	}
 

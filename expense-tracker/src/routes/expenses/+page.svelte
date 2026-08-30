@@ -143,9 +143,9 @@
 			</button>
 		</div>
 
-		<!-- Value Tag Filter Pills (Touch Horizontal Scroll) -->
+		<!-- Value Tag Filter Pills -->
 		{#if activeSegment === 'all' || activeSegment === 'expense'}
-			<div class="filter-chips-row touch-scroll-x">
+			<div class="filter-chips-row">
 				<button
 					class="filter-chip"
 					class:active={activeValueFilter === 'all'}
@@ -420,8 +420,9 @@
 
 	.filter-chips-row {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 6px;
-		padding-bottom: 4px;
+		margin-bottom: 0.85rem;
 	}
 
 	.filter-chip {
