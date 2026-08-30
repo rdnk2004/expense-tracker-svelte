@@ -1029,8 +1029,8 @@
 	}
 
 	.mobile-back-btn {
-		width: 40px;
-		height: 40px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -1048,7 +1048,7 @@
 	}
 
 	.subpage-title {
-		font-size: 1.05rem;
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		white-space: nowrap;
@@ -1058,7 +1058,7 @@
 	}
 
 	.subpage-sub {
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 		color: var(--text-muted);
 		font-weight: 700;
 	}
@@ -1066,7 +1066,7 @@
 	.mobile-header-right {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.4rem;
 	}
 
 	.mobile-month-pill {
@@ -1075,12 +1075,12 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-pill);
-		padding: 3px 6px;
+		padding: 2px 4px;
 	}
 
 	.mini-month-btn {
-		width: 32px;
-		height: 32px;
+		width: 28px;
+		height: 28px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -1089,15 +1089,15 @@
 	}
 
 	.mini-month-label {
-		font-size: 0.88rem;
+		font-size: 0.8rem;
 		font-weight: 800;
-		padding: 0 6px;
+		padding: 0 4px;
 		color: var(--text-primary);
 	}
 
 	.theme-btn-compact {
-		width: 40px;
-		height: 40px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -1108,8 +1108,8 @@
 	}
 
 	.drawer-trigger-btn {
-		width: 40px;
-		height: 40px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -1135,7 +1135,7 @@
 		bottom: 0;
 		left: 0;
 		right: 0;
-		padding: 0 1rem calc(0.65rem + var(--safe-bottom));
+		padding: 0 1rem calc(0.5rem + var(--safe-bottom));
 		z-index: 300;
 		pointer-events: none;
 		justify-content: center;
@@ -1144,7 +1144,7 @@
 	.bottom-dock {
 		pointer-events: auto;
 		width: 100%;
-		max-width: 440px;
+		max-width: 380px;
 		height: var(--bottom-nav-height);
 		border-radius: var(--border-radius-pill);
 		background: var(--glass-bg);
@@ -1155,7 +1155,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-around;
-		padding: 0 0.5rem;
+		padding: 0 0.35rem;
 		position: relative;
 	}
 
@@ -1164,9 +1164,9 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 3px;
-		width: 58px;
-		height: 56px;
+		gap: 2px;
+		width: 50px;
+		height: 48px;
 		border-radius: var(--border-radius-pill);
 		color: var(--text-muted);
 		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1178,16 +1178,16 @@
 	}
 
 	.dock-label {
-		font-size: 0.8rem;
+		font-size: 0.72rem;
 		font-weight: 800;
 		letter-spacing: 0.02em;
 	}
 
 	.dock-active-glow {
 		position: absolute;
-		top: 4px;
-		width: 16px;
-		height: 3px;
+		top: 3px;
+		width: 14px;
+		height: 2.5px;
 		border-radius: var(--border-radius-pill);
 		background: var(--accent-primary);
 		box-shadow: 0 0 8px var(--accent-primary);
@@ -1195,8 +1195,8 @@
 
 	/* Center Action Button (+) */
 	.center-fab {
-		width: 52px;
-		height: 52px;
+		width: 46px;
+		height: 46px;
 		border-radius: 50%;
 		background: linear-gradient(135deg, var(--accent-primary) 0%, #06B6D4 100%);
 		color: #FFFFFF;
@@ -1205,7 +1205,7 @@
 		justify-content: center;
 		box-shadow: 0 4px 16px var(--accent-glow);
 		transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-		margin: 0 4px;
+		margin: 0 2px;
 		flex-shrink: 0;
 	}
 
