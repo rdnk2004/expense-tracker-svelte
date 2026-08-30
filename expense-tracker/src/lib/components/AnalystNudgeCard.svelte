@@ -90,7 +90,7 @@
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		position: relative;
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);
@@ -103,7 +103,7 @@
 		left: 0;
 		top: 0;
 		bottom: 0;
-		width: 4px;
+		width: 3px;
 	}
 
 	.type-warning::before { background: var(--danger); }
@@ -135,14 +135,14 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.analyst-badge {
 		display: flex;
 		align-items: center;
-		gap: 7px;
-		font-size: 0.82rem;
+		gap: 6px;
+		font-size: 0.74rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -153,8 +153,8 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-pill);
-		padding: 4px 10px;
-		font-size: 0.8rem;
+		padding: 3px 8px;
+		font-size: 0.74rem;
 		font-weight: 800;
 		color: var(--text-secondary);
 		display: flex;
@@ -165,9 +165,9 @@
 
 	.insight-content-block {
 		display: flex;
-		gap: 0.95rem;
+		gap: 0.75rem;
 		align-items: flex-start;
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.insight-icon-col {
@@ -176,8 +176,8 @@
 	}
 
 	.icon-bubble {
-		width: 42px;
-		height: 42px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -194,11 +194,11 @@
 	}
 
 	.insight-title {
-		font-size: 1.08rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 4px;
-		line-height: 1.25;
+		margin-bottom: 3px;
+	}	line-height: 1.25;
 	}
 
 	.insight-message {

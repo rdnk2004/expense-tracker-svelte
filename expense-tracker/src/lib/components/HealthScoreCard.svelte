@@ -102,7 +102,7 @@
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		box-shadow: var(--shadow-sm);
 	}
 
@@ -110,20 +110,20 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
 		flex-wrap: wrap;
-		gap: 8px;
+		gap: 6px;
 	}
 
 	.header-title-wrap {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.65rem;
 	}
 
 	.award-icon-box {
-		width: 40px;
-		height: 40px;
+		width: 36px;
+		height: 36px;
 		border-radius: var(--border-radius-sm);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
@@ -135,7 +135,7 @@
 
 	.card-title {
 		display: block;
-		font-size: 1.05rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		line-height: 1.2;
@@ -143,16 +143,16 @@
 
 	.card-sub {
 		display: block;
-		font-size: 0.82rem;
+		font-size: 0.76rem;
 		color: var(--text-muted);
 		font-weight: 600;
 		margin-top: 2px;
 	}
 
 	.grade-pill {
-		font-size: 0.82rem;
+		font-size: 0.76rem;
 		font-weight: 800;
-		padding: 0.35rem 0.75rem;
+		padding: 0.25rem 0.65rem;
 		border-radius: var(--border-radius-pill);
 		border: 1px solid currentColor;
 		text-transform: uppercase;
@@ -162,11 +162,11 @@
 	/* Score Breakdown Grid */
 	.score-breakdown-row {
 		display: grid;
-		grid-template-columns: 110px 1fr;
-		gap: 1rem;
+		grid-template-columns: 95px 1fr;
+		gap: 0.75rem;
 		align-items: center;
-		margin-bottom: 1.15rem;
-		padding-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
+		padding-bottom: 0.85rem;
 		border-bottom: 1px solid var(--border-color);
 	}
 
@@ -174,8 +174,8 @@
 		text-align: center;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius);
-		padding: 1rem 0.5rem;
+		border-radius: var(--border-radius-sm);
+		padding: 0.75rem 0.4rem;
 	}
 
 	.score-number-wrap {
@@ -185,25 +185,25 @@
 	}
 
 	.big-score {
-		font-size: 2.25rem;
+		font-size: 1.85rem;
 		font-weight: 800;
 		line-height: 1;
 	}
 
 	.score-out-of {
-		font-size: 0.88rem;
+		font-size: 0.82rem;
 		font-weight: 800;
 		color: var(--text-muted);
 	}
 
 	.score-caption {
 		display: block;
-		font-size: 0.74rem;
+		font-size: 0.7rem;
 		font-weight: 800;
 		color: var(--text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		margin-top: 5px;
+		margin-top: 4px;
 	}
 
 	.pillars-container {

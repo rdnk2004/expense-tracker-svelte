@@ -97,7 +97,7 @@
 	.safe-spend-card {
 		background: var(--bg-card);
 		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		border: 1px solid var(--status-border);
 		box-shadow: var(--shadow-sm);
 		position: relative;
@@ -111,7 +111,7 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 4px;
+		height: 3px;
 		background: linear-gradient(90deg, var(--status-color), #06B6D4);
 	}
 
@@ -119,27 +119,27 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.status-indicator-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 7px;
-		padding: 0.4rem 0.85rem;
+		gap: 6px;
+		padding: 0.3rem 0.7rem;
 		border-radius: var(--border-radius-pill);
 		background: var(--status-bg);
 		border: 1px solid var(--status-border);
 		color: var(--status-color);
-		font-size: 0.85rem;
+		font-size: 0.74rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
 
 	.status-pulse-dot {
-		width: 8px;
-		height: 8px;
+		width: 7px;
+		height: 7px;
 		border-radius: 50%;
 		background: var(--status-color);
 		box-shadow: 0 0 8px var(--status-color);
@@ -148,39 +148,39 @@
 	.runway-cycle-pill {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
-		font-size: 0.85rem;
+		gap: 5px;
+		font-size: 0.74rem;
 		color: var(--text-secondary);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 0.4rem 0.85rem;
+		padding: 0.3rem 0.7rem;
 		border-radius: var(--border-radius-pill);
 		font-weight: 700;
 	}
 
 	/* Hero Block */
 	.safe-hero-block {
-		margin-bottom: 1.25rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.hero-sub-eyebrow {
 		display: block;
-		font-size: 0.82rem;
+		font-size: 0.72rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		color: var(--text-muted);
-		margin-bottom: 0.35rem;
+		margin-bottom: 0.25rem;
 	}
 
 	.amount-hero-row {
 		display: flex;
 		align-items: baseline;
-		gap: 0.5rem;
+		gap: 0.4rem;
 	}
 
 	.amount-val {
-		font-size: 2.35rem;
+		font-size: 1.85rem;
 		font-weight: 800;
 		letter-spacing: -0.04em;
 		color: var(--text-primary);
@@ -189,15 +189,15 @@
 	}
 
 	.per-day-tag {
-		font-size: 1.05rem;
+		font-size: 0.88rem;
 		font-weight: 700;
 		color: var(--text-muted);
 	}
 
 	.amount-today-caption {
-		font-size: 0.95rem;
+		font-size: 0.82rem;
 		color: var(--text-secondary);
-		margin-top: 0.45rem;
+		margin-top: 0.35rem;
 		font-weight: 600;
 	}
 
@@ -208,16 +208,16 @@
 
 	/* Gauge Progress */
 	.gauge-section {
-		margin-bottom: 1.25rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.gauge-track {
-		height: 10px;
+		height: 7px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		border: 1px solid var(--border-color);
-		margin-bottom: 0.55rem;
+		margin-bottom: 0.45rem;
 	}
 
 	.gauge-progress {
