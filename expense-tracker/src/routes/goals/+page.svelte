@@ -384,6 +384,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -397,11 +398,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.add-goal-btn {
@@ -420,7 +428,7 @@
 
 	/* Hero Card */
 	.goals-hero-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 		background: linear-gradient(135deg, var(--bg-card) 0%, var(--surface-2) 100%);
 	}
 
@@ -510,7 +518,7 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 0.75rem;
+		padding: 0.85rem 1rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
@@ -524,8 +532,8 @@
 	}
 
 	.preset-icon {
-		width: 34px;
-		height: 34px;
+		width: 42px;
+		height: 42px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
@@ -539,19 +547,19 @@
 	}
 
 	.p-title {
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 		font-weight: 700;
 		color: var(--text-primary);
 	}
 
 	.p-val {
-		font-size: 0.72rem;
+		font-size: 0.74rem;
 		color: var(--text-muted);
 	}
 
 	/* Active Goals */
 	.goals-ledger-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.card-heading {
@@ -570,7 +578,7 @@
 	.goal-card-item {
 		background: var(--surface-2);
 		border-radius: var(--border-radius);
-		padding: 1rem;
+		padding: 0.85rem 1rem;
 		border: 1px solid var(--border-subtle);
 		display: flex;
 		flex-direction: column;

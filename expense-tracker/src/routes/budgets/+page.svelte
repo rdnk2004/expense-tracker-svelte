@@ -515,6 +515,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
+		margin-bottom: 1.15rem;
 	}
 
 	.campus-sub {
@@ -528,11 +529,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.adjust-split-btn {
@@ -624,8 +632,8 @@
 	}
 
 	.bucket-hero-card {
-		border-radius: 24px;
-		padding: 1.35rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		box-shadow: var(--shadow-sm);
 		border: 1px solid var(--border-color);
 		background: var(--bg-card);
@@ -647,7 +655,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		margin-bottom: 1.15rem;
+		margin-bottom: 1rem;
 		gap: 8px;
 	}
 
@@ -658,9 +666,9 @@
 	}
 
 	.bucket-badge-icon {
-		width: 38px;
-		height: 38px;
-		border-radius: var(--border-radius-sm);
+		width: 42px;
+		height: 42px;
+		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -732,7 +740,7 @@
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		border: 1px solid var(--border-subtle);
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.progress-fill-neo {
@@ -772,7 +780,7 @@
 	}
 
 	.base-budget-card {
-		padding: 1.25rem;
+		padding: 1.15rem;
 	}
 
 	.base-budget-title {
@@ -831,7 +839,7 @@
 	}
 
 	.cat-budget-card {
-		padding: 1rem 1.25rem;
+		padding: 0.85rem 1rem;
 	}
 
 	.cat-card-header {
@@ -848,9 +856,9 @@
 	}
 
 	.cat-icon-frame {
-		width: 36px;
-		height: 36px;
-		border-radius: var(--border-radius-sm);
+		width: 42px;
+		height: 42px;
+		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -858,8 +866,8 @@
 	}
 
 	.cat-title {
-		font-size: 0.88rem;
-		font-weight: 800;
+		font-size: 0.92rem;
+		font-weight: 700;
 		color: var(--text-primary);
 		margin: 0 0 2px;
 	}
