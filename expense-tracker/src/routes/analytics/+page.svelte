@@ -201,16 +201,16 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.page-header {
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.campus-sub {
 		display: block;
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -219,7 +219,7 @@
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
@@ -229,7 +229,7 @@
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
@@ -238,7 +238,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.45rem;
 		flex-wrap: wrap;
 		gap: 6px;
 	}
@@ -250,43 +250,43 @@
 	}
 
 	.card-heading {
-		font-size: 1rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		margin: 0;
 	}
 
 	.matrix-tag {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 2px 8px;
+		padding: 2px 7px;
 		border-radius: var(--border-radius-pill);
 		color: var(--text-secondary);
 	}
 
 	.card-desc {
-		font-size: 0.84rem;
+		font-size: 0.78rem;
 		color: var(--text-secondary);
-		margin-bottom: 0.85rem;
-		line-height: 1.45;
+		margin-bottom: 0.75rem;
+		line-height: 1.4;
 	}
 
 	/* Emotional ROI */
 	.emotional-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.satisfaction-bar {
 		display: flex;
-		height: 9px;
+		height: 7px;
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		background: var(--surface-2);
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 		border: 1px solid var(--border-color);
 	}
 
@@ -297,15 +297,15 @@
 	.satisfaction-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 6px;
-		margin-bottom: 0.85rem;
+		gap: 5px;
+		margin-bottom: 0.75rem;
 	}
 
 	.sat-box {
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-sm);
-		padding: 0.75rem 0.4rem;
+		padding: 0.65rem 0.35rem;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
@@ -321,19 +321,19 @@
 	}
 
 	.sat-pct {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		font-weight: 800;
 		color: var(--text-muted);
 	}
 
 	.sat-val {
-		font-size: 0.95rem;
+		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.sat-label {
-		font-size: 0.7rem;
+		font-size: 0.68rem;
 		font-weight: 600;
 		color: var(--text-muted);
 	}
@@ -342,24 +342,24 @@
 		background: rgba(244, 63, 94, 0.1);
 		border: 1px solid rgba(244, 63, 94, 0.3);
 		border-radius: var(--border-radius);
-		padding: 0.75rem 1rem;
-		font-size: 0.84rem;
+		padding: 0.65rem 0.85rem;
+		font-size: 0.78rem;
 		color: var(--text-primary);
-		line-height: 1.45;
+		line-height: 1.4;
 	}
 
 	/* Value Split */
 	.value-split-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.value-track {
 		display: flex;
-		height: 9px;
+		height: 7px;
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		background: var(--surface-2);
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 		border: 1px solid var(--border-color);
 	}
 
@@ -370,14 +370,14 @@
 	.value-tags-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 6px;
+		gap: 5px;
 	}
 
 	.vtag-box {
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-sm);
-		padding: 0.75rem 0.4rem;
+		padding: 0.65rem 0.35rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
@@ -385,7 +385,7 @@
 	}
 
 	.vtag-header {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 800;
 		color: var(--text-muted);
 		display: flex;
@@ -395,28 +395,28 @@
 	}
 
 	.vtag-amount {
-		font-size: 0.95rem;
+		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.vtag-pct {
-		font-size: 0.7rem;
+		font-size: 0.68rem;
 		font-weight: 600;
 		color: var(--text-muted);
 	}
 
 	/* Labor Card */
 	.labor-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.wage-rate-pill {
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 		font-weight: 800;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 3px 9px;
+		padding: 2.5px 8px;
 		border-radius: var(--border-radius-pill);
 		color: var(--accent-primary);
 	}
@@ -424,28 +424,28 @@
 	.labor-boxes-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 8px;
+		gap: 6px;
 	}
 
 	.labor-stat-card {
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.85rem 1rem;
+		padding: 0.75rem 0.85rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 
 	.l-stat-lbl {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
 
 	.l-stat-val {
-		font-size: 1.45rem;
+		font-size: 1.25rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
