@@ -651,18 +651,18 @@
 	.primary-btn-full {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 0.95rem;
 		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
-		min-height: 46px;
+		min-height: 48px;
 	}
 
 	/* Active Tabs Ledger */
 	.debts-ledger-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.ledger-header {
@@ -673,7 +673,7 @@
 	}
 
 	.toggle-settled-link {
-		font-size: 0.75rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 		color: var(--accent-primary);
 	}
@@ -681,23 +681,23 @@
 	.debts-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.65rem;
 	}
 
 	.debt-row-card {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.85rem;
+		padding: 0.85rem 1rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		gap: 8px;
 		flex-wrap: wrap;
 	}
 
-	.receive-border { border-left: 3px solid #10B981; }
-	.give-border { border-left: 3px solid #F43F5E; }
+	.receive-border { border-left: 4px solid #10B981; }
+	.give-border { border-left: 4px solid #F43F5E; }
 
 	.debt-info-left {
 		display: flex;
@@ -707,19 +707,19 @@
 	}
 
 	.friend-avatar {
-		width: 38px;
-		height: 38px;
+		width: 40px;
+		height: 40px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.76rem;
+		font-size: 0.82rem;
 		font-weight: 800;
 		flex-shrink: 0;
 	}
 
-	.receive-av { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-	.give-av { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+	.receive-av { background: rgba(16, 185, 129, 0.18); color: #10B981; }
+	.give-av { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
 	.settled-av { background: var(--surface-3); color: var(--text-muted); }
 
 	.debt-text-col {
@@ -735,23 +735,23 @@
 	}
 
 	.person-name {
-		font-size: 0.88rem;
+		font-size: 0.92rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.direction-tag {
-		font-size: 0.65rem;
-		font-weight: 700;
-		padding: 1px 5px;
+		font-size: 0.68rem;
+		font-weight: 800;
+		padding: 1px 6px;
 		border-radius: var(--border-radius-pill);
 	}
 
-	.tag-receive { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-	.tag-give { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+	.tag-receive { background: rgba(16, 185, 129, 0.18); color: #10B981; }
+	.tag-give { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
 
 	.debt-meta-line {
-		font-size: 0.72rem;
+		font-size: 0.76rem;
 		color: var(--text-muted);
 		display: flex;
 		align-items: center;
@@ -762,11 +762,12 @@
 
 	.upi-chip {
 		background: var(--bg-card);
-		border: 1px solid var(--border-subtle);
-		padding: 1px 5px;
+		border: 1px solid var(--border-color);
+		padding: 1px 6px;
 		border-radius: var(--border-radius-xs);
-		font-size: 0.65rem;
+		font-size: 0.68rem;
 		color: var(--text-secondary);
+		font-weight: 600;
 	}
 
 	.debt-action-right {
@@ -776,22 +777,22 @@
 	}
 
 	.debt-amount-figure {
-		font-size: 1.05rem;
+		font-size: 1.1rem;
 		font-weight: 800;
 	}
 
 	.debt-btns-row {
 		display: flex;
 		align-items: center;
-		gap: 5px;
+		gap: 6px;
 	}
 
 	.icon-action-btn {
-		width: 30px;
-		height: 30px;
+		width: 34px;
+		height: 34px;
 		border-radius: 50%;
 		background: var(--bg-card);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -811,13 +812,14 @@
 	.settle-pill-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 3px;
+		gap: 4px;
 		background: var(--accent-primary);
-		color: #080C14;
-		font-size: 0.72rem;
+		color: #FFFFFF;
+		font-size: 0.78rem;
 		font-weight: 800;
-		padding: 0.35rem 0.65rem;
+		padding: 0.4rem 0.8rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 34px;
 	}
 
 	.settled-card {
@@ -830,7 +832,7 @@
 	}
 
 	.settled-archive-divider {
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -847,7 +849,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		color: var(--text-muted);
-		font-size: 0.84rem;
+		font-size: 0.88rem;
 	}
 
 	/* Settlement Modal */
@@ -864,7 +866,7 @@
 	}
 
 	.sheet-sub {
-		font-size: 0.84rem;
+		font-size: 0.88rem;
 		color: var(--text-secondary);
 		margin-bottom: 1.25rem;
 	}
@@ -879,18 +881,18 @@
 		background: var(--surface-2);
 		border-radius: var(--border-radius);
 		padding: 1rem;
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 	}
 
 	.settle-choice-card h4 {
-		font-size: 0.88rem;
+		font-size: 0.92rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		margin-bottom: 3px;
 	}
 
 	.choice-desc {
-		font-size: 0.76rem;
+		font-size: 0.78rem;
 		color: var(--text-muted);
 		margin-bottom: 0.75rem;
 	}
@@ -902,18 +904,18 @@
 
 	.wallet-select {
 		flex: 1;
-		min-height: 40px;
+		min-height: 44px;
 		padding: 0.4rem 0.75rem;
-		font-size: 0.82rem;
+		font-size: 16px;
 	}
 
 	.primary-btn-mini {
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
-		padding: 0.4rem 0.85rem;
+		padding: 0.4rem 0.95rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 		white-space: nowrap;
 	}
 
@@ -922,10 +924,11 @@
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
-		font-size: 0.82rem;
+		font-size: 0.85rem;
 		font-weight: 700;
-		padding: 0.65rem;
+		padding: 0.75rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 44px;
 	}
 
 	@media (max-width: 520px) {

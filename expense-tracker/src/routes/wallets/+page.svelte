@@ -554,17 +554,23 @@
 	}
 
 	.card-balance-val {
-		font-size: 2.15rem;
+		font-size: 1.85rem;
 		font-weight: 800;
 		letter-spacing: -0.04em;
 		line-height: 1.1;
+	}
+
+	@media (min-width: 768px) {
+		.card-balance-val {
+			font-size: 2.15rem;
+		}
 	}
 
 	.card-footer-stats {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		border-top: 1px solid rgba(255, 255, 255, 0.12);
+		border-top: 1px solid rgba(255, 255, 255, 0.16);
 		padding-top: 0.85rem;
 		position: relative;
 		z-index: 2;
@@ -576,32 +582,33 @@
 	}
 
 	.c-stat-lbl {
-		font-size: 0.65rem;
-		opacity: 0.7;
+		font-size: 0.72rem;
+		opacity: 0.8;
 		text-transform: uppercase;
+		font-weight: 700;
 	}
 
 	.c-stat-val {
-		font-size: 0.88rem;
-		font-weight: 700;
+		font-size: 0.95rem;
+		font-weight: 800;
 	}
 
 	.card-transfer-pill {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		background: rgba(255, 255, 255, 0.15);
+		background: rgba(255, 255, 255, 0.18);
 		color: #FFFFFF;
-		padding: 0.4rem 0.85rem;
+		padding: 0.45rem 0.95rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.75rem;
-		font-weight: 700;
-		border: 1px solid rgba(255, 255, 255, 0.2);
+		font-size: 0.78rem;
+		font-weight: 800;
+		border: 1px solid rgba(255, 255, 255, 0.25);
 		transition: all 0.2s ease;
 	}
 
 	.card-transfer-pill:hover {
-		background: rgba(255, 255, 255, 0.28);
+		background: rgba(255, 255, 255, 0.32);
 	}
 
 	/* Modal Sheets */
@@ -619,7 +626,7 @@
 	}
 
 	.sheet-desc {
-		font-size: 0.84rem;
+		font-size: 0.86rem;
 		color: var(--text-secondary);
 		margin-bottom: 1.15rem;
 	}
@@ -630,8 +637,8 @@
 
 	.form-group-custom label {
 		display: block;
-		font-size: 0.76rem;
-		font-weight: 700;
+		font-size: 0.78rem;
+		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		color: var(--text-muted);
@@ -644,8 +651,9 @@
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
 		padding: 0.75rem 1rem;
-		font-size: 0.92rem;
+		font-size: 16px;
 		color: var(--text-primary);
+		min-height: 48px;
 	}
 
 	.sheet-btn-row {
@@ -655,12 +663,16 @@
 	.primary-btn-full {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 0.95rem;
 		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.err-txt {

@@ -804,17 +804,24 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.65rem 1rem;
-		font-size: 0.95rem;
+		padding: 0.75rem 1rem;
+		font-size: 16px;
+		color: var(--text-primary);
+		min-height: 48px;
 	}
 
 	.save-cap-btn {
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
-		padding: 0.65rem 1.15rem;
+		padding: 0.75rem 1.25rem;
 		border-radius: var(--border-radius-pill);
 		font-size: 0.88rem;
+		box-shadow: 0 2px 10px var(--accent-glow);
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.category-cards-grid {

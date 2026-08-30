@@ -401,9 +401,10 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.65rem 0.85rem;
-		font-size: 0.84rem;
+		padding: 0.75rem 1rem;
+		font-size: 16px;
 		color: var(--text-primary);
+		min-height: 48px;
 	}
 
 	.flow-arrow-icon {
@@ -456,11 +457,11 @@
 
 	.preset-chip {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		color: var(--text-secondary);
-		padding: 4px 10px;
+		padding: 6px 12px;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.75rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
 	}
@@ -468,13 +469,13 @@
 	.preset-chip:hover {
 		background: var(--bg-hover);
 		color: var(--text-primary);
-		border-color: var(--border-medium);
+		border-color: var(--accent-primary);
 	}
 
 	/* Balance Preview */
 	.balance-preview-box {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
 		padding: 0.85rem 1rem;
 		margin-bottom: 1.15rem;
@@ -486,7 +487,7 @@
 	.preview-item {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 		color: var(--text-secondary);
 	}
 
@@ -504,7 +505,7 @@
 	.submit-transfer-btn {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 0.95rem;
 		padding: 0.85rem;
@@ -512,6 +513,9 @@
 		box-shadow: 0 4px 14px var(--accent-glow);
 		transition: all 0.2s ease;
 		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.submit-transfer-btn:hover {

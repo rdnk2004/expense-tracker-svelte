@@ -11,14 +11,14 @@
 	<div class="card-header">
 		<div class="header-title-wrap">
 			<div class="award-icon-box">
-				<Award size={16} color="var(--accent-primary)" />
+				<Award size={18} color="var(--accent-primary)" />
 			</div>
 			<div>
 				<span class="card-title">Campus Health Score</span>
-				<span class="card-sub">Gamified Financial Discipline</span>
+				<span class="card-sub">Financial Discipline Index</span>
 			</div>
 		</div>
-		<span class="grade-pill" style="border-color: {score.gradeColor}40; background: {score.gradeColor}15; color: {score.gradeColor};">
+		<span class="grade-pill" style="border-color: {score.gradeColor}50; background: {score.gradeColor}20; color: {score.gradeColor};">
 			{score.grade} • {score.gradeLabel}
 		</span>
 	</div>
@@ -30,7 +30,7 @@
 				<span class="big-score tabular" style="color: {score.gradeColor};">{score.totalScore}</span>
 				<span class="score-out-of">/100</span>
 			</div>
-			<span class="score-caption">Overall Discipline</span>
+			<span class="score-caption">Discipline Index</span>
 		</div>
 
 		<!-- 4 Pillar Progress Mini-Bars -->
@@ -83,13 +83,13 @@
 			<span class="badges-title">Milestone Badges ({score.unlockedBadgesCount}/{score.badges.length})</span>
 		</div>
 
-		<div class="badges-strip">
+		<div class="badges-strip touch-scroll-x">
 			{#each score.badges as badge}
 				<div class="badge-pill" class:locked={!badge.unlocked} title="{badge.title}: {badge.desc}">
 					<span class="badge-emoji">{badge.emoji}</span>
 					<span class="badge-title">{badge.title}</span>
 					{#if !badge.unlocked}
-						<Lock size={10} color="var(--text-muted)" />
+						<Lock size={11} color="var(--text-muted)" />
 					{/if}
 				</div>
 			{/each}
@@ -101,17 +101,23 @@
 	.health-score-card {
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
-		border-radius: var(--border-radius-lg);
-		padding: 1.35rem;
-		margin-bottom: 1.15rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		box-shadow: var(--shadow-sm);
+	}
+
+	@media (min-width: 768px) {
+		.health-score-card {
+			border-radius: var(--border-radius-lg);
+			padding: 1.35rem;
+		}
 	}
 
 	.card-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.25rem;
+		margin-bottom: 1rem;
 		flex-wrap: wrap;
 		gap: 8px;
 	}
@@ -123,11 +129,11 @@
 	}
 
 	.award-icon-box {
-		width: 32px;
-		height: 32px;
+		width: 36px;
+		height: 36px;
 		border-radius: var(--border-radius-xs);
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -136,20 +142,21 @@
 
 	.card-title {
 		display: block;
-		font-size: 0.95rem;
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		line-height: 1.15;
+		line-height: 1.2;
 	}
 
 	.card-sub {
 		display: block;
-		font-size: 0.72rem;
+		font-size: 0.74rem;
 		color: var(--text-muted);
+		font-weight: 600;
 	}
 
 	.grade-pill {
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		font-weight: 800;
 		padding: 0.25rem 0.65rem;
 		border-radius: var(--border-radius-pill);
@@ -161,19 +168,19 @@
 	/* Score Breakdown Grid */
 	.score-breakdown-row {
 		display: grid;
-		grid-template-columns: 100px 1fr;
-		gap: 1.25rem;
+		grid-template-columns: 105px 1fr;
+		gap: 1rem;
 		align-items: center;
-		margin-bottom: 1.25rem;
-		padding-bottom: 1.25rem;
-		border-bottom: 1px solid var(--border-subtle);
+		margin-bottom: 1rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--border-color);
 	}
 
 	.score-hero-col {
 		text-align: center;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		border-radius: var(--border-radius);
+		border: 1px solid var(--border-color);
+		border-radius: var(--border-radius-sm);
 		padding: 0.85rem 0.5rem;
 	}
 
@@ -184,7 +191,7 @@
 	}
 
 	.big-score {
-		font-size: 2.2rem;
+		font-size: 2rem;
 		font-weight: 800;
 		line-height: 1;
 	}
@@ -197,8 +204,8 @@
 
 	.score-caption {
 		display: block;
-		font-size: 0.65rem;
-		font-weight: 700;
+		font-size: 0.68rem;
+		font-weight: 800;
 		color: var(--text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
@@ -208,7 +215,7 @@
 	.pillars-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.55rem;
+		gap: 0.5rem;
 	}
 
 	.pillar-row {
@@ -220,21 +227,22 @@
 	.pillar-info {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.75rem;
+		font-size: 0.78rem;
 		color: var(--text-secondary);
+		font-weight: 600;
 	}
 
 	.pillar-score {
-		font-weight: 700;
+		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.mini-track {
-		height: 5px;
+		height: 6px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 	}
 
 	.mini-fill {
@@ -245,11 +253,11 @@
 
 	/* Badges Strip */
 	.badges-header {
-		margin-bottom: 0.55rem;
+		margin-bottom: 0.5rem;
 	}
 
 	.badges-title {
-		font-size: 0.72rem;
+		font-size: 0.74rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -268,10 +276,10 @@
 		align-items: center;
 		gap: 5px;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		padding: 0.35rem 0.65rem;
+		border: 1px solid var(--border-color);
+		padding: 0.35rem 0.7rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		font-weight: 700;
 		color: var(--text-primary);
 		white-space: nowrap;
@@ -279,21 +287,22 @@
 	}
 
 	.badge-pill.locked {
-		opacity: 0.45;
-		filter: grayscale(0.85);
+		opacity: 0.5;
+		filter: grayscale(0.8);
 	}
 
 	.badge-emoji {
-		font-size: 0.85rem;
+		font-size: 0.88rem;
 	}
 
 	.badge-title {
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 	}
 
 	@media (max-width: 480px) {
 		.score-breakdown-row {
-			grid-template-columns: 1fr;
+			grid-template-columns: 95px 1fr;
+			gap: 0.75rem;
 		}
 	}
 </style>

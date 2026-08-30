@@ -35,14 +35,14 @@
 	>
 		<div class="card-top-row">
 			<div class="analyst-badge">
-				<Zap size={13} color="var(--accent-primary)" />
-				<span>Financial Analyst Pulse</span>
+				<Zap size={14} color="var(--accent-primary)" />
+				<span>Analyst Intelligence</span>
 			</div>
 
 			{#if insightsState.insights.length > 1}
 				<button class="cycle-pill" onclick={nextInsight} title="Next Insight">
 					<span>{activeInsightIndex + 1}/{insightsState.insights.length}</span>
-					<ChevronRight size={12} />
+					<ChevronRight size={13} />
 				</button>
 			{/if}
 		</div>
@@ -51,19 +51,19 @@
 			<div class="insight-icon-col">
 				{#if currentInsight.type === 'warning'}
 					<div class="icon-bubble warning">
-						<AlertTriangle size={16} />
+						<AlertTriangle size={18} />
 					</div>
 				{:else if currentInsight.type === 'opportunity'}
 					<div class="icon-bubble opportunity">
-						<Sparkles size={16} />
+						<Sparkles size={18} />
 					</div>
 				{:else if currentInsight.type === 'praise'}
 					<div class="icon-bubble praise">
-						<TrendingUp size={16} />
+						<TrendingUp size={18} />
 					</div>
 				{:else}
 					<div class="icon-bubble tip">
-						<Lightbulb size={16} />
+						<Lightbulb size={18} />
 					</div>
 				{/if}
 			</div>
@@ -78,7 +78,7 @@
 			<div class="card-footer-row">
 				<a href={currentInsight.actionHref} class="action-pill-btn">
 					<span>{currentInsight.actionLabel}</span>
-					<ArrowRight size={13} />
+					<ArrowRight size={14} />
 				</a>
 			</div>
 		{/if}
@@ -90,12 +90,18 @@
 		background: var(--bg-card);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 1.15rem 1.25rem;
-		margin-bottom: 1.15rem;
+		padding: 1.15rem;
 		position: relative;
 		overflow: hidden;
 		box-shadow: var(--shadow-sm);
 		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	@media (min-width: 768px) {
+		.analyst-card {
+			border-radius: var(--border-radius-lg);
+			padding: 1.35rem;
+		}
 	}
 
 	.analyst-card::before {
@@ -113,22 +119,22 @@
 	.type-tip::before { background: var(--warning); }
 
 	.type-warning {
-		background: linear-gradient(135deg, rgba(244, 63, 94, 0.06) 0%, var(--bg-card) 100%);
+		background: linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, var(--bg-card) 100%);
 		border-color: var(--danger-border);
 	}
 
 	.type-opportunity {
-		background: linear-gradient(135deg, rgba(6, 182, 212, 0.06) 0%, var(--bg-card) 100%);
-		border-color: rgba(6, 182, 212, 0.25);
+		background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, var(--bg-card) 100%);
+		border-color: rgba(6, 182, 212, 0.35);
 	}
 
 	.type-praise {
-		background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, var(--bg-card) 100%);
+		background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--bg-card) 100%);
 		border-color: var(--success-border);
 	}
 
 	.type-tip {
-		background: linear-gradient(135deg, rgba(245, 158, 11, 0.06) 0%, var(--bg-card) 100%);
+		background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, var(--bg-card) 100%);
 		border-color: var(--warning-border);
 	}
 
@@ -143,24 +149,24 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.72rem;
+		font-size: 0.76rem;
 		font-weight: 800;
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.05em;
 		color: var(--text-muted);
 	}
 
 	.cycle-pill {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-pill);
-		padding: 2px 8px;
-		font-size: 0.68rem;
+		padding: 3px 9px;
+		font-size: 0.74rem;
 		font-weight: 700;
 		color: var(--text-secondary);
 		display: flex;
 		align-items: center;
-		gap: 2px;
+		gap: 3px;
 		cursor: pointer;
 	}
 
@@ -177,8 +183,8 @@
 	}
 
 	.icon-bubble {
-		width: 32px;
-		height: 32px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -186,7 +192,7 @@
 	}
 
 	.icon-bubble.warning { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
-	.icon-bubble.opportunity { background: rgba(6, 182, 212, 0.15); color: #06B6D4; border: 1px solid rgba(6, 182, 212, 0.3); }
+	.icon-bubble.opportunity { background: rgba(6, 182, 212, 0.18); color: #06B6D4; border: 1px solid rgba(6, 182, 212, 0.35); }
 	.icon-bubble.praise { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
 	.icon-bubble.tip { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
 
@@ -195,7 +201,7 @@
 	}
 
 	.insight-title {
-		font-size: 0.95rem;
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		margin-bottom: 3px;
@@ -203,35 +209,37 @@
 	}
 
 	.insight-message {
-		font-size: 0.82rem;
+		font-size: 0.86rem;
 		color: var(--text-secondary);
-		line-height: 1.45;
+		line-height: 1.5;
 		margin: 0;
 	}
 
 	.card-footer-row {
 		display: flex;
 		justify-content: flex-end;
+		padding-top: 0.35rem;
 	}
 
 	.action-pill-btn {
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
-		padding: 4px 12px;
+		padding: 6px 14px;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.75rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: 6px;
 		text-decoration: none;
 		transition: all 0.2s ease;
+		min-height: 36px;
 	}
 
 	.action-pill-btn:hover {
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		border-color: var(--accent-primary);
 	}
 </style>

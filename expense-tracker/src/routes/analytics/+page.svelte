@@ -70,7 +70,7 @@
 					<span class="sat-pct tabular">{emotional.neutralPercent}%</span>
 				</div>
 				<span class="sat-val tabular">{formatCurrency(emotional.neutralTotal)}</span>
-				<span class="sat-label">Neutral (Necessities)</span>
+				<span class="sat-label">Neutral (Essentials)</span>
 			</div>
 
 			<div class="sat-box regret-box">
@@ -111,7 +111,7 @@
 			<div class="vtag-box need-box">
 				<div class="vtag-header">
 					<Zap size={14} color="#10B981" />
-					<span>⚡ Needs (50% target)</span>
+					<span>⚡ Needs (50% goal)</span>
 				</div>
 				<div class="vtag-amount tabular">{formatCurrency(valueTags.needTotal)}</div>
 				<span class="vtag-pct tabular">{valueTags.needPercent}% of spend</span>
@@ -120,7 +120,7 @@
 			<div class="vtag-box want-box">
 				<div class="vtag-header">
 					<Sparkles size={14} color="#38BDF8" />
-					<span>✨ Wants (30% target)</span>
+					<span>✨ Wants (30% goal)</span>
 				</div>
 				<div class="vtag-amount tabular">{formatCurrency(valueTags.wantTotal)}</div>
 				<span class="vtag-pct tabular">{valueTags.wantPercent}% of spend</span>
@@ -129,7 +129,7 @@
 			<div class="vtag-box growth-box">
 				<div class="vtag-header">
 					<GraduationCap size={14} color="#818CF8" />
-					<span>📚 Growth (20% target)</span>
+					<span>📚 Growth (20% goal)</span>
 				</div>
 				<div class="vtag-amount tabular">{formatCurrency(valueTags.growthTotal)}</div>
 				<span class="vtag-pct tabular">{valueTags.growthPercent}% of spend</span>
@@ -159,7 +159,7 @@
 			</div>
 
 			<div class="labor-stat-card saved">
-				<span class="l-stat-lbl">Labor Preserved in Sinking Funds</span>
+				<span class="l-stat-lbl">Labor Preserved in Goals</span>
 				<div class="l-stat-val text-success tabular">{workVal.laborHoursSaved}</div>
 				<span class="l-stat-sub tabular">{formatCurrency(workVal.totalSavedInGoals)} stashed</span>
 			</div>
@@ -175,11 +175,11 @@
 				<div class="cat-rank-row">
 					<div class="cat-rank-left">
 						<div class="cat-icon-frame" style="background: {cat.color}20; color: {cat.color};">
-							<CategoryIcon icon={cat.icon} size={16} />
+							<CategoryIcon icon={cat.icon} size={18} />
 						</div>
 						<div>
 							<strong class="cat-name">{cat.name}</strong>
-							<span class="cat-count-sub">{cat.count} txns</span>
+							<span class="cat-count-sub">{cat.count} transactions</span>
 						</div>
 					</div>
 
@@ -210,7 +210,7 @@
 
 	.campus-sub {
 		display: block;
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -219,11 +219,18 @@
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	/* Card Base Layout */
@@ -232,6 +239,8 @@
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: 0.5rem;
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 
 	.card-title-wrap {
@@ -248,37 +257,37 @@
 	}
 
 	.matrix-tag {
-		font-size: 0.68rem;
+		font-size: 0.72rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		padding: 2px 6px;
+		border: 1px solid var(--border-color);
+		padding: 2px 8px;
 		border-radius: var(--border-radius-pill);
 		color: var(--text-secondary);
 	}
 
 	.card-desc {
-		font-size: 0.78rem;
-		color: var(--text-muted);
+		font-size: 0.84rem;
+		color: var(--text-secondary);
 		margin-bottom: 0.85rem;
 		line-height: 1.45;
 	}
 
 	/* Emotional ROI */
 	.emotional-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.satisfaction-bar {
 		display: flex;
-		height: 8px;
+		height: 9px;
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		background: var(--surface-2);
 		margin-bottom: 0.85rem;
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 	}
 
 	.sat-fill.worth { background: #F59E0B; }
@@ -294,9 +303,9 @@
 
 	.sat-box {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-sm);
-		padding: 0.75rem 0.5rem;
+		padding: 0.75rem 0.4rem;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
@@ -312,8 +321,8 @@
 	}
 
 	.sat-pct {
-		font-size: 0.72rem;
-		font-weight: 700;
+		font-size: 0.75rem;
+		font-weight: 800;
 		color: var(--text-muted);
 	}
 
@@ -324,33 +333,34 @@
 	}
 
 	.sat-label {
-		font-size: 0.65rem;
+		font-size: 0.7rem;
+		font-weight: 600;
 		color: var(--text-muted);
 	}
 
 	.regret-callout-banner {
-		background: rgba(244, 63, 94, 0.08);
-		border: 1px solid rgba(244, 63, 94, 0.25);
+		background: rgba(244, 63, 94, 0.1);
+		border: 1px solid rgba(244, 63, 94, 0.3);
 		border-radius: var(--border-radius);
 		padding: 0.75rem 1rem;
-		font-size: 0.78rem;
+		font-size: 0.84rem;
 		color: var(--text-primary);
 		line-height: 1.45;
 	}
 
 	/* Value Split */
 	.value-split-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.value-track {
 		display: flex;
-		height: 8px;
+		height: 9px;
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		background: var(--surface-2);
 		margin-bottom: 0.85rem;
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 	}
 
 	.v-seg.need-seg { background: #10B981; }
@@ -365,9 +375,9 @@
 
 	.vtag-box {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-sm);
-		padding: 0.75rem 0.5rem;
+		padding: 0.75rem 0.4rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
@@ -375,8 +385,8 @@
 	}
 
 	.vtag-header {
-		font-size: 0.68rem;
-		font-weight: 700;
+		font-size: 0.72rem;
+		font-weight: 800;
 		color: var(--text-muted);
 		display: flex;
 		align-items: center;
@@ -391,21 +401,22 @@
 	}
 
 	.vtag-pct {
-		font-size: 0.65rem;
+		font-size: 0.7rem;
+		font-weight: 600;
 		color: var(--text-muted);
 	}
 
 	/* Labor Card */
 	.labor-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.wage-rate-pill {
-		font-size: 0.72rem;
-		font-weight: 700;
+		font-size: 0.75rem;
+		font-weight: 800;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		padding: 2px 8px;
+		border: 1px solid var(--border-color);
+		padding: 3px 9px;
 		border-radius: var(--border-radius-pill);
 		color: var(--accent-primary);
 	}
@@ -418,41 +429,42 @@
 
 	.labor-stat-card {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 1rem;
+		padding: 0.85rem 1rem;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 
 	.l-stat-lbl {
-		font-size: 0.68rem;
-		font-weight: 700;
+		font-size: 0.72rem;
+		font-weight: 800;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
 
 	.l-stat-val {
-		font-size: 1.55rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.l-stat-sub {
-		font-size: 0.72rem;
-		color: var(--text-muted);
+		font-size: 0.76rem;
+		color: var(--text-secondary);
+		font-weight: 600;
 	}
 
 	/* Categories Card */
 	.categories-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.categories-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.65rem;
 		margin-top: 0.85rem;
 	}
 
@@ -460,57 +472,58 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.5rem 0.25rem;
-		border-bottom: 1px solid var(--border-subtle);
-	}
-
-	.cat-rank-row:last-child {
-		border-bottom: none;
+		padding: 0.65rem 0.5rem;
+		border-radius: var(--border-radius-sm);
+		background: var(--surface-2);
+		border: 1px solid var(--border-color);
 	}
 
 	.cat-rank-left {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 0.65rem;
 	}
 
 	.cat-icon-frame {
-		width: 32px;
-		height: 32px;
+		width: 38px;
+		height: 38px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		flex-shrink: 0;
 	}
 
 	.cat-name {
-		font-size: 0.88rem;
+		font-size: 0.9rem;
+		font-weight: 800;
 		color: var(--text-primary);
 		display: block;
 	}
 
 	.cat-count-sub {
-		font-size: 0.68rem;
+		font-size: 0.74rem;
 		color: var(--text-muted);
+		font-weight: 600;
 	}
 
 	.cat-rank-right {
 		text-align: right;
-		width: 140px;
+		min-width: 90px;
 	}
 
 	.cat-total-amt {
-		font-size: 0.88rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 3px;
 	}
 
 	.cat-pct-track {
 		height: 4px;
-		background: var(--surface-2);
+		background: var(--surface-3);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
+		margin-top: 4px;
 	}
 
 	.cat-pct-bar {

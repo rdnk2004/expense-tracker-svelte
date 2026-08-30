@@ -11,9 +11,9 @@
 	});
 
 	let statusBg = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.12)';
-		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.12)';
-		return 'rgba(244, 63, 94, 0.12)';
+		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.16)';
+		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.16)';
+		return 'rgba(244, 63, 94, 0.16)';
 	});
 
 	let statusColor = $derived.by(() => {
@@ -23,9 +23,9 @@
 	});
 
 	let statusBorder = $derived.by(() => {
-		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.25)';
-		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.25)';
-		return 'rgba(244, 63, 94, 0.25)';
+		if ($runway.burnRateStatus === 'safe') return 'rgba(16, 185, 129, 0.35)';
+		if ($runway.burnRateStatus === 'caution') return 'rgba(245, 158, 11, 0.35)';
+		return 'rgba(244, 63, 94, 0.35)';
 	});
 </script>
 
@@ -39,7 +39,7 @@
 			</div>
 		</div>
 		<div class="runway-cycle-pill" title="Days remaining in current allowance cycle">
-			<Calendar size={13} class="calendar-icon" />
+			<Calendar size={14} class="calendar-icon" />
 			<span><strong>{$runway.daysRemaining}</strong> days left</span>
 		</div>
 	</div>
@@ -69,7 +69,7 @@
 			></div>
 		</div>
 		<div class="gauge-meta-row">
-			<span>Today's Spend: <strong class="tabular">{formatCurrency($runway.todaySpent)}</strong></span>
+			<span>Today: <strong class="tabular">{formatCurrency($runway.todaySpent)}</strong></span>
 			<span>Pace: <strong class="tabular">{$runway.todayPacePercent}%</strong></span>
 		</div>
 	</div>
@@ -96,14 +96,20 @@
 <style>
 	.safe-spend-card {
 		background: var(--bg-card);
-		border-radius: var(--border-radius-lg);
-		padding: 1.35rem;
-		margin-bottom: 1.15rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 		border: 1px solid var(--status-border);
 		box-shadow: var(--shadow-sm);
 		position: relative;
 		overflow: hidden;
 		transition: all 0.25s ease;
+	}
+
+	@media (min-width: 768px) {
+		.safe-spend-card {
+			border-radius: var(--border-radius-lg);
+			padding: 1.35rem;
+		}
 	}
 
 	.safe-spend-card::before {
@@ -120,27 +126,27 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 1rem;
 	}
 
 	.status-indicator-badge {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		padding: 0.25rem 0.65rem;
+		padding: 0.3rem 0.7rem;
 		border-radius: var(--border-radius-pill);
 		background: var(--status-bg);
 		border: 1px solid var(--status-border);
 		color: var(--status-color);
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 	}
 
 	.status-pulse-dot {
-		width: 6px;
-		height: 6px;
+		width: 7px;
+		height: 7px;
 		border-radius: 50%;
 		background: var(--status-color);
 		box-shadow: 0 0 6px var(--status-color);
@@ -150,26 +156,26 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		color: var(--text-secondary);
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		padding: 0.25rem 0.65rem;
+		border: 1px solid var(--border-color);
+		padding: 0.3rem 0.7rem;
 		border-radius: var(--border-radius-pill);
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	/* Hero Block */
 	.safe-hero-block {
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.hero-sub-eyebrow {
 		display: block;
 		font-size: 0.76rem;
-		font-weight: 700;
+		font-weight: 800;
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.05em;
 		color: var(--text-muted);
 		margin-bottom: 0.25rem;
 	}
@@ -181,7 +187,7 @@
 	}
 
 	.amount-val {
-		font-size: 2.15rem;
+		font-size: 1.85rem;
 		font-weight: 800;
 		letter-spacing: -0.04em;
 		color: var(--text-primary);
@@ -189,16 +195,23 @@
 		margin: 0;
 	}
 
+	@media (min-width: 768px) {
+		.amount-val {
+			font-size: 2.15rem;
+		}
+	}
+
 	.per-day-tag {
-		font-size: 0.95rem;
-		font-weight: 600;
+		font-size: 0.92rem;
+		font-weight: 700;
 		color: var(--text-muted);
 	}
 
 	.amount-today-caption {
-		font-size: 0.82rem;
+		font-size: 0.84rem;
 		color: var(--text-secondary);
 		margin-top: 0.35rem;
+		font-weight: 500;
 	}
 
 	.over-limit-txt {
@@ -208,15 +221,15 @@
 
 	/* Gauge Progress */
 	.gauge-section {
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.gauge-track {
-		height: 7px;
+		height: 8px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		margin-bottom: 0.45rem;
 	}
 
@@ -229,8 +242,9 @@
 	.gauge-meta-row {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		color: var(--text-muted);
+		font-weight: 600;
 	}
 
 	.gauge-meta-row strong {
@@ -241,16 +255,16 @@
 	.metrics-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 0.65rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--border-subtle);
+		gap: 0.5rem;
+		padding-top: 0.85rem;
+		border-top: 1px solid var(--border-color);
 	}
 
 	.metric-tile {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-sm);
-		padding: 0.65rem 0.5rem;
+		padding: 0.6rem 0.4rem;
 		text-align: center;
 		display: flex;
 		flex-direction: column;
@@ -258,22 +272,28 @@
 	}
 
 	.tile-label {
-		font-size: 0.65rem;
-		font-weight: 700;
+		font-size: 0.68rem;
+		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		color: var(--text-muted);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.tile-value {
 		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.tile-value small {
 		font-size: 0.72rem;
-		font-weight: 600;
+		font-weight: 700;
 		color: var(--text-muted);
 	}
 

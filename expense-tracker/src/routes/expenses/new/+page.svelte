@@ -654,9 +654,10 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.75rem 1rem;
-		font-size: 0.88rem;
-		min-height: 44px;
+		padding: 0.85rem 1rem;
+		font-size: 16px;
+		color: var(--text-primary);
+		min-height: 48px;
 	}
 
 	/* Keypad & Confirm */
@@ -670,14 +671,14 @@
 
 	.confirm-submit-btn {
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 1rem;
 		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
 		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-		min-height: 50px;
+		min-height: 52px;
 		display: flex;
 		align-items: center;
 		justify-content: center;

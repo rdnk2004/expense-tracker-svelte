@@ -540,13 +540,14 @@
 		justify-content: center;
 		gap: 6px;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
-		font-size: 0.92rem;
-		padding: 0.8rem;
+		font-size: 0.95rem;
+		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
 		margin-top: 0.45rem;
+		min-height: 48px;
 	}
 
 	/* Theme Card */
@@ -566,25 +567,26 @@
 	}
 
 	.theme-title {
-		font-size: 0.88rem;
+		font-size: 0.92rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
 
 	.theme-sub {
-		font-size: 0.72rem;
+		font-size: 0.78rem;
 		color: var(--text-muted);
 	}
 
 	.theme-toggle-btn {
-		width: 40px;
-		height: 40px;
+		width: 44px;
+		height: 44px;
 		border-radius: 50%;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		color: var(--text-primary);
 	}
 
 	/* Badges */
@@ -600,9 +602,9 @@
 
 	.badge-item-box {
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius);
-		padding: 0.75rem;
+		padding: 0.85rem;
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
@@ -611,30 +613,30 @@
 
 	.badge-item-box.unlocked {
 		opacity: 1;
-		border-color: rgba(16, 185, 129, 0.3);
-		background: rgba(16, 185, 129, 0.05);
+		border-color: rgba(16, 185, 129, 0.4);
+		background: rgba(16, 185, 129, 0.08);
 	}
 
 	.badge-emoji {
-		font-size: 1.35rem;
+		font-size: 1.45rem;
 	}
 
 	.badge-name {
-		font-size: 0.82rem;
+		font-size: 0.88rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		display: block;
 	}
 
 	.badge-desc {
-		font-size: 0.68rem;
-		color: var(--text-muted);
+		font-size: 0.74rem;
+		color: var(--text-secondary);
 		display: block;
 	}
 
 	.badge-status-tag {
-		font-size: 0.65rem;
-		font-weight: 700;
+		font-size: 0.72rem;
+		font-weight: 800;
 		margin-top: 4px;
 		color: var(--text-secondary);
 	}
@@ -656,13 +658,14 @@
 		align-items: center;
 		justify-content: center;
 		gap: 6px;
-		padding: 0.65rem;
+		padding: 0.75rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
+		font-size: 0.85rem;
 		font-weight: 700;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		color: var(--text-primary);
+		min-height: 46px;
 	}
 
 	.lock-row {
@@ -677,18 +680,19 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		border-top: 1px solid var(--border-subtle);
+		border-top: 1px solid var(--border-color);
 		padding-top: 0.85rem;
 	}
 
 	.danger-title {
-		font-size: 0.84rem;
+		font-size: 0.88rem;
+		font-weight: 700;
 		color: var(--danger);
 		display: block;
 	}
 
 	.danger-sub {
-		font-size: 0.7rem;
+		font-size: 0.74rem;
 		color: var(--text-muted);
 	}
 
@@ -699,10 +703,11 @@
 		background: var(--danger-bg);
 		border: 1px solid var(--danger-border);
 		color: var(--danger);
-		font-size: 0.74rem;
+		font-size: 0.78rem;
 		font-weight: 800;
-		padding: 0.35rem 0.75rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 36px;
 	}
 
 	/* Modal */
@@ -714,8 +719,8 @@
 	}
 
 	.sheet-desc {
-		font-size: 0.82rem;
-		color: var(--text-muted);
+		font-size: 0.86rem;
+		color: var(--text-secondary);
 		margin-bottom: 1rem;
 		line-height: 1.45;
 	}
@@ -725,19 +730,27 @@
 		background: var(--danger);
 		color: white;
 		font-weight: 800;
-		font-size: 0.92rem;
-		padding: 0.8rem;
+		font-size: 0.95rem;
+		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.primary-btn-full {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
-		font-size: 0.92rem;
-		padding: 0.8rem;
+		font-size: 0.95rem;
+		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	@media (max-width: 520px) {

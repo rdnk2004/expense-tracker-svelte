@@ -411,31 +411,37 @@
 	}
 
 	.friend-card-row input {
-		min-height: 36px;
-		padding: 0.4rem 0.65rem;
-		font-size: 0.8rem;
+		min-height: 44px;
+		padding: 0.5rem 0.75rem;
+		font-size: 16px;
 	}
 
 	.equal-chip {
 		background: var(--bg-card);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		border-radius: var(--border-radius-pill);
-		padding: 0.4rem 0.5rem;
-		font-size: 0.78rem;
+		padding: 0.45rem 0.5rem;
+		font-size: 0.85rem;
 		font-weight: 800;
 		text-align: center;
 		color: var(--text-primary);
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.delete-friend-btn {
-		width: 32px;
-		height: 32px;
+		width: 36px;
+		height: 36px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		color: var(--danger);
 		background: var(--danger-bg);
+		border: 1px solid var(--danger-border);
+		flex-shrink: 0;
 	}
 
 	.sheet-action-footer {
@@ -445,17 +451,21 @@
 	.primary-btn-full {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 0.95rem;
 		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	@media (max-width: 520px) {
 		.friend-card-row {
-			grid-template-columns: 1fr 1fr 32px;
+			grid-template-columns: 1fr 1fr 36px;
 		}
 
 		.friend-upi-input {

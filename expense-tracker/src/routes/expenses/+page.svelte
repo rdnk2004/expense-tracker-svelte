@@ -107,7 +107,7 @@
 
 		<!-- Search Input Bar -->
 		<div class="search-wrap">
-			<Search size={16} class="search-icon" />
+			<Search size={18} class="search-icon" />
 			<input type="text" placeholder="Search transactions, notes, items..." bind:value={searchQuery} />
 		</div>
 
@@ -143,9 +143,9 @@
 			</button>
 		</div>
 
-		<!-- Value Tag Filter Pills -->
+		<!-- Value Tag Filter Pills (Touch Horizontal Scroll) -->
 		{#if activeSegment === 'all' || activeSegment === 'expense'}
-			<div class="filter-chips-row">
+			<div class="filter-chips-row touch-scroll-x">
 				<button
 					class="filter-chip"
 					class:active={activeValueFilter === 'all'}
@@ -263,7 +263,7 @@
 			</div>
 		{:else}
 			<div class="empty-feed card">
-				<Receipt size={32} color="var(--text-muted)" />
+				<Receipt size={36} color="var(--text-muted)" />
 				<p>No matching transactions found.</p>
 			</div>
 		{/each}
@@ -287,6 +287,7 @@
 			aria-modal="true"
 			tabindex="-1"
 		>
+			<div class="sheet-handle-bar"></div>
 			<div class="sheet-top-row">
 				<h3>Mindful Spending Audit</h3>
 				<button class="close-btn" onclick={() => (showSatisfactionModal = false)}>✕</button>
@@ -307,7 +308,7 @@
 				>
 					<span class="emoji">🔥</span>
 					<strong>Worth It</strong>
-					<span class="sub">Loved it / high utility</span>
+					<span class="sub">High joy / utility</span>
 				</button>
 
 				<button
@@ -327,7 +328,7 @@
 				>
 					<span class="emoji">💀</span>
 					<strong>Regretted</strong>
-					<span class="sub">Impulse / peer pressure</span>
+					<span class="sub">Impulse purchase</span>
 				</button>
 			</div>
 
@@ -348,30 +349,38 @@
 	}
 
 	.header-section {
-		margin-bottom: 1.25rem;
+		margin-bottom: 1.15rem;
 	}
 
 	.page-title {
-		font-size: 1.65rem;
+		font-size: 1.45rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
-		margin-bottom: 1rem;
+		letter-spacing: -0.03em;
+		margin-bottom: 0.85rem;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.65rem;
+		}
 	}
 
 	.search-wrap {
 		position: relative;
-		margin-bottom: 0.75rem;
+		margin-bottom: 0.65rem;
 	}
 
 	.search-wrap input {
 		width: 100%;
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		padding: 0.75rem 1rem 0.75rem 2.4rem;
+		padding: 0.75rem 1rem 0.75rem 2.6rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.88rem;
+		font-size: 16px;
 		color: var(--text-primary);
+		min-height: 46px;
 	}
 
 	.search-icon {
@@ -388,15 +397,15 @@
 		background: var(--surface-2);
 		padding: 3px;
 		border-radius: var(--border-radius-pill);
-		border: 1px solid var(--border-subtle);
-		margin-bottom: 0.75rem;
+		border: 1px solid var(--border-color);
+		margin-bottom: 0.65rem;
 	}
 
 	.segment-btn {
 		flex: 1;
-		padding: 0.45rem 0.6rem;
+		padding: 0.5rem 0.4rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.78rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 		color: var(--text-secondary);
 		transition: all 0.2s ease;
@@ -406,22 +415,22 @@
 		background: var(--bg-card);
 		color: var(--text-primary);
 		box-shadow: var(--shadow-xs);
+		font-weight: 800;
 	}
 
 	.filter-chips-row {
 		display: flex;
 		gap: 6px;
-		overflow-x: auto;
-		padding-bottom: 2px;
+		padding-bottom: 4px;
 	}
 
 	.filter-chip {
-		padding: 0.35rem 0.75rem;
+		padding: 0.35rem 0.8rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.72rem;
+		font-size: 0.76rem;
 		font-weight: 700;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		color: var(--text-secondary);
 		white-space: nowrap;
 		transition: all 0.2s ease;
@@ -429,30 +438,31 @@
 
 	.filter-chip.active {
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		border-color: var(--accent-primary);
+		box-shadow: 0 2px 8px var(--accent-glow);
 	}
 
 	.feed-container {
 		display: flex;
 		flex-direction: column;
-		gap: 0.65rem;
+		gap: 0.5rem;
 	}
 
 	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
-		padding: 1rem 1.15rem;
+		gap: 0.75rem;
+		padding: 0.85rem 1rem;
 		cursor: pointer;
 	}
 
 	.icon-wrap {
-		width: 40px;
-		height: 40px;
-		border-radius: var(--border-radius-sm);
+		width: 42px;
+		height: 42px;
+		border-radius: var(--border-radius-xs);
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -483,7 +493,7 @@
 	}
 
 	.meta-line {
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		color: var(--text-muted);
 		display: flex;
 		align-items: center;
@@ -494,7 +504,7 @@
 	}
 
 	.bullet {
-		color: var(--border-strong);
+		color: var(--border-medium);
 	}
 
 	.wallet-tag {
@@ -503,20 +513,20 @@
 	}
 
 	.tag-pill {
-		font-size: 0.65rem;
-		font-weight: 700;
+		font-size: 0.68rem;
+		font-weight: 800;
 		padding: 1px 6px;
 		border-radius: var(--border-radius-pill);
 	}
 
-	.tag-need { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-	.tag-want { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
-	.tag-growth { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
-	.tag-worth { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-	.tag-regret { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+	.tag-need { background: rgba(16, 185, 129, 0.18); color: #10B981; }
+	.tag-want { background: rgba(56, 189, 248, 0.18); color: #38BDF8; }
+	.tag-growth { background: rgba(99, 102, 241, 0.18); color: #818CF8; }
+	.tag-worth { background: rgba(245, 158, 11, 0.18); color: #F59E0B; }
+	.tag-regret { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
 
 	.amount-col {
-		font-size: 1rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		flex-shrink: 0;
@@ -544,13 +554,20 @@
 		margin-bottom: 1.15rem;
 	}
 
+	.sheet-top-row h3 {
+		font-size: 1.15rem;
+		font-weight: 800;
+		color: var(--text-primary);
+		margin: 0;
+	}
+
 	.audit-summary-box {
 		background: var(--surface-2);
 		border-radius: var(--border-radius);
 		padding: 1rem;
 		text-align: center;
 		margin-bottom: 1.15rem;
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 	}
 
 	.audit-amount {
@@ -560,13 +577,14 @@
 	}
 
 	.audit-note {
-		font-size: 0.78rem;
+		font-size: 0.8rem;
 		color: var(--text-muted);
 		margin-top: 2px;
+		font-weight: 600;
 	}
 
 	.audit-question {
-		font-size: 0.88rem;
+		font-size: 0.9rem;
 		color: var(--text-secondary);
 		text-align: center;
 		margin-bottom: 1rem;
@@ -587,7 +605,7 @@
 		padding: 0.85rem 0.45rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		text-align: center;
 		gap: 2px;
 		transition: all 0.2s ease;
@@ -599,18 +617,19 @@
 	}
 
 	.satisfaction-btn strong {
-		font-size: 0.78rem;
+		font-size: 0.82rem;
 		color: var(--text-primary);
+		font-weight: 800;
 	}
 
 	.satisfaction-btn .sub {
-		font-size: 0.65rem;
+		font-size: 0.68rem;
 		color: var(--text-muted);
 	}
 
 	.satisfaction-btn.selected {
 		border-color: var(--accent-primary);
-		background: var(--bg-hover);
+		background: var(--accent-glow);
 	}
 
 	.sheet-delete-row {
@@ -626,9 +645,10 @@
 		color: var(--danger);
 		background: var(--danger-bg);
 		border: 1px solid var(--danger-border);
-		padding: 0.55rem 1.15rem;
+		padding: 0.65rem 1.25rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
-		font-weight: 700;
+		font-size: 0.85rem;
+		font-weight: 800;
+		min-height: 44px;
 	}
 </style>

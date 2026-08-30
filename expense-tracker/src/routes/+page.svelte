@@ -98,7 +98,7 @@
 </script>
 
 <div class="dashboard-page">
-	<!-- Top Greeting & Action Header -->
+	<!-- Top Greeting & Action Header (Desktop & Mobile Adaptive) -->
 	<header class="dashboard-header">
 		<div class="header-titles">
 			<div class="campus-tag-pill">
@@ -139,10 +139,10 @@
 				<h2 class="balance-display tabular">{formatCurrency($totalBalance)}</h2>
 			</div>
 
-			<!-- Individual Wallets Mini Chips -->
-			<div class="wallet-pills-row">
+			<!-- Individual Wallets Mini Chips (Horizontal Touch Scroll) -->
+			<div class="wallet-pills-row touch-scroll-x">
 				{#each $wallets as w}
-					<div class="wallet-mini-pill">
+					<div class="wallet-mini-pill" onclick={() => goto('/wallets')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && goto('/wallets')}>
 						<span class="wallet-pill-name">{w.name}</span>
 						<span class="wallet-pill-val tabular">{formatCurrency(w.balance)}</span>
 					</div>
@@ -153,14 +153,14 @@
 			<div class="stats-row">
 				<div class="stat-item">
 					<div class="stat-label">
-						<ArrowDownLeft size={14} color="#10B981" />
+						<ArrowDownLeft size={15} color="#10B981" />
 						<span>Inflow</span>
 					</div>
 					<div class="stat-value text-success tabular">{formatCurrency(monthlyIncome)}</div>
 				</div>
 				<div class="stat-item">
 					<div class="stat-label">
-						<ArrowUpRight size={14} color="#F43F5E" />
+						<ArrowUpRight size={15} color="#F43F5E" />
 						<span>Outflow</span>
 					</div>
 					<div class="stat-value text-danger tabular">{formatCurrency(monthlyExpense)}</div>
@@ -214,7 +214,7 @@
 		{#if totalReceivable > 0}
 			<div class="alert-banner-receivable">
 				<div class="alert-icon-col">
-					<Handshake size={20} color="#818CF8" />
+					<Handshake size={22} color="#818CF8" />
 				</div>
 				<div class="alert-content-col">
 					<strong class="tabular">{formatCurrency(totalReceivable)}</strong> owed to you from {$unsettledDebts.filter(d => d.direction === 'receive').length} friend splits.
@@ -239,7 +239,7 @@
 				{#each recentExpenses as exp}
 					{@const cat = getCategoryById(exp.categoryId)}
 					{@const laborCost = calculateTimeCost(exp.amount)}
-					<div class="transaction-row">
+					<div class="transaction-row" onclick={() => goto('/expenses')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && goto('/expenses')}>
 						<div class="t-icon">
 							<CategoryIcon icon={cat?.icon || 'Receipt'} color={cat?.color || '#10B981'} size={20} />
 						</div>
@@ -253,11 +253,11 @@
 									</span>
 								{/if}
 								{#if exp.satisfactionRating === 'regretted'}
-									<span class="tag-pill tag-regret">💀 Regretted</span>
+									<span class="tag-pill tag-regret">💀 Regret</span>
 								{/if}
 								{#if laborCost && exp.categoryId !== 'income'}
 									<span class="time-cost-pill" title="Time cost based on student hourly rate">
-										<Clock size={10} />
+										<Clock size={11} />
 										<span>{laborCost}</span>
 									</span>
 								{/if}
@@ -269,7 +269,7 @@
 					</div>
 				{:else}
 					<div class="empty-state-box">
-						<Receipt size={32} color="var(--text-muted)" />
+						<Receipt size={36} color="var(--text-muted)" />
 						<p>No transactions logged in this cycle.</p>
 						<a href="/expenses/new" class="btn btn-secondary">Log your first spend</a>
 					</div>
@@ -289,48 +289,56 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.25rem;
-		gap: 1rem;
+		margin-bottom: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.campus-tag-pill {
 		display: inline-flex;
 		align-items: center;
 		gap: 5px;
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		font-weight: 700;
 		color: var(--accent-primary);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.04em;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		padding: 0.2rem 0.6rem;
+		border: 1px solid var(--border-color);
+		padding: 0.2rem 0.65rem;
 		border-radius: var(--border-radius-pill);
-		margin-bottom: 0.35rem;
+		margin-bottom: 0.3rem;
 	}
 
 	.page-title {
-		font-size: 1.75rem;
+		font-size: 1.5rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		margin: 0;
+		line-height: 1.2;
+	}
+
+	@media (min-width: 768px) {
+		.page-title {
+			font-size: 1.75rem;
+		}
 	}
 
 	.quick-log-btn {
 		background: var(--accent-primary);
-		color: #080C14;
-		padding: 0.55rem 1rem;
+		color: #FFFFFF;
+		padding: 0.6rem 1.1rem;
 		border-radius: var(--border-radius-pill);
-		font-weight: 700;
-		font-size: 0.84rem;
+		font-weight: 800;
+		font-size: 0.85rem;
 		display: inline-flex;
 		align-items: center;
-		gap: 5px;
+		gap: 6px;
 		box-shadow: 0 2px 10px var(--accent-glow);
 		text-decoration: none;
 		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 		flex-shrink: 0;
+		min-height: 40px;
 	}
 
 	.quick-log-btn:hover {
@@ -340,7 +348,7 @@
 	.dashboard-stream {
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 1rem;
 	}
 
 	/* Hero Card */
@@ -348,26 +356,26 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 1rem;
 	}
 
 	.account-selector {
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		background: rgba(255, 255, 255, 0.08);
-		padding: 4px 10px;
+		background: rgba(255, 255, 255, 0.1);
+		padding: 5px 12px;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.76rem;
+		font-size: 0.78rem;
 		font-weight: 700;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		border: 1px solid rgba(255, 255, 255, 0.16);
 	}
 
 	.icon-btn-ghost {
-		background: rgba(255, 255, 255, 0.08);
+		background: rgba(255, 255, 255, 0.1);
 		color: white;
-		width: 32px;
-		height: 32px;
+		width: 34px;
+		height: 34px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -377,63 +385,76 @@
 	}
 
 	.icon-btn-ghost:hover {
-		background: rgba(255, 255, 255, 0.16);
+		background: rgba(255, 255, 255, 0.2);
 	}
 
 	.balance-section {
-		margin-bottom: 1.15rem;
+		margin-bottom: 1rem;
 	}
 
 	.label-sm {
 		display: block;
-		font-size: 0.74rem;
-		opacity: 0.75;
+		font-size: 0.75rem;
+		opacity: 0.8;
 		margin-bottom: 4px;
-		font-weight: 600;
+		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.05em;
 	}
 
 	.balance-display {
-		font-size: 2.35rem;
+		font-size: 2rem;
 		font-weight: 800;
 		line-height: 1.1;
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		color: #FFFFFF;
 		margin: 0;
+	}
+
+	@media (min-width: 768px) {
+		.balance-display {
+			font-size: 2.35rem;
+		}
 	}
 
 	.wallet-pills-row {
 		display: flex;
 		gap: 6px;
-		margin-bottom: 1.15rem;
-		flex-wrap: wrap;
+		margin-bottom: 1rem;
+		padding-bottom: 4px;
 	}
 
 	.wallet-mini-pill {
-		background: rgba(255, 255, 255, 0.08);
-		padding: 4px 10px;
+		background: rgba(255, 255, 255, 0.1);
+		padding: 5px 12px;
 		border-radius: var(--border-radius-xs);
-		font-size: 0.74rem;
+		font-size: 0.78rem;
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		white-space: nowrap;
+		cursor: pointer;
+		transition: background 0.2s ease;
+	}
+
+	.wallet-mini-pill:hover {
+		background: rgba(255, 255, 255, 0.18);
 	}
 
 	.wallet-pill-name {
-		opacity: 0.7;
+		opacity: 0.8;
 	}
 
 	.wallet-pill-val {
-		font-weight: 700;
+		font-weight: 800;
 	}
 
 	.stats-row {
 		display: flex;
 		gap: 1rem;
-		border-top: 1px solid rgba(255, 255, 255, 0.1);
-		padding-top: 1rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.12);
+		padding-top: 0.85rem;
 	}
 
 	.stat-item {
@@ -444,8 +465,8 @@
 		display: flex;
 		align-items: center;
 		gap: 4px;
-		font-size: 0.72rem;
-		opacity: 0.75;
+		font-size: 0.74rem;
+		opacity: 0.8;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
@@ -467,14 +488,14 @@
 
 	/* Section Card */
 	.section-card {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.section-header-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1.15rem;
+		margin-bottom: 1rem;
 	}
 
 	.section-title {
@@ -485,7 +506,7 @@
 	}
 
 	.sub-label {
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		color: var(--text-muted);
 		display: block;
 		margin-top: 2px;
@@ -495,7 +516,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 3px;
-		font-size: 0.78rem;
+		font-size: 0.8rem;
 		font-weight: 700;
 		color: var(--accent-primary);
 		text-decoration: none;
@@ -508,8 +529,8 @@
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		background: var(--surface-2);
-		margin-bottom: 1rem;
-		border: 1px solid var(--border-subtle);
+		margin-bottom: 0.85rem;
+		border: 1px solid var(--border-color);
 	}
 
 	.bucket-segment.survival { background: #10B981; }
@@ -519,7 +540,7 @@
 	.bucket-legend-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 0.65rem;
+		gap: 0.5rem;
 	}
 
 	.bucket-legend-item {
@@ -527,15 +548,15 @@
 		flex-direction: column;
 		gap: 2px;
 		background: var(--surface-2);
-		padding: 0.65rem 0.5rem;
+		padding: 0.65rem 0.4rem;
 		border-radius: var(--border-radius-sm);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		text-align: center;
 	}
 
 	.dot {
-		width: 6px;
-		height: 6px;
+		width: 7px;
+		height: 7px;
 		border-radius: 50%;
 		margin: 0 auto 2px;
 	}
@@ -545,8 +566,8 @@
 	.dot.future { background: #818CF8; }
 
 	.b-name {
-		font-size: 0.68rem;
-		font-weight: 700;
+		font-size: 0.72rem;
+		font-weight: 800;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
@@ -558,14 +579,15 @@
 	}
 
 	.b-pct {
-		font-size: 0.68rem;
+		font-size: 0.7rem;
+		font-weight: 600;
 		color: var(--text-muted);
 	}
 
 	/* Receivables Alert */
 	.alert-banner-receivable {
-		background: rgba(99, 102, 241, 0.1);
-		border: 1px solid rgba(99, 102, 241, 0.25);
+		background: rgba(99, 102, 241, 0.12);
+		border: 1px solid rgba(99, 102, 241, 0.3);
 		border-radius: var(--border-radius);
 		padding: 0.85rem 1rem;
 		display: flex;
@@ -579,18 +601,19 @@
 
 	.alert-content-col {
 		flex: 1;
-		font-size: 0.84rem;
+		font-size: 0.86rem;
 		color: var(--text-primary);
+		font-weight: 600;
 	}
 
 	.alert-action-btn {
 		background: var(--surface-2);
-		border: 1px solid rgba(99, 102, 241, 0.3);
+		border: 1px solid rgba(99, 102, 241, 0.35);
 		color: #818CF8;
-		padding: 4px 10px;
+		padding: 5px 12px;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.74rem;
-		font-weight: 700;
+		font-size: 0.78rem;
+		font-weight: 800;
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
@@ -600,22 +623,23 @@
 
 	/* Recent Transactions */
 	.section-recent {
-		padding: 1.35rem;
+		padding: 1.15rem;
 	}
 
 	.transactions-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.4rem;
 	}
 
 	.transaction-row {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
-		padding: 0.75rem 0.5rem;
+		gap: 0.75rem;
+		padding: 0.7rem 0.5rem;
 		border-radius: var(--border-radius-sm);
 		transition: background 0.2s ease;
+		cursor: pointer;
 	}
 
 	.transaction-row:hover {
@@ -623,11 +647,11 @@
 	}
 
 	.t-icon {
-		width: 40px;
-		height: 40px;
-		border-radius: var(--border-radius-sm);
+		width: 42px;
+		height: 42px;
+		border-radius: var(--border-radius-xs);
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
+		border: 1px solid var(--border-color);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -640,7 +664,7 @@
 	}
 
 	.t-title {
-		font-size: 0.88rem;
+		font-size: 0.9rem;
 		font-weight: 700;
 		color: var(--text-primary);
 		white-space: nowrap;
@@ -652,38 +676,39 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		color: var(--text-muted);
 		margin-top: 2px;
 		flex-wrap: wrap;
 	}
 
 	.tag-pill {
-		font-size: 0.65rem;
-		font-weight: 700;
+		font-size: 0.68rem;
+		font-weight: 800;
 		padding: 1px 6px;
 		border-radius: var(--border-radius-pill);
 	}
 
-	.tag-need { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-	.tag-want { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
-	.tag-growth { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
-	.tag-regret { background: rgba(244, 63, 94, 0.15); color: #F43F5E; }
+	.tag-need { background: rgba(16, 185, 129, 0.18); color: #10B981; }
+	.tag-want { background: rgba(56, 189, 248, 0.18); color: #38BDF8; }
+	.tag-growth { background: rgba(99, 102, 241, 0.18); color: #818CF8; }
+	.tag-regret { background: rgba(244, 63, 94, 0.18); color: #F43F5E; }
 
 	.time-cost-pill {
 		display: inline-flex;
 		align-items: center;
 		gap: 3px;
-		font-size: 0.65rem;
+		font-size: 0.68rem;
 		background: var(--surface-2);
-		border: 1px solid var(--border-subtle);
-		padding: 1px 5px;
+		border: 1px solid var(--border-color);
+		padding: 1px 6px;
 		border-radius: var(--border-radius-pill);
-		color: var(--text-muted);
+		color: var(--text-secondary);
+		font-weight: 600;
 	}
 
 	.t-amount {
-		font-size: 0.95rem;
+		font-size: 0.98rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		flex-shrink: 0;
@@ -703,7 +728,7 @@
 	}
 
 	.empty-state-box p {
-		font-size: 0.84rem;
+		font-size: 0.88rem;
 		color: var(--text-muted);
 		margin: 0;
 	}

@@ -627,12 +627,13 @@
 	.pacing-row {
 		display: flex;
 		justify-content: space-between;
-		font-size: 0.72rem;
+		font-size: 0.78rem;
 		color: var(--text-secondary);
 		background: var(--bg-card);
 		border-radius: var(--border-radius-pill);
-		padding: 3px 8px;
-		border: 1px solid var(--border-subtle);
+		padding: 4px 10px;
+		border: 1px solid var(--border-color);
+		font-weight: 600;
 	}
 
 	.pacing-item {
@@ -653,15 +654,16 @@
 		align-items: center;
 		gap: 4px;
 		background: var(--accent-primary);
-		color: #080C14;
-		font-size: 0.75rem;
+		color: #FFFFFF;
+		font-size: 0.78rem;
 		font-weight: 800;
-		padding: 0.35rem 0.75rem;
+		padding: 0.4rem 0.85rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 36px;
 	}
 
 	.achieved-tag {
-		font-size: 0.75rem;
+		font-size: 0.78rem;
 		font-weight: 800;
 		color: var(--success);
 	}
@@ -669,7 +671,7 @@
 	.delete-goal-icon {
 		color: var(--text-muted);
 		background: transparent;
-		padding: 4px;
+		padding: 6px;
 	}
 
 	.delete-goal-icon:hover {
@@ -684,7 +686,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		color: var(--text-muted);
-		font-size: 0.84rem;
+		font-size: 0.88rem;
 	}
 
 	/* Sheet Forms */
@@ -706,8 +708,8 @@
 
 	.form-group-custom label {
 		display: block;
-		font-size: 0.76rem;
-		font-weight: 700;
+		font-size: 0.78rem;
+		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		color: var(--text-muted);
@@ -717,13 +719,17 @@
 	.primary-btn-full {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 0.95rem;
 		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
 		margin-top: 0.5rem;
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	@media (max-width: 480px) {

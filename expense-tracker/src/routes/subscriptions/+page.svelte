@@ -699,18 +699,19 @@
 		align-items: center;
 		gap: 4px;
 		background: var(--bg-card);
-		border: 1px solid var(--border-subtle);
-		color: var(--text-primary);
-		font-size: 0.72rem;
-		font-weight: 700;
-		padding: 0.25rem 0.55rem;
+		border: 1px solid var(--border-color);
+		color: var(--accent-primary);
+		font-size: 0.78rem;
+		font-weight: 800;
+		padding: 0.35rem 0.75rem;
 		border-radius: var(--border-radius-pill);
+		min-height: 32px;
 	}
 
 	.delete-sub-btn {
 		color: var(--text-muted);
 		background: transparent;
-		padding: 3px;
+		padding: 6px;
 	}
 
 	.delete-sub-btn:hover {
@@ -721,7 +722,7 @@
 		text-align: center;
 		padding: 2.5rem 1rem;
 		color: var(--text-muted);
-		font-size: 0.84rem;
+		font-size: 0.88rem;
 	}
 
 	/* Sheet */
@@ -743,8 +744,8 @@
 
 	.form-group-custom label {
 		display: block;
-		font-size: 0.76rem;
-		font-weight: 700;
+		font-size: 0.78rem;
+		font-weight: 800;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		color: var(--text-muted);
@@ -755,7 +756,7 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		font-size: 0.82rem;
+		font-size: 0.85rem;
 		color: var(--text-primary);
 		cursor: pointer;
 		margin-bottom: 1rem;
@@ -764,19 +765,23 @@
 	}
 
 	.essential-check-label input {
-		width: 16px;
-		height: 16px;
+		width: 18px;
+		height: 18px;
 		min-height: auto;
 	}
 
 	.primary-btn-full {
 		width: 100%;
 		background: var(--accent-primary);
-		color: #080C14;
+		color: #FFFFFF;
 		font-weight: 800;
 		font-size: 0.95rem;
 		padding: 0.85rem;
 		border-radius: var(--border-radius-pill);
 		box-shadow: 0 4px 14px var(--accent-glow);
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>
