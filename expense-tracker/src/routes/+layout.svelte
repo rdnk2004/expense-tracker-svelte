@@ -88,20 +88,6 @@
 		}
 	];
 
-	// Quick scrollable pill items for mobile sub-header
-	const quickNavPills = [
-		{ href: '/', label: 'Overview', icon: LayoutDashboard },
-		{ href: '/expenses', label: 'Expenses', icon: Receipt },
-		{ href: '/debts', label: 'Splits', icon: Handshake },
-		{ href: '/wallets', label: 'Wallets', icon: Wallet },
-		{ href: '/budgets', label: 'Buckets', icon: Target },
-		{ href: '/analytics', label: 'Labor ROI', icon: ChartPie },
-		{ href: '/goals', label: 'Goals', icon: PiggyBank },
-		{ href: '/subscriptions', label: 'Radar', icon: Radio },
-		{ href: '/transfers', label: 'Transfers', icon: ArrowLeftRight },
-		{ href: '/settings', label: 'Hub', icon: Settings }
-	];
-
 	const routeTitles: Record<string, string> = {
 		'/': 'Dashboard',
 		'/expenses': 'Transactions & Audit',
@@ -275,25 +261,6 @@
 				</button>
 			</div>
 		</header>
-
-		<!-- Mobile Horizontal Feature Quick-Pill Bar -->
-		<nav class="mobile-subnav-bar glass-panel" aria-label="Quick Category Switching">
-			<div class="mobile-pills-scroll touch-scroll-x">
-				{#each quickNavPills as item}
-					<a
-						href={item.href}
-						class="subnav-pill"
-						class:active={$page.url.pathname === item.href || ($page.url.pathname.startsWith(item.href) && item.href !== '/')}
-					>
-						<item.icon size={13} />
-						<span>{item.label}</span>
-						{#if item.href === '/debts' && totalReceivableCount > 0}
-							<span class="pill-badge">{totalReceivableCount}</span>
-						{/if}
-					</a>
-				{/each}
-			</div>
-		</nav>
 
 		<!-- Desktop Neo-Bank Sidebar -->
 		<aside class="sidebar glass-panel">
@@ -1159,60 +1126,6 @@
 		border-color: var(--accent-primary);
 	}
 
-	/* Mobile Horizontal Sub-Nav Bar */
-	.mobile-subnav-bar {
-		display: none;
-		position: fixed;
-		top: var(--header-height);
-		left: 0;
-		right: 0;
-		height: var(--subnav-height);
-		background: var(--glass-bg);
-		border-bottom: 1px solid var(--border-color);
-		z-index: 240;
-		padding: 0 0.85rem;
-		align-items: center;
-	}
-
-	.mobile-pills-scroll {
-		display: flex;
-		gap: 0.55rem;
-		align-items: center;
-		width: 100%;
-	}
-
-	.subnav-pill {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		padding: 0.45rem 0.95rem;
-		border-radius: var(--border-radius-pill);
-		font-size: 0.86rem;
-		font-weight: 800;
-		background: var(--surface-2);
-		border: 1px solid var(--border-color);
-		color: var(--text-secondary);
-		white-space: nowrap;
-		transition: all 0.2s ease;
-		min-height: 38px;
-	}
-
-	.subnav-pill.active {
-		background: var(--accent-primary);
-		color: #FFFFFF;
-		border-color: var(--accent-primary);
-		box-shadow: 0 2px 8px var(--accent-glow);
-	}
-
-	.pill-badge {
-		background: #F43F5E;
-		color: white;
-		font-size: 0.72rem;
-		font-weight: 800;
-		padding: 2px 6px;
-		border-radius: var(--border-radius-pill);
-	}
-
 	/* ==========================================================================
 	   FLOATING BOTTOM GLASS DOCK
 	   ========================================================================== */
@@ -1637,18 +1550,16 @@
 			display: flex;
 		}
 
-		.mobile-subnav-bar {
-			display: flex;
-		}
-
 		.main-content {
 			margin-left: 0;
-			padding-top: calc(var(--header-height) + var(--subnav-height) + 0.65rem);
-			padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 2rem);
+			padding-top: calc(var(--header-height) + 0.85rem);
+			padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 1.5rem);
 		}
 
 		.content-wrapper {
-			padding: 0.75rem 0.85rem 2rem;
+			padding: 0 0.85rem 1.5rem;
+			max-width: 680px;
+			margin: 0 auto;
 		}
 
 		.bottom-dock-wrapper {

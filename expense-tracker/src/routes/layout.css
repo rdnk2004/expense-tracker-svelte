@@ -22,12 +22,7 @@ html {
 	font-size: 16px;
 	scroll-behavior: smooth;
 	height: 100%;
-}
-
-@media (max-width: 768px) {
-	html {
-		font-size: 17px;
-	}
+	overflow-x: hidden;
 }
 
 body {
@@ -258,8 +253,8 @@ a:hover {
 
 @media (min-width: 768px) {
 	.card {
-		border-radius: var(--border-radius-lg);
-		padding: 1.35rem;
+		border-radius: var(--border-radius);
+		padding: 1.15rem;
 	}
 }
 
