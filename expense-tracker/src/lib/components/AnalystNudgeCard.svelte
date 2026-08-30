@@ -198,7 +198,7 @@
 		font-weight: 800;
 		color: var(--text-primary);
 		margin-bottom: 3px;
-	}	line-height: 1.25;
+		line-height: 1.25;
 	}
 
 	.insight-message {

@@ -515,7 +515,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.campus-sub {
@@ -529,7 +529,7 @@
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
@@ -539,7 +539,7 @@
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
@@ -550,9 +550,9 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
 		color: var(--text-primary);
-		padding: 0.55rem 0.95rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
 	}
@@ -570,12 +570,12 @@
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
 		border-radius: var(--border-radius-pill);
-		padding: 4px 6px;
+		padding: 3px 5px;
 	}
 
 	.m-dock-btn {
-		width: 32px;
-		height: 32px;
+		width: 28px;
+		height: 28px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -590,7 +590,7 @@
 	}
 
 	.m-dock-name {
-		font-size: 0.88rem;
+		font-size: 0.82rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
@@ -600,7 +600,7 @@
 		display: flex;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
-		padding: 3px;
+		padding: 2.5px;
 		border-radius: var(--border-radius-pill);
 	}
 
@@ -609,10 +609,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 6px;
-		padding: 0.55rem 0.85rem;
+		gap: 5px;
+		padding: 0.45rem 0.75rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		color: var(--text-secondary);
 		transition: all 0.2s ease;
@@ -628,12 +628,12 @@
 	.buckets-deck {
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.bucket-hero-card {
 		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		box-shadow: var(--shadow-sm);
 		border: 1px solid var(--border-color);
 		background: var(--bg-card);
@@ -655,19 +655,19 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 		gap: 8px;
 	}
 
 	.bucket-brand-group {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.65rem;
 		align-items: center;
 	}
 
 	.bucket-badge-icon {
-		width: 42px;
-		height: 42px;
+		width: 38px;
+		height: 38px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;
@@ -680,22 +680,22 @@
 	.bucket-badge-icon.future { background: rgba(99, 102, 241, 0.15); color: #818CF8; border: 1px solid rgba(99, 102, 241, 0.3); }
 
 	.bucket-heading {
-		font-size: 0.98rem;
+		font-size: 0.92rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		margin: 0;
 	}
 
 	.bucket-sub-desc {
-		font-size: 0.74rem;
+		font-size: 0.72rem;
 		color: var(--text-muted);
 		margin: 2px 0 0;
 	}
 
 	.status-indicator-tag {
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		font-weight: 800;
-		padding: 0.2rem 0.55rem;
+		padding: 0.15rem 0.5rem;
 		border-radius: var(--border-radius-pill);
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
@@ -709,7 +709,7 @@
 	.bucket-figures-row {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 0.75rem;
+		margin-bottom: 0.65rem;
 	}
 
 	.figure-block {
@@ -718,14 +718,14 @@
 	}
 
 	.figure-lbl {
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		color: var(--text-muted);
 	}
 
 	.figure-val {
-		font-size: 1.25rem;
+		font-size: 1.15rem;
 		font-weight: 800;
 		color: var(--text-primary);
 	}
@@ -735,12 +735,12 @@
 	}
 
 	.progress-track-neo {
-		height: 8px;
+		height: 7px;
 		background: var(--surface-2);
 		border-radius: var(--border-radius-pill);
 		overflow: hidden;
 		border: 1px solid var(--border-subtle);
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.progress-fill-neo {
@@ -755,7 +755,7 @@
 
 	.category-chips-strip {
 		display: flex;
-		gap: 6px;
+		gap: 5px;
 		flex-wrap: wrap;
 	}
 
@@ -765,9 +765,9 @@
 		gap: 4px;
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
-		padding: 0.25rem 0.55rem;
+		padding: 0.2rem 0.5rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.72rem;
+		font-size: 0.7rem;
 		font-weight: 700;
 		color: var(--text-secondary);
 	}
@@ -776,11 +776,11 @@
 	.category-limits-view {
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.base-budget-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.base-budget-title {
@@ -790,13 +790,13 @@
 	}
 
 	.base-budget-title h3 {
-		font-size: 1rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		margin: 0;
 	}
 
 	.active-cap-tag {
-		font-size: 0.88rem;
+		font-size: 0.84rem;
 		font-weight: 800;
 		color: var(--accent-primary);
 	}
@@ -835,29 +835,29 @@
 	.category-cards-grid {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.55rem;
 	}
 
 	.cat-budget-card {
-		padding: 0.85rem 1rem;
+		padding: 0.65rem 0.85rem;
 	}
 
 	.cat-card-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 0.65rem;
+		margin-bottom: 0.55rem;
 	}
 
 	.cat-info-group {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.65rem;
 	}
 
 	.cat-icon-frame {
-		width: 42px;
-		height: 42px;
+		width: 38px;
+		height: 38px;
 		border-radius: var(--border-radius-xs);
 		display: flex;
 		align-items: center;

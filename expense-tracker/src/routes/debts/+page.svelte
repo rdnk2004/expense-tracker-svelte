@@ -445,7 +445,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.15rem;
+		gap: 0.85rem;
 	}
 
 	.toast-pill {
@@ -467,7 +467,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-end;
-		margin-bottom: 1.15rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.campus-sub {
@@ -481,7 +481,7 @@
 	}
 
 	.page-title {
-		font-size: 1.45rem;
+		font-size: 1.3rem;
 		font-weight: 800;
 		color: var(--text-primary);
 		letter-spacing: -0.03em;
@@ -491,21 +491,21 @@
 
 	@media (min-width: 768px) {
 		.page-title {
-			font-size: 1.65rem;
+			font-size: 1.5rem;
 		}
 	}
 
 	.split-bill-hero-btn {
 		display: inline-flex;
 		align-items: center;
-		gap: 6px;
+		gap: 5px;
 		background: var(--accent-primary);
 		color: #080C14;
-		padding: 0.55rem 1rem;
+		padding: 0.45rem 0.85rem;
 		border-radius: var(--border-radius-pill);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
-		box-shadow: 0 4px 14px var(--accent-glow);
+		box-shadow: 0 3px 12px var(--accent-glow);
 		transition: all 0.2s ease;
 	}
 
@@ -516,7 +516,7 @@
 	/* Net Position Card */
 	.net-position-card {
 		border-radius: var(--border-radius);
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 		box-shadow: var(--shadow-sm);
 		border: 1px solid var(--border-color);
 		background: var(--bg-card);
@@ -538,7 +538,7 @@
 	}
 
 	.net-title-eyebrow {
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
@@ -546,9 +546,9 @@
 	}
 
 	.net-status-pill {
-		font-size: 0.68rem;
+		font-size: 0.65rem;
 		font-weight: 800;
-		padding: 0.2rem 0.55rem;
+		padding: 0.15rem 0.5rem;
 		border-radius: var(--border-radius-pill);
 		text-transform: uppercase;
 		background: var(--surface-2);
@@ -557,19 +557,19 @@
 	}
 
 	.net-amount-hero {
-		font-size: 2.15rem;
+		font-size: 1.85rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 		line-height: 1.1;
 	}
 
 	.position-stats-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem;
+		gap: 0.65rem;
 		border-top: 1px solid var(--border-subtle);
-		padding-top: 0.85rem;
+		padding-top: 0.75rem;
 	}
 
 	.pos-stat-box {
@@ -582,14 +582,14 @@
 		display: flex;
 		align-items: center;
 		gap: 4px;
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		font-weight: 700;
 		color: var(--text-muted);
 		text-transform: uppercase;
 	}
 
 	.pos-val {
-		font-size: 1.15rem;
+		font-size: 1.05rem;
 		font-weight: 800;
 	}
 
@@ -598,34 +598,34 @@
 
 	/* Quick Tab Card */
 	.quick-tab-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.card-heading {
-		font-size: 1rem;
+		font-size: 0.95rem;
 		font-weight: 800;
 		color: var(--text-primary);
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.direction-toggle-row {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 6px;
-		margin-bottom: 1rem;
+		gap: 5px;
+		margin-bottom: 0.85rem;
 	}
 
 	.dir-toggle-btn {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		gap: 6px;
-		padding: 0.65rem;
-		border-radius: var(--border-radius);
+		gap: 5px;
+		padding: 0.55rem;
+		border-radius: var(--border-radius-sm);
 		background: var(--surface-2);
 		border: 1px solid var(--border-subtle);
 		color: var(--text-secondary);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		transition: all 0.2s ease;
 	}
@@ -640,8 +640,8 @@
 	.form-inputs-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 8px;
-		margin-bottom: 0.85rem;
+		gap: 6px;
+		margin-bottom: 0.75rem;
 	}
 
 	.form-field-col {
@@ -650,7 +650,7 @@
 	}
 
 	.err-txt {
-		font-size: 0.72rem;
+		font-size: 0.7rem;
 		color: var(--danger);
 		font-weight: 600;
 		margin-top: 2px;
@@ -661,27 +661,27 @@
 		background: var(--accent-primary);
 		color: #FFFFFF;
 		font-weight: 800;
-		font-size: 0.95rem;
-		padding: 0.85rem;
+		font-size: 0.88rem;
+		padding: 0.7rem;
 		border-radius: var(--border-radius-pill);
-		box-shadow: 0 4px 14px var(--accent-glow);
-		min-height: 48px;
+		box-shadow: 0 3px 12px var(--accent-glow);
+		min-height: 42px;
 	}
 
 	/* Active Tabs Ledger */
 	.debts-ledger-card {
-		padding: 1.15rem;
+		padding: 0.95rem 1rem;
 	}
 
 	.ledger-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.toggle-settled-link {
-		font-size: 0.8rem;
+		font-size: 0.76rem;
 		font-weight: 700;
 		color: var(--accent-primary);
 	}
@@ -689,39 +689,39 @@
 	.debts-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.65rem;
+		gap: 0.55rem;
 	}
 
 	.debt-row-card {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.85rem 1rem;
+		padding: 0.65rem 0.85rem;
 		border-radius: var(--border-radius);
 		background: var(--surface-2);
 		border: 1px solid var(--border-color);
-		gap: 8px;
+		gap: 6px;
 		flex-wrap: wrap;
 	}
 
-	.receive-border { border-left: 4px solid #10B981; }
-	.give-border { border-left: 4px solid #F43F5E; }
+	.receive-border { border-left: 3px solid #10B981; }
+	.give-border { border-left: 3px solid #F43F5E; }
 
 	.debt-info-left {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 0.65rem;
 		min-width: 0;
 	}
 
 	.friend-avatar {
-		width: 42px;
-		height: 42px;
+		width: 38px;
+		height: 38px;
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		font-weight: 800;
 		flex-shrink: 0;
 	}
