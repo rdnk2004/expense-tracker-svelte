@@ -1,0 +1,83 @@
+/* ==========================================================================
+   AXIOM PRODUCT MARKETING DESIGN SYSTEM
+   Restrained, typography-driven, product-focused Apple-inspired aesthetic.
+   Near-white canvas, dark readable typography, single sapphire accent.
+   ========================================================================== */
+
+:root {
+	--axiom-canvas: #fbfbfd;
+	--axiom-canvas-subtle: #f5f5f7;
+	--axiom-surface: #ffffff;
+	--axiom-surface-elevated: #ffffff;
+	--axiom-border: #e5e5ea;
+	--axiom-border-subtle: #f0f0f2;
+	--axiom-border-strong: #d2d2d7;
+
+	--axiom-text-primary: #1d1d1f;
+	--axiom-text-secondary: #515154;
+	--axiom-text-tertiary: #6e6e73;
+	--axiom-text-muted: #86868b;
+
+	--axiom-accent: #0066cc;
+	--axiom-accent-hover: #004ea3;
+	--axiom-accent-subtle: #f0f6fc;
+	--axiom-accent-border: #cce0f5;
+
+	--axiom-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	--axiom-font-mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+	--axiom-radius-sm: 6px;
+	--axiom-radius-md: 10px;
+	--axiom-radius-lg: 14px;
+	--axiom-radius-xl: 18px;
+
+	--axiom-container-width: 1080px;
+	--axiom-container-wide: 1200px;
+	--axiom-container-narrow: 760px;
+}
+
+/* Global resets for marketing layout pages */
+.axiom-marketing-root {
+	background-color: var(--axiom-canvas);
+	color: var(--axiom-text-primary);
+	font-family: var(--axiom-font-sans);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	line-height: 1.5;
+	min-height: 100vh;
+	width: 100%;
+	overflow-x: hidden;
+}
+
+.axiom-marketing-root *,
+.axiom-marketing-root *::before,
+.axiom-marketing-root *::after {
+	box-sizing: border-box;
+}
+
+/* Accessible focus ring */
+.axiom-marketing-root a:focus-visible,
+.axiom-marketing-root button:focus-visible,
+.axiom-marketing-root input:focus-visible,
+.axiom-marketing-root select:focus-visible {
+	outline: 2px solid var(--axiom-accent);
+	outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+	.axiom-marketing-root *,
+	.axiom-marketing-root *::before,
+	.axiom-marketing-root *::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+html.marketing-view,
+html.marketing-view body {
+	background-color: var(--axiom-canvas) !important;
+	color: var(--axiom-text-primary) !important;
+}
