@@ -143,7 +143,7 @@
 					description.trim() || undefined
 				);
 			}
-			goto('/');
+			goto('/dashboard');
 		} catch (err) {
 			console.error(err);
 		}
@@ -153,7 +153,7 @@
 <div class="transaction-creator-page">
 	<!-- Top Navigation Bar -->
 	<header class="top-nav-bar">
-		<button class="back-btn" onclick={() => goto('/')} aria-label="Go back to Dashboard">
+		<button class="back-btn" onclick={() => goto('/dashboard')} aria-label="Go back to Dashboard">
 			<ArrowLeft size={20} />
 		</button>
 

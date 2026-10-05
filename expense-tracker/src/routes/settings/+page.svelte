@@ -84,7 +84,7 @@
 			try {
 				await loadStudentDemoData();
 				showToastMessage('College demo data loaded successfully! 🎓');
-				goto('/');
+				goto('/dashboard');
 			} catch (err) {
 				console.error(err);
 				showToastMessage('Failed to load demo data');

@@ -59,7 +59,7 @@
 		{
 			title: 'Command',
 			items: [
-				{ icon: LayoutDashboard, label: 'Dashboard', desc: 'Liquid Capital & Safe-to-Spend', href: '/' },
+				{ icon: LayoutDashboard, label: 'Dashboard', desc: 'Liquid Capital & Safe-to-Spend', href: '/dashboard' },
 				{ icon: Receipt, label: 'Expenses', desc: 'Outflows, Inflows & Regret Audit', href: '/expenses' },
 				{ icon: ChartPie, label: 'Labor & ROI', desc: 'Work-Valuation & Emotional Joy', href: '/analytics' }
 			]
@@ -89,7 +89,8 @@
 	];
 
 	const routeTitles: Record<string, string> = {
-		'/': 'Dashboard',
+		'/dashboard': 'Dashboard',
+		'/': 'Axiom',
 		'/expenses': 'Transactions & Audit',
 		'/expenses/new': 'Log Expense',
 		'/analytics': 'Labor & Spending ROI',
@@ -99,10 +100,15 @@
 		'/budgets': '3-Bucket Macro Budget',
 		'/goals': 'Sinking Goals & Reserves',
 		'/subscriptions': 'Subscriptions Radar',
-		'/settings': 'Settings & OS Config'
+		'/settings': 'Settings & OS Config',
+		'/privacy': 'Privacy Policy',
+		'/terms': 'Terms of Service'
 	};
 
-	let isSubPage = $derived($page.url.pathname !== '/' && $page.url.pathname !== '/login');
+	const publicMarketingRoutes = ['/', '/privacy', '/terms'];
+	let isMarketingRoute = $derived(publicMarketingRoutes.includes($page.url.pathname));
+
+	let isSubPage = $derived($page.url.pathname !== '/dashboard' && $page.url.pathname !== '/login' && !isMarketingRoute);
 	let currentTitle = $derived(routeTitles[$page.url.pathname] || 'Axiom');
 	let totalReceivableCount = $derived($unsettledDebts.filter((d) => d.direction === 'receive').length);
 
@@ -141,10 +147,19 @@
 
 	$effect(() => {
 		const currentPath = $page.url.pathname;
+		if (publicMarketingRoutes.includes(currentPath)) {
+			if (typeof document !== 'undefined') {
+				document.documentElement.classList.add('marketing-view');
+			}
+			return;
+		}
+		if (typeof document !== 'undefined') {
+			document.documentElement.classList.remove('marketing-view');
+		}
 		if (!auth.isAuthenticated() && currentPath !== '/login') {
 			goto('/login');
 		} else if (auth.isAuthenticated() && currentPath === '/login') {
-			goto('/');
+			goto('/dashboard');
 		}
 	});
 
@@ -172,7 +187,7 @@
 		if (window.history.length > 1) {
 			window.history.back();
 		} else {
-			goto('/');
+			goto('/dashboard');
 		}
 	}
 </script>
@@ -202,7 +217,9 @@
 		</div>
 	{/if}
 
-	{#if $page.url.pathname === '/login'}
+	{#if isMarketingRoute}
+		{@render children()}
+	{:else if $page.url.pathname === '/login'}
 		{@render children()}
 	{:else if $auth}
 		<!-- Mobile Sticky Glass Header -->
@@ -218,7 +235,7 @@
 					</div>
 				</div>
 			{:else}
-				<div class="mobile-brand-wrap" onclick={() => goto('/')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && goto('/')}>
+				<div class="mobile-brand-wrap" onclick={() => goto('/dashboard')} role="button" tabindex="0" onkeydown={(e) => e.key === 'Enter' && goto('/dashboard')}>
 					<div class="brand-glyph">
 						<Zap size={16} class="glyph-icon" />
 					</div>
@@ -365,10 +382,10 @@
 		<nav class="bottom-dock-wrapper" aria-label="Mobile Navigation">
 			<div class="bottom-dock glass-panel">
 				<!-- Tab 1: Home -->
-				<a href="/" class="dock-item" class:active={$page.url.pathname === '/'}>
+				<a href="/dashboard" class="dock-item" class:active={$page.url.pathname === '/dashboard'}>
 					<LayoutDashboard size={20} />
 					<span class="dock-label">Home</span>
-					{#if $page.url.pathname === '/'}
+					{#if $page.url.pathname === '/dashboard'}
 						<div class="dock-active-glow"></div>
 					{/if}
 				</a>

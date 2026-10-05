@@ -18,7 +18,7 @@
 
 	function handleLogin() {
 		if (auth.login(pin)) {
-			goto('/');
+			goto('/dashboard');
 		} else {
 			error = true;
 			isShake = true;
@@ -27,6 +27,11 @@
 				pin = '';
 			}, 500);
 		}
+	}
+
+	function fillDemoPin() {
+		pin = '2255';
+		handleLogin();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -67,6 +72,12 @@
 				<span>Enter System</span>
 				<ArrowRight size={18} />
 			</button>
+
+			<button type="button" class="quick-demo-link" onclick={fillDemoPin}>
+				Demo Passkey (2255)
+			</button>
+
+			<a href="/" class="home-nav-link">Return to Overview</a>
 		</div>
 
 		{#if error}
@@ -289,5 +300,36 @@
 		to {
 			opacity: 1;
 		}
+	}
+
+	.quick-demo-link {
+		background: transparent;
+		border: 1px dashed rgba(255, 255, 255, 0.2);
+		color: rgba(255, 255, 255, 0.7);
+		padding: 0.6rem 1rem;
+		border-radius: 12px;
+		font-size: 0.8rem;
+		cursor: pointer;
+		font-family: inherit;
+		transition: all 0.2s;
+	}
+
+	.quick-demo-link:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: #ffffff;
+	}
+
+	.home-nav-link {
+		color: rgba(255, 255, 255, 0.5);
+		text-align: center;
+		font-size: 0.8rem;
+		text-decoration: none;
+		margin-top: -0.25rem;
+		transition: color 0.2s;
+	}
+
+	.home-nav-link:hover {
+		color: #ffffff;
+		text-decoration: underline;
 	}
 </style>
